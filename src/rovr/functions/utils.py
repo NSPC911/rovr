@@ -19,7 +19,7 @@ from textual.message import Message
 from textual.screen import Screen, ScreenResultType
 from textual.worker import NoActiveWorker, WorkerCancelled, get_current_worker
 
-from rovr.classes.type_aliases import ShellRunTypes
+from rovr.classes.type_aliases import CallableNone, ShellRunTypes
 from rovr.functions.cwd import getcwd
 
 
@@ -467,7 +467,7 @@ def s(item: Any, notone: str = "s", isone: str = "") -> str:
 R = TypeVar("R")
 
 
-def enter(obj: AbstractContextManager[R]) -> tuple[R, Callable[[], None]]:
+def enter(obj: AbstractContextManager[R]) -> tuple[R, CallableNone]:
     resource = obj.__enter__()
 
     def closer() -> None:
@@ -476,14 +476,28 @@ def enter(obj: AbstractContextManager[R]) -> tuple[R, Callable[[], None]]:
     return resource, closer
 
 
+type ErrorCallable = Callable[[BaseException], Any]
+
+
 @contextmanager
-def dump_on_exc(widget: DOMNode | None, *filter: type[BaseException]) -> Any:
+def dump_on_exc(
+    widget: DOMNode | None,
+    *filter: type[BaseException],
+    other_callers: list[ErrorCallable] | ErrorCallable | None = None,
+) -> Any:
+    if other_callers is not None:
+        if not isinstance(other_callers, list):
+            other_callers = [other_callers]
+    else:
+        other_callers = []
     try:
         yield
     except filter or (BaseException,) as exc:
         from rovr.functions.path import dump_exc
 
         dump_exc(widget, exc)
+        for caller in other_callers:
+            caller(exc)
 
 
 def strftime(timestamp: float, format: str = "") -> str:

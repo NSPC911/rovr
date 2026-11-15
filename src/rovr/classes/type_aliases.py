@@ -1,5 +1,5 @@
 import os
-from typing import Literal, NotRequired, TypeAlias, TypedDict
+from typing import Callable, Literal, NotRequired, TypeAlias, TypedDict
 
 
 class BarPanicDismissible(TypedDict):
@@ -29,3 +29,5 @@ ShellRunTypes: TypeAlias = Literal["suspend", "background", "orphan"]
 KeysConfig: TypeAlias = dict[str, KeyMap]
 
 type CacheSource = tuple[str, os.stat_result, tuple[str, str]]
+
+CallableNone: TypeAlias = Callable[[], None]

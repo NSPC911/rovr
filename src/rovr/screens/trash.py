@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Callable, ClassVar
+from typing import ClassVar
 
 from pytrash import RecycleBin, TrashEntry
 from rich.cells import cell_len
@@ -25,7 +25,7 @@ from rovr.classes.mixins import (
 from rovr.functions import details as detail_utils
 from rovr.functions import icons as icon_utils
 from rovr.functions import path as path_utils
-from rovr.functions.utils import dismiss, get_shortcut, natural_size, s
+from rovr.functions.utils import CallableNone, dismiss, get_shortcut, natural_size, s
 from rovr.variables.constants import bindings, config
 from rovr.variables.maps import RovrVars
 
@@ -131,7 +131,7 @@ class TrashSelectionList(
         """Select the current and next entry."""
         await self.action_select_cursor(1)
 
-    def _select_range_to(self, mover: Callable[[], None]) -> None:
+    def _select_range_to(self, mover: CallableNone) -> None:
         if self.highlighted_option is None:
             return
         old = self.highlighted or 0

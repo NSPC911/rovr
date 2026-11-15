@@ -36,9 +36,10 @@ import os
 import sys
 import warnings
 from io import TextIOWrapper
-from typing import Callable, cast
+from typing import cast
 
 from rovr import RESOURCE_PACKAGE, main, pprint
+from rovr.classes.type_aliases import CallableNone
 from rovr.functions.cli import (
     RichArgumentParser,
     RichPanelHelpAction,
@@ -235,7 +236,7 @@ def _build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def _redirect_windows_stdin(tty_in: TextIOWrapper) -> Callable[[], None]:
+def _redirect_windows_stdin(tty_in: TextIOWrapper) -> CallableNone:
     if os.name != "nt":
         return lambda: None
 

@@ -752,4 +752,10 @@ def get_birthtime(dir_entry: os.DirEntry) -> float | None:
 
 
 def control(string: str) -> str:
+    """Turn the string gay to show control pictures for better visibility in the terminal.
+    Args:
+        string (str): The string to translate.
+    Returns:
+        str: The translated string with control pictures.
+    """
     return string.translate(CONTROL_PICTURES)

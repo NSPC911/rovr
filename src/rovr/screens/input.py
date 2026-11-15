@@ -109,9 +109,11 @@ class ModalInput(ModalScreen, inherit_bindings=False):
                 icon = icon_utils.get_icon_for_folder(event.value)
             else:
                 # file
-                icon = icon_utils.get_icon_for_file(event.value)
+                icon = icon_utils.get_icon_for_file(event.value, False)
             self.icon_widget.update(
-                Content.from_markup(f" [{icon[1]}]{icon[0]}[{icon[1]}] ")
+                Content.from_markup(
+                    f" [{icon[1]}]{icon[0]}[{icon[1]}] " if icon[1] else f" {icon[0]} "
+                )
             )
 
     def on_mount(self) -> None:

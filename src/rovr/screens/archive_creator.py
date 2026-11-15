@@ -1,5 +1,5 @@
 from asyncio import sleep
-from typing import ClassVar, Literal, NamedTuple
+from typing import ClassVar, Literal, NamedTuple, TypeAlias
 
 from textual import events, on, work
 from textual.app import ComposeResult
@@ -17,7 +17,11 @@ from rovr.variables.constants import bindings
 
 from .input import ModalInput
 
+Algos: TypeAlias = Literal["zip", "tar", "tar.gz", "tar.bz2", "tar.xz", "tar.zst"]
 
+
+# I could have used RadioSet and RadioButton, but SelectionNavigationMixin only supports
+# SelectionLists, so I just made a SelectionList mimic a RadioSet
 class ArchiveTypes(
     CheckboxRenderingMixin,
     SelectionNavigationMixin,
@@ -84,9 +88,7 @@ class ArchiveCompression(
                 self._deselect(option.value)
         self.select(self.get_option_at_index(event.selection_index))
 
-    def update_compressions(
-        self, algo: Literal["zip", "tar", "tar.gz", "tar.bz2", "tar.xz", "tar.zst"]
-    ) -> None:
+    def update_compressions(self, algo: Algos) -> None:
         """Update compression levels based on selected algorithm."""
         if algo == "zip" or algo == "tar.gz" or algo == "tar.xz":
             self.set_options(
@@ -113,7 +115,7 @@ class ArchiveCreationScreen(ModalInput):
 
     class ReturnType(NamedTuple):
         path: str
-        algo: Literal["zip", "tar", "tar.gz", "tar.bz2", "tar.xz", "tar.zst"]
+        algo: Algos
         level: int
 
     BINDINGS = [

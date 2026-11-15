@@ -29,6 +29,7 @@ class YesOrNo(Actionable, ModalScreen):
         with_toggle: bool = False,
         border_title: str = "",
         border_subtitle: str = "",
+        allow_cancel: bool = False,
     ) -> None:
         super().__init__()
         self.message = message
@@ -36,6 +37,7 @@ class YesOrNo(Actionable, ModalScreen):
         self.with_toggle = with_toggle
         self.border_title = border_title
         self.border_subtitle = border_subtitle
+        self.allow_cancel = allow_cancel
         self.ACTIONS: list[Action] = [
             Action(part, config["keybinds"]["yes_or_no"][part]) for part in ("yes", "no")
         ]
@@ -111,3 +113,9 @@ class YesOrNo(Actionable, ModalScreen):
     def action_dont_ask_again(self) -> None:
         if self.with_toggle:
             self.query_one(Switch).action_toggle_switch()
+
+    async def on_key(self, event: events.Key) -> None:
+        # this case must be handled manually
+        if self.allow_cancel and event.key == "escape":
+            event.stop()
+            dismiss(self, None)

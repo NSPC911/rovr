@@ -21,9 +21,10 @@ class FileInUse(ModalScreen):
         value: Literal["try_again", "cancel", "skip"]
         toggle: bool
 
-    def __init__(self, message: str) -> None:
+    def __init__(self, message: str, border_title: str = "File in Use") -> None:
         super().__init__()
         self.message = message
+        self.border_title = border_title
 
     def compose(self) -> ComposeResult:
         retry_bind = get_shortcut("file_in_use", "retry")
@@ -43,7 +44,7 @@ class FileInUse(ModalScreen):
                 yield Label(f"\\[{dont_ask_bind}] Don't ask again")
 
     def on_mount(self) -> None:
-        self.query_one("#dialog").border_title = "File in Use"
+        self.query_one("#dialog").border_title = self.border_title
         # focus the Try Again button like other modals
         self.query_one("#try_again").focus()
         # Optionally add padding or styling here if needed for consistency

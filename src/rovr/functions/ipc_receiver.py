@@ -89,16 +89,20 @@ async def conn(
         )
         return
     out, err = None, None
-    ok: bool | str = True
+    ok: bool = True
+
+    async def checker() -> bool:
+        nonlocal ok, err
+        if not (ok := await check_permission(self, action, args)):
+            err = "denied"
+        return ok
+
     match action:
         case "cd":
             if len(args) != 1:
                 ok = False
                 err = "too many arguments" if len(args) > 1 else "path not provided"
-            elif not await check_permission(self, action, args):
-                ok = False
-                err = "denied"
-            else:
+            elif await checker():
                 try:
                     if os.path.samefile(getcwd(), p(args[0])):
                         out = getcwd()
@@ -122,10 +126,7 @@ async def conn(
                 )
             match args[0]:
                 case "list":
-                    if not await check_permission(self, action, args):
-                        ok = False
-                        err = "denied"
-                    else:
+                    if await checker():
                         options = self.Clipboard.options
                         selected = self.Clipboard.selected
                         # we need to parse this as well yay
@@ -138,10 +139,7 @@ async def conn(
                             for option in options
                         ]
                 case "paste":
-                    if not await check_permission(self, action, args):
-                        ok = False
-                        err = "denied"
-                    else:
+                    if await checker():
                         selected_items = (
                             self.Clipboard.selected
                         )  # dont include highlighted
@@ -170,10 +168,7 @@ async def conn(
                         else:
                             err = "user intervened"
                 case "copy" | "cut":
-                    if not await check_permission(self, action, args):
-                        ok = False
-                        err = "denied"
-                    else:
+                    if await checker():
                         selection = next(
                             (
                                 arg.removeprefix("--selection=")
@@ -222,10 +217,7 @@ async def conn(
                 return assemble_and_write(writer, False, None, "tab action not provided")
             match args[0]:
                 case "list":
-                    if not await check_permission(self, action, args):
-                        ok = False
-                        err = "denied"
-                    else:
+                    if await checker():
                         active = self.tabWidget.active_tab
                         tabs: list[str] = []
                         out: dict[str, int | list[str]] = {"focused": 0, "tabs": tabs}
@@ -238,10 +230,7 @@ async def conn(
                     if len(args) > 3:
                         ok = False
                         err = "too many arguments"
-                    elif not await check_permission(self, action, args):
-                        ok = False
-                        err = "denied"
-                    else:
+                    elif await checker():
                         # optional path argument, if not provided, use cwd
                         # also may contain --focus flag, if not provided, do not focus
                         focus = "--focus" in args
@@ -269,10 +258,7 @@ async def conn(
                             if len(args) > 2
                             else "tab index not provided"
                         )
-                    elif not await check_permission(self, action, args):
-                        ok = False
-                        err = "denied"
-                    else:
+                    elif await checker():
                         try:
                             index = int(args[1])
                         except ValueError:
@@ -288,13 +274,10 @@ async def conn(
                     if len(args) > 2:
                         ok = False
                         err = "too many arguments"
-                    elif not await check_permission(self, action, args):
-                        ok = False
-                        err = "denied"
                     elif self.tabWidget.active_tab is None:
                         ok = False
                         err = "no active tab somehow"
-                    else:
+                    elif await checker():
                         try:
                             index = (
                                 int(args[1])
@@ -319,13 +302,10 @@ async def conn(
                     if len(args) > 2:
                         ok = False
                         err = "too many arguments for history"
-                    elif not await check_permission(self, action, args):
-                        ok = False
-                        err = "denied"
                     elif self.tabWidget.active_tab is None:
                         ok = False
                         err = "no active tab somehow"
-                    else:
+                    elif await checker():
                         try:
                             index = (
                                 int(args[1])
@@ -355,16 +335,10 @@ async def conn(
                 )
             match args[0]:
                 case "list":
-                    if not await check_permission(self, action, args):
-                        ok = False
-                        err = "denied"
-                    else:
+                    if await checker():
                         out = sorted(self.available_themes)
                 case "query":
-                    if not await check_permission(self, action, args):
-                        ok = False
-                        err = "denied"
-                    else:
+                    if await checker():
                         from rovr.functions.themes import resolve_theme_ansi
 
                         _, fixed = resolve_theme_ansi(
@@ -383,13 +357,10 @@ async def conn(
                             if len(args) > 2
                             else "theme name not provided"
                         )
-                    elif not await check_permission(self, action, args):
-                        ok = False
-                        err = "denied"
                     elif args[1] not in self.available_themes:
                         ok = False
                         err = f"unknown theme: {args[1]}"
-                    else:
+                    elif await checker():
                         self.theme = args[1]
                         out = self.theme
                 case _:
@@ -398,46 +369,39 @@ async def conn(
         case "notify":
             from rovr.functions.ipc_sender import IPC_PARSER
 
-            if not await check_permission(self, action, args):
-                return assemble_and_write(writer, False, None, "denied")
-            try:
-                notification = IPC_PARSER.parse_args([action, *args])
-            except SystemExit:
-                ok = False
-                err = "invalid notification arguments"
-            else:
-                if notification.markup:
-                    from textual.content import Content
+            if await checker():
+                try:
+                    notification = IPC_PARSER.parse_args([action, *args])
+                except SystemExit:
+                    ok = False
+                    err = "invalid notification arguments"
+                else:
+                    if notification.markup:
+                        from textual.content import Content
 
-                    try:
-                        Content.from_markup(notification.message)
-                    except Exception as exc:
-                        return assemble_and_write(
-                            writer, False, None, f"invalid markup: {exc}"
-                        )
+                        try:
+                            Content.from_markup(notification.message)
+                        except Exception as exc:
+                            return assemble_and_write(
+                                writer, False, None, f"invalid markup: {exc}"
+                            )
 
-                self.notify(
-                    notification.message,
-                    title=notification.title or "",
-                    severity=notification.severity or "information",
-                    timeout=notification.timeout,
-                    markup=notification.markup,
-                )
+                    self.notify(
+                        notification.message,
+                        title=notification.title or "",
+                        severity=notification.severity or "information",
+                        timeout=notification.timeout,
+                        markup=notification.markup,
+                    )
         case "quit":
-            if not await check_permission(self, action, args):
-                ok = False
-                err = "denied"
-            else:
-                worker = self.action_quit("--no-cd" not in args)
+            if await checker():
+                worker: Worker = self.action_quit("--no-cd" not in args)
                 await worker.wait()
                 if self.return_code is None:
                     ok = False
                     err = "processes still running, denied"
         case "suspend":
-            if not await check_permission(self, action, args):
-                ok = False
-                err = "denied"
-            else:
+            if await checker():
                 from textual.app import WINDOWS
 
                 if WINDOWS:
@@ -449,12 +413,7 @@ async def conn(
             if len(args) != 1:
                 ok = False
                 err = "too many arguments" if args else "question not provided"
-            elif not await check_permission(self, action, args):
-                ok = False
-                err = "denied"
-            else:
-                from rovr.screens import YesOrNo
-
+            elif await checker():
                 out: bool = await self.push_screen_wait(YesOrNo(args[0]))
         case "input":
             if len(args) > 2 or len(args) == 0:
@@ -463,10 +422,7 @@ async def conn(
             elif len(args) == 1 and args[0] == "--is-path":
                 ok = False
                 err = "prompt not provided"
-            elif not await check_permission(self, action, args):
-                ok = False
-                err = "denied"
-            else:
+            elif await checker():
                 from rovr.screens import ModalInput
 
                 out: str = await self.push_screen_wait(

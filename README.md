@@ -1,26 +1,8 @@
-<!-- <div align="center">
-  <h1>rovr</h1>
-  <img alt="Python Version" src="https://img.shields.io/pypi/pyversions/rovr?style=for-the-badge&logo=python&logoColor=white&color=yellow&label=for" height="24px" width="auto">
-  <a href="https://nspc911.github.io/discord"><img alt="Discord" src="https://img.shields.io/discord/1110189201313513552?style=for-the-badge&logoColor=white&color=%235865f2&logo=discord" height="24px" width="auto"></a>
-  <a href="https://pypi.org/project/rovr"><img alt="PyPI - Downloads" src="https://img.shields.io/pypi/dw/rovr?style=for-the-badge&logoColor=white&color=darkgreen&label=pip&logo=pypi" height="24px" width="auto"></a>
-  <br>
-  <img alt="GitHub Actions Formatting Status" src="https://img.shields.io/github/actions/workflow/status/NSPC911/rovr/.github%2Fworkflows%2Fformatting.yml?style=for-the-badge&logo=opencontainersinitiative&label=style" height="24px" width="auto">
-  <img alt="GitHub Actions Docs Build Status" src="https://img.shields.io/github/actions/workflow/status/NSPC911/rovr/.github%2Fworkflows%2Fdocs-build.yml?style=for-the-badge&logo=opencontainersinitiative&label=Docs" height="24px" width="auto">
-  <img alt="GitHub Actions Nuitka Build Status" src="https://img.shields.io/github/actions/workflow/status/NSPC911/rovr/.github%2Fworkflows%2Fnuitka-build.yml?style=for-the-badge&logo=opencontainersinitiative&label=build" height="24px" width="auto">
-  <br>
-  <a href="https://terminaltrove.com/rovr">
-    <img src="https://terminaltrove.com/static/assets/media/terminal_trove_normal.png" alt="terminal trove" height="24px" width="auto">
-  </a>
-</div> -->
-
 ## rovr - a stylish, batteries-included terminal file manager.
 
 ![image](https://github.com/NSPC911/rovr/blob/master/docs%2Fpublic%2Fscreenshots%2Fmain.png?raw=true)
 
 rovr is a terminal file manager built with Python's [Textual](https://textual.textualize.io) framework. It was born out of frustration that TUI apps don't support the mouse properly, and I wanted to change that.
-
-> [!NOTE]
-> rovr's development has been temporarily paused for the next 1.5 months (until 17 November) as I would like to focus more on my studies than on rovr.
 
 ### Features
 
@@ -186,3 +168,19 @@ Thank you so much for starring this repo! Each star pushes me more to make even 
  \ \_\\ \____/\___/\ \_\
   \/_/ \/___/\/__/  \/_/ by NSPC911
 ```
+
+<!-- <div align="center">
+  <h1>rovr</h1>
+  <img alt="Python Version" src="https://img.shields.io/pypi/pyversions/rovr?style=for-the-badge&logo=python&logoColor=white&color=yellow&label=for" height="24px" width="auto">
+  <a href="https://nspc911.github.io/discord"><img alt="Discord" src="https://img.shields.io/discord/1110189201313513552?style=for-the-badge&logoColor=white&color=%235865f2&logo=discord" height="24px" width="auto"></a>
+  <a href="https://pypi.org/project/rovr"><img alt="PyPI - Downloads" src="https://img.shields.io/pypi/dw/rovr?style=for-the-badge&logoColor=white&color=darkgreen&label=pip&logo=pypi" height="24px" width="auto"></a>
+  <br>
+  <img alt="GitHub Actions Formatting Status" src="https://img.shields.io/github/actions/workflow/status/NSPC911/rovr/.github%2Fworkflows%2Fformatting.yml?style=for-the-badge&logo=opencontainersinitiative&label=style" height="24px" width="auto">
+  <img alt="GitHub Actions Docs Build Status" src="https://img.shields.io/github/actions/workflow/status/NSPC911/rovr/.github%2Fworkflows%2Fdocs-build.yml?style=for-the-badge&logo=opencontainersinitiative&label=Docs" height="24px" width="auto">
+  <img alt="GitHub Actions Nuitka Build Status" src="https://img.shields.io/github/actions/workflow/status/NSPC911/rovr/.github%2Fworkflows%2Fnuitka-build.yml?style=for-the-badge&logo=opencontainersinitiative&label=build" height="24px" width="auto">
+  <br>
+  <a href="https://terminaltrove.com/rovr">
+    <img src="https://terminaltrove.com/static/assets/media/terminal_trove_normal.png" alt="terminal trove" height="24px" width="auto">
+  </a>
+</div> -->
+

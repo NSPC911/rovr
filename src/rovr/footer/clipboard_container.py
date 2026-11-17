@@ -1,3 +1,4 @@
+from copy import copy
 from os import path
 from typing import Any, ClassVar, Literal, cast
 
@@ -8,6 +9,7 @@ from textual.reactive import reactive
 from textual.widgets import Button, ListItem, ListView, Static
 from textual.worker import Worker
 
+from rovr.classes.type_aliases import CallableNone
 from rovr.functions import icons as icon_utils
 from rovr.functions.path import control, normalise
 from rovr.functions.utils import s
@@ -100,13 +102,11 @@ class Clipboard(ListView, inherit_bindings=False):
         if self.children and (
             self.highlighted_child is None or not self.highlighted_child.highlighted
         ):
-            index = (
+            self.index = (
                 self.children.index(self._active)
                 if self._active in self.children
                 else (self.index or 0)
             )
-            self.index = None
-            self.index = index
 
     @property
     def options(self) -> tuple[ClipboardBlock, ...]:
@@ -184,7 +184,9 @@ class Clipboard(ListView, inherit_bindings=False):
             self._set_active(block)
 
     def action_cursor(self, offset: int) -> None:
-        action = self.action_cursor_down if offset > 0 else self.action_cursor_up
+        action: CallableNone = (
+            self.action_cursor_down if offset > 0 else self.action_cursor_up
+        )
         for _ in range(abs(offset)):
             action()
 
@@ -216,7 +218,7 @@ class Clipboard(ListView, inherit_bindings=False):
     @work(thread=True)
     def check_clipboard_existence(self) -> None:
         """Remove paths from the clipboard that no longer exist."""
-        blocks = self.options
+        blocks = copy(self.options)
         existing = {
             block.id: tuple(item for item in block.paths if path.lexists(item))
             for block in blocks
@@ -262,7 +264,7 @@ class Clipboard(ListView, inherit_bindings=False):
         block = self.options[index]
         if block is self._active:
             self._set_active(None)
-        await block.remove()
+        await self.pop(index)
         self._clipboard_changed()
 
     def _clipboard_changed(self) -> None:

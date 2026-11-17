@@ -63,6 +63,16 @@ async def test_clipboard_focus_initializes_cursor(tmp_path: Path) -> None:
         assert app.Clipboard.options[0].highlighted
         assert app.Clipboard.selected == (None, [])
 
+        app.Clipboard.set_index(0)
+        app.Clipboard.set_index(None)
+        app.file_list.focus()
+        app.Clipboard.focus()
+        await pilot.pause()
+
+        assert app.Clipboard.index == 0
+        assert app.Clipboard.selected == (None, [])
+        assert app.Clipboard.paste_button.disabled
+
 
 @pytest.mark.asyncio
 async def test_new_block_clears_old_cursor(tmp_path: Path) -> None:

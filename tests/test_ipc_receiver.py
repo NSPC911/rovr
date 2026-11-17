@@ -236,10 +236,11 @@ async def test_conn_pastes_clipboard_block(
 async def test_conn_selects_and_unselects_clipboard_block(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    clipboard = SimpleNamespace(options=[object()], index=None)
+    clipboard = SimpleNamespace(options=[object()], index=None, _active=None)
 
     def set_index(index: int | None) -> None:
         clipboard.index = index
+        clipboard._active = None if index is None else clipboard.options[index]
 
     clipboard.set_index = set_index
     app = SimpleNamespace(Clipboard=clipboard)
@@ -261,6 +262,7 @@ async def test_conn_selects_and_unselects_clipboard_block(
         "secret",
     )
     assert clipboard.index == 0
+    assert clipboard._active is clipboard.options[0]
     assert response(select_writer) == {"ok": True}
 
     unselect_writer = Writer()
@@ -275,6 +277,7 @@ async def test_conn_selects_and_unselects_clipboard_block(
         "secret",
     )
     assert clipboard.index is None
+    assert clipboard._active is None
     assert response(unselect_writer) == {"ok": True, "out": 0}
 
 

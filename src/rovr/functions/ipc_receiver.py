@@ -205,15 +205,17 @@ async def conn(
                             else:
                                 self.Clipboard.set_index(index)
                 case "unselect":
-                    if not await check_permission(self, action, args):
-                        ok = False
-                        err = "denied"
-                    elif self.Clipboard.index is None:
-                        ok = False
-                        err = "no selection to unselect"
-                    else:
-                        out = self.Clipboard.index
-                        self.Clipboard.set_index(None)
+                    if await checker():
+                        if self.Clipboard._active is None:
+                            ok = False
+                            err = "no selection to unselect"
+                        else:
+                            try:
+                                out = self.Clipboard.options.index(self.Clipboard._active)
+                                self.Clipboard.set_index(None)
+                            except ValueError:
+                                ok = False
+                                err = "active selection not found somehow"
                 case _:
                     ok = False
                     err = "clipboard action is not valid"

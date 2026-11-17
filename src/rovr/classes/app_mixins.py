@@ -728,7 +728,7 @@ class DragAndDrop:
 
     @work
     async def on_paste(self: App, event: events.Paste) -> None:
-        from urllib.parse import urlparse
+        from urllib.parse import unquote, urlparse
 
         if len(self.screen_stack) != 1:
             if self._p_timer:
@@ -756,7 +756,10 @@ class DragAndDrop:
                 screens.ModalInput(
                     "Save file as",
                     "existing file will be overwritten",
-                    initial_value=path.basename(urlparse(event.text).path),
+                    # i chose to unquote later because if i unquote before basename, path
+                    # can contain %2F which will be interpreted as a path separator
+                    # and basename will be wrong
+                    initial_value=unquote(path.basename(urlparse(event.text).path)),
                     validators=[IsValidFilePath(), AllowsExistingFiles()],
                     is_path=True,
                 )

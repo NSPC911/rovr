@@ -2718,13 +2718,11 @@ Both the folder name and glob will be forced to lowercase!
 | **Required**              | No          |
 | **Additional properties** | Not allowed |
 
-| Property                          | Type             | Title/Description                                                                                                                                                                                   |
-| --------------------------------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [default](#theme_default)         | string           | The default theme. Can be changed while in rovr, but it is not persistent.                                                                                                                          |
-| [preview](#theme_preview)         | enum (of string) | The theme to use when previewing files in the preview sidebar.                                                                                                                                      |
-| [dark](#theme_dark)               | string           | The theme to use when the terminal reports dark mode (CSI ? 997 ; 1 n). Falls back to \`default\` when unset. Setting both \`light\` and \`dark\` enables automatic dark and light mode detection.  |
-| [light](#theme_light)             | string           | The theme to use when the terminal reports light mode (CSI ? 997 ; 2 n). Falls back to \`default\` when unset. Setting both \`light\` and \`dark\` enables automatic dark and light mode detection. |
-| [transparent](#theme_transparent) | boolean          | Use a transparent background.                                                                                                                                                                       |
+| Property                          | Type             | Title/Description                                                          |
+| --------------------------------- | ---------------- | -------------------------------------------------------------------------- |
+| [default](#theme_default)         | string           | The default theme. Can be changed while in rovr, but it is not persistent. |
+| [preview](#theme_preview)         | enum (of string) | The theme to use when previewing files in the preview sidebar.             |
+| [transparent](#theme_transparent) | boolean          | Use a transparent background.                                              |
 
 ### <a name="theme_default"></a>5.1. Property `Rovr Config > theme > default`
 
@@ -2798,25 +2796,7 @@ Must be one of:
 - "xcode"
 - "zenburn"
 
-### <a name="theme_dark"></a>5.3. Property `Rovr Config > theme > dark`
-
-|              |          |
-| ------------ | -------- |
-| **Type**     | `string` |
-| **Required** | No       |
-
-**Description:** The theme to use when the terminal reports dark mode (CSI ? 997 ; 1 n). Falls back to `default` when unset. Setting both `light` and `dark` enables automatic dark and light mode detection.
-
-### <a name="theme_light"></a>5.4. Property `Rovr Config > theme > light`
-
-|              |          |
-| ------------ | -------- |
-| **Type**     | `string` |
-| **Required** | No       |
-
-**Description:** The theme to use when the terminal reports light mode (CSI ? 997 ; 2 n). Falls back to `default` when unset. Setting both `light` and `dark` enables automatic dark and light mode detection.
-
-### <a name="theme_transparent"></a>5.5. Property `Rovr Config > theme > transparent`
+### <a name="theme_transparent"></a>5.3. Property `Rovr Config > theme > transparent`
 
 |              |           |
 | ------------ | --------- |

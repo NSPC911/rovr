@@ -399,6 +399,15 @@ r""" Default value of the field path 'Rovr Config settings ipc permissions tab.l
 _ROVR_CONFIG_SETTINGS_IPC_PERMISSIONS_TAB_FULL_STOP_NEW_DEFAULT = "allow"
 r""" Default value of the field path 'Rovr Config settings ipc permissions tab.new' """
 
+_ROVR_CONFIG_SETTINGS_IPC_PERMISSIONS_THEME_FULL_STOP_LIST_DEFAULT = "allow"
+r""" Default value of the field path 'Rovr Config settings ipc permissions theme.list' """
+
+_ROVR_CONFIG_SETTINGS_IPC_PERMISSIONS_THEME_FULL_STOP_QUERY_DEFAULT = "allow"
+r""" Default value of the field path 'Rovr Config settings ipc permissions theme.query' """
+
+_ROVR_CONFIG_SETTINGS_IPC_PERMISSIONS_THEME_FULL_STOP_SET_DEFAULT = "allow"
+r""" Default value of the field path 'Rovr Config settings ipc permissions theme.set' """
+
 _ROVR_CONFIG_SETTINGS_OPENERS_GROUPS_ADDITIONALPROPERTIES_ITEM_ONEOF1_ORPHAN_DEFAULT = (
     True
 )
@@ -1889,6 +1898,9 @@ _RovrConfigSettingsIpcPermissions = TypedDict(
         "tab.focus": "_IpcPerms",
         "tab.close": "_IpcPerms",
         "tab.history": "_IpcPerms",
+        "theme.list": "_IpcPerms",
+        "theme.query": "_IpcPerms",
+        "theme.set": "_IpcPerms",
         "quit": "_IpcPerms",
         "suspend": "_IpcPerms",
         "notify": "_IpcNoPrompt",

@@ -28,6 +28,7 @@ from textual.widgets import Label, ProgressBar
 from textual.widgets._progress_bar import UNUSED
 
 import rovr.screens as screens
+from rovr import RESOURCE_PACKAGE
 from rovr.classes.mixins import Action, Actionable
 from rovr.classes.type_aliases import BarPanicDismissible, BarPanicNotify, CallableNone
 from rovr.functions import icons as icons
@@ -46,7 +47,7 @@ class ThickBar(BarRenderable):
     HALF_BAR_RIGHT = "▌"
 
 
-class PasteCancelled(Exception):
+class ExitNow(Exception):
     pass
 
 
@@ -764,6 +765,7 @@ class ProcessContainer(Actionable, VerticalScroll):
         bar = ProgressBarContainer(label="Preparing to extract...", classes="active")
         self.mount_bar(bar)
         bar.set_icon(icons.get_icon("general", "open")[0])
+        destination_path = path.abspath(destination_path)
         os.makedirs(destination_path, exist_ok=True)
         archive: Archive | None = None
         password: bytes | None = None
@@ -816,14 +818,10 @@ class ProcessContainer(Actionable, VerticalScroll):
                     )
                     return
         del password
-        members = archive.infolist()
-        bar.set_progress(
-            total=sum(member.uncompressed_size for member in members) + 1,
-            progress=0,
-        )
         unsaferes: bool | None = None
         conflictres: screens.FileNameConflict.ReturnType | None = None
         permissionres: Literal["try_again", "cancel", "skip"] | None = None
+        directory_targets: dict[str, str | None] = {}
 
         # -------------------- bunch of helper functions ----------------------------------------------------------------------
 
@@ -847,7 +845,7 @@ class ProcessContainer(Actionable, VerticalScroll):
                 unsaferes = res["value"]
             return res["value"]
 
-        def conflict_resolve(
+        def ask_conflict_resolve(
             message: str, allow_overwrite: bool
         ) -> Literal["overwrite", "rename", "skip", "cancel"]:
             nonlocal conflictres
@@ -867,7 +865,7 @@ class ProcessContainer(Actionable, VerticalScroll):
                 conflictres = res
             return res["value"]
 
-        def run_with_permission_prompt(func: CallableNone, path_str: str) -> bool | None:
+        def run_with_permission_prompt(func: CallableNone, path_str: str) -> bool:
             nonlocal permissionres
             use_remembered = True
             while True:
@@ -889,7 +887,7 @@ class ProcessContainer(Actionable, VerticalScroll):
                     if action == "skip":
                         return False
                     if action == "cancel":
-                        return None
+                        raise ExitNow
 
                     retry_target = (
                         path_str if path.lexists(path_str) else path.dirname(path_str)
@@ -899,123 +897,160 @@ class ProcessContainer(Actionable, VerticalScroll):
                     # Do not loop forever when a remembered retry keeps failing.
                     use_remembered = False
 
+        def resolve_conflict(target: str, is_dir: bool) -> str | None:
+            if not path.lexists(target):
+                return target
+            existing_is_dir = (
+                path.isdir(target)
+                and not path.islink(target)
+                and not path.isjunction(target)
+            )
+            if is_dir and existing_is_dir:
+                return target
+            action = ask_conflict_resolve(
+                f"{display_path(target, destination_path)} already exists in destination."
+                "\nWhat do you want to do?",
+                allow_overwrite=is_dir == existing_is_dir,
+            )
+            if action == "cancel":
+                raise ExitNow
+            if action == "skip":
+                return None
+            if action == "rename":
+                return helper_rename(target)
+            if run_with_permission_prompt(lambda: os.unlink(target), target):
+                return target
+            return None
+
+        def check_remap(original: str, target: str) -> None:
+            if target != original and not is_path_in_directory(destination_path, target):
+                raise ValueError(
+                    f"Remapped path {target!r} escapes the destination directory"
+                )
+
+        def resolve_directory(directory: str) -> str | None:
+            relative = path.relpath(directory, destination_path)
+            if relative == path.curdir:
+                return destination_path
+
+            original = target = destination_path
+            for part in relative.split(path.sep):
+                original = path.join(original, part)
+                key = path.normcase(original)
+                if key not in directory_targets:
+                    candidate = path.join(target, part)
+                    check_remap(original, candidate)
+                    resolved = resolve_conflict(candidate, is_dir=True)
+                    if resolved is not None:
+                        check_remap(original, resolved)
+                        if not run_with_permission_prompt(
+                            partial(os.makedirs, resolved, exist_ok=True), resolved
+                        ):
+                            resolved = None
+                    directory_targets[key] = resolved
+                resolved = directory_targets[key]
+                if resolved is None:
+                    return None
+                check_remap(original, resolved)
+                target = resolved
+            return target
+
         # ------------------------ theres one more below btw ---------------------------------------------------------------------
 
-        for member in members:
-            bar.set_text(member.name)
-            # do some pre checks like absolute path and escaping destination
-            normalised = path.normpath(member.name)
-            res: bool | None = None
-            exc: ValueError | None = None
-            if path.isabs(normalised):
-                res = confirm_unsafe_member(
-                    f"{member.name!r} is an absolute path"
-                    "\nExtracting it may cause unintended consequences."
-                    "\nDo you want to extract this?"
+        item = archive_path
+        try:
+            with archive:
+                members = archive.infolist()
+                bar.set_progress(
+                    total=sum(member.uncompressed_size for member in members) + 1,
+                    progress=0,
                 )
-                if res is None:
-                    exc = ValueError(
-                        f"Unsafe archive member path {member.name!r} is an absolute"
-                        " path and cannot be extracted."
-                    )
-            final_path = path.abspath(path.join(destination_path, normalised))
-            if res is None and (
-                not is_path_in_directory(destination_path, final_path, False)
-            ):
-                res = confirm_unsafe_member(
-                    f"{member.name!r} escapes the destination directory (via relative path)"
-                    "\nExtracting it may cause unintended consequences."
-                    "\nDo you want to extract this?"
-                )
-                if res is None:
-                    exc = ValueError(
-                        f"Unsafe archive member path {member.name!r} escapes the destination directory and cannot be extracted."
-                    )
-            if res is None and (not is_path_in_directory(destination_path, final_path)):
-                res = confirm_unsafe_member(
-                    f"{member.name!r} escapes the destination directory (via symlink)"
-                    "\nExtracting it may cause unintended consequences."
-                    "\nDo you want to extract this?"
-                )
-                if res is None:
-                    exc = ValueError(
-                        f"Unsafe archive member path {member.name!r} escapes"
-                        " destination via a symbolic link."
-                    )
-            if exc is not None:
-                bar.panic(
-                    notify={
-                        "message": f"Failed to extract {member.name} due to {exc!r}",
-                        "title": "Archive Error",
-                    },
-                    bar_text="Rejected extracting unsafe archive member",
-                    exceptions=(member.name, exc),
-                )
-                archive.close()
-                return
-            if res is False:
-                bar.advance(member.uncompressed_size)
-                continue
-
-            if path.lexists(final_path):
-                # isdir follows links, but links are still conflicts
-                # even if they point to directories
-                existing_is_link = path.islink(final_path) or path.isjunction(final_path)
-                existing_is_dir = path.isdir(final_path) and not existing_is_link
-                if member.is_dir and existing_is_dir:
-                    pass
-                else:
-                    same_type = member.is_dir == existing_is_dir
-                    action = conflict_resolve(
-                        "Path already exists in destination.\nWhat do you want to do?",
-                        allow_overwrite=same_type,
-                    )
-                    match action:
-                        case "skip":
+                for member in members:
+                    item = member.name
+                    bar.set_text(item)
+                    normalised = path.normpath(item)
+                    original = path.abspath(path.join(destination_path, normalised))
+                    inside = is_path_in_directory(destination_path, original, False)
+                    reason = ""
+                    if path.isabs(normalised):
+                        reason = "is an absolute path"
+                    elif not inside:
+                        reason = "escapes the destination directory (via relative path)"
+                    elif not is_path_in_directory(destination_path, original):
+                        reason = "escapes the destination directory (via symlink)"
+                    if reason:
+                        ok = confirm_unsafe_member(
+                            f"{item!r} {reason}"
+                            "\nExtracting it may cause unintended consequences."
+                            "\nDo you want to extract this?"
+                        )
+                        if ok is None:
+                            bar.panic(
+                                bar_text="Rejected extracting unsafe archive member",
+                                exceptions=(item, ValueError(f"{item!r} {reason}")),
+                                action="extract",
+                            )
+                            return
+                        if not ok:
                             bar.advance(member.uncompressed_size)
                             continue
-                        case "cancel":
-                            bar.panic(), archive.close()
+
+                    if inside and member.is_dir:
+                        resolve_directory(original)
+                        bar.advance(member.uncompressed_size)
+                        continue
+
+                    candidate = original
+                    if inside and path.normcase(original) != path.normcase(
+                        destination_path
+                    ):
+                        parent = resolve_directory(path.dirname(original))
+                        if parent is None:
+                            bar.advance(member.uncompressed_size)
+                            continue
+                        candidate = path.join(parent, path.basename(original))
+                        check_remap(original, candidate)
+
+                    final_path = resolve_conflict(candidate, member.is_dir)
+                    if final_path is None:
+                        bar.advance(member.uncompressed_size)
+                        continue
+                    if inside:
+                        check_remap(original, final_path)
+                    extracted_bytes = 0
+
+                    def extract_member(target_path: str) -> None:
+                        nonlocal extracted_bytes
+                        if member.is_dir:
+                            os.makedirs(target_path, exist_ok=True)
                             return
-                        case "rename":
-                            final_path = helper_rename(final_path)
-                        case "overwrite":
-                            removed = run_with_permission_prompt(
-                                lambda: os.unlink(final_path), final_path
-                            )
-                            if removed is None:
-                                bar.panic(), archive.close()
-                                return
-                            if not removed:
-                                bar.advance(member.uncompressed_size)
-                                continue
+                        if not inside:
+                            os.makedirs(path.dirname(target_path), exist_ok=True)
+                        source = archive.open(member)
+                        if source:
+                            with source, open(target_path, "wb") as target:
+                                copied = 0
+                                while chunk := source.read(1024 * 1024):
+                                    target.write(chunk)
+                                    copied += len(chunk)
+                                    if copied > extracted_bytes:
+                                        bar.advance(copied - extracted_bytes)
+                                        extracted_bytes = copied
 
-            extracted_bytes = 0
-
-            def extract_member() -> None:
-                nonlocal extracted_bytes
-                if member.is_dir:
-                    os.makedirs(final_path, exist_ok=True)
-                else:
-                    os.makedirs(path.dirname(final_path), exist_ok=True)
-                    source = archive.open(member)
-                    if source:
-                        with source, open(final_path, "wb") as target:
-                            copied = 0
-                            while chunk := source.read(1024 * 1024):
-                                target.write(chunk)
-                                copied += len(chunk)
-                                if copied > extracted_bytes:
-                                    bar.advance(copied - extracted_bytes)
-                                    extracted_bytes = copied
-
-            extracted = run_with_permission_prompt(extract_member, final_path)
-            if extracted is None:
-                bar.panic(), archive.close()
-                return
-            if not extracted:
-                bar.advance(member.uncompressed_size - extracted_bytes)
-        archive.close(), bar.ok()
+                    if not run_with_permission_prompt(
+                        partial(extract_member, final_path), final_path
+                    ):
+                        bar.advance(member.uncompressed_size - extracted_bytes)
+        except ExitNow:
+            bar.panic(bar_text="Extraction cancelled.")
+        except (OSError, ValueError, zipfile.BadZipFile) as exc:
+            bar.panic(
+                bar_text="Extraction failed",
+                exceptions=(item, exc),
+                action="extract",
+            )
+        else:
+            bar.ok()
 
     @work(thread=True)
     def paste_items(
@@ -1110,7 +1145,7 @@ class ProcessContainer(Actionable, VerticalScroll):
 
         def transfer(source: str, destination: str) -> bool:
             if should_cancel():
-                raise PasteCancelled
+                raise ExitNow
             if not path.lexists(source):
                 bar.advance(work_size(source))
                 return True
@@ -1160,11 +1195,42 @@ class ProcessContainer(Actionable, VerticalScroll):
                         else None
                     )
                     if not sudo:
-                        raise
+                        bar.panic(
+                            notify={
+                                "message": "Failed to create a symbolic link. "
+                                "You may need to run this program with elevated privileges (or have sudo.exe)",
+                                "title": "Symlink Error",
+                            },
+                            bar_text="Failed to create a symbolic link. "
+                            "You may need to run this program with elevated privileges.",
+                            exceptions=[(source, exc)],
+                            action="paste",
+                        )
+                        return
+                    if RESOURCE_PACKAGE != "rovr":
+                        pyexec: str | None = (
+                            shutil.which("python")
+                            or shutil.which("python3")
+                            or shutil.which("py")
+                            or shutil.which("py3")
+                        )
+                        if pyexec is None:
+                            bar.panic(
+                                notify={
+                                    "message": "Failed to find a Python executable to run with elevated privileges.",
+                                    "title": "Symlink Error",
+                                },
+                                bar_text="Failed to find a Python executable to run with elevated privileges.",
+                                exceptions=[(source, exc)],
+                                action="paste",
+                            )
+                            return
+                    else:
+                        pyexec = sys.executable
                     subprocess.run(
                         [
                             sudo,
-                            sys.executable,
+                            pyexec,
                             "-c",
                             "import os,sys;os.symlink(sys.argv[1],sys.argv[2],target_is_directory=sys.argv[3]=='1')",
                             target,
@@ -1190,13 +1256,12 @@ class ProcessContainer(Actionable, VerticalScroll):
                     ),
                 )
                 if action == "cancel":
-                    raise PasteCancelled
+                    raise ExitNow
                 if action == "skip":
                     bar.advance(work_size(source))
                     return False
                 if action == "rename":
                     destination = helper_rename(destination)
-                    destination_is_dir = False
                     bar.set_text(display_path(destination, dest))
                 elif not (source_is_dir and destination_is_dir):
                     if path.isjunction(destination):
@@ -1259,7 +1324,7 @@ class ProcessContainer(Actionable, VerticalScroll):
 
             try:
                 transfer(source, destination)
-            except PasteCancelled:
+            except ExitNow:
                 bar.panic(bar_text="Pasting cancelled.")
                 return
             except (PermissionError, OSError) as exc:
@@ -1270,7 +1335,7 @@ class ProcessContainer(Actionable, VerticalScroll):
                             source,
                             lambda: transfer(source, destination),
                         )
-                    except PasteCancelled:
+                    except ExitNow:
                         bar.panic(bar_text="Pasting cancelled.")
                         return
                     except Exception as retry_exc:

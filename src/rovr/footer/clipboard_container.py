@@ -157,7 +157,7 @@ class Clipboard(ListView, inherit_bindings=False):
 
             block = ClipboardBlock(paths, operation)
             await self.insert(0, [block])
-            if activate:
+            if activate and self.children and self.children[0] is block:
                 self.set_index(0)
             elif highlighted in self.children:
                 self.index = self.children.index(highlighted)
@@ -191,7 +191,10 @@ class Clipboard(ListView, inherit_bindings=False):
             action()
 
     def action_cursor_page(self, pages: float) -> None:
-        (self.action_page_down if pages > 0 else self.action_page_up)()
+        [
+            (self.action_page_down if pages > 0 else self.action_page_up)()
+            for _ in range(abs(int(pages)))
+        ]
 
     def action_first(self) -> None:
         if self.children:

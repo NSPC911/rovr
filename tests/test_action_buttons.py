@@ -170,7 +170,7 @@ async def test_move_and_delete_broken_symlink(tmp_path: Path) -> None:
     async with app.run_test(size=(143, 37)):
         process_container = app.query_one(ProcessContainer)
         worker = process_container.paste_items(
-            "cut", [link.as_posix()], destination.as_posix()
+            [], [link.as_posix()], destination.as_posix()
         )
         await worker.wait()
 

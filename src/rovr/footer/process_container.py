@@ -217,7 +217,8 @@ class ProgressBarContainer(VerticalGroup, inherit_bindings=False):
                     return
                 new_path = new_label[0]
                 for p in new_label[1:-1]:
-                    new_path += f"/{p[0]}"
+                    if p:
+                        new_path += f"/{p[0]}"
                 label = new_path + f"/{new_label[-1]}"
 
         self.call_safe(self.text_label.update, label)
@@ -278,7 +279,7 @@ class ProgressBarContainer(VerticalGroup, inherit_bindings=False):
         dismiss_with: BarPanicDismissible | None = None,
         notify: BarPanicNotify | None = None,
         bar_text: str = "",
-        exceptions: list[tuple[str, Exception]] | None = None,
+        exceptions: list[tuple[str, Exception]] | tuple[str, Exception] | None = None,
         action: str = "handle",
     ) -> None:
         """Do something when an error occurs.
@@ -289,10 +290,13 @@ class ProgressBarContainer(VerticalGroup, inherit_bindings=False):
             exceptions(list): A list of tuples containing the file and the exception that occurred
             action(str): The action that was being performed when the error occurred
         """
-        if self.__state != "running":
-            return
-        self.__state = "error"
-        self.call_safe(self._set_panic_state, bar_text, notify)
+        was_running = self.__state != "running"
+        if was_running:
+            self.__state = "error"
+            self.call_safe(self._set_panic_state, bar_text, notify)
+
+        if isinstance(exceptions, tuple):
+            exceptions = [exceptions]
 
         for file, exc in exceptions or []:
             self.notify(
@@ -302,7 +306,7 @@ class ProgressBarContainer(VerticalGroup, inherit_bindings=False):
             )
             path_utils.dump_exc(self, exc)
 
-        if dismiss_with:
+        if dismiss_with and was_running:
             self.call_safe(
                 self.app.push_screen,
                 screens.Dismissible(
@@ -500,36 +504,47 @@ class ProcessContainer(Actionable, VerticalScroll):
                 continue
             elif path.isdir(file):
                 bar.set_text(file)
-                directories: list[str] = []
-                for root, dirs, file_names in os.walk(file, topdown=True):
-                    for name in file_names:
-                        if panic_cancel(bar):
-                            return
-                        file_path = path.join(root, name)
-                        if not remove_file(file_path):
-                            return
-                    for name in list(dirs):
-                        if panic_cancel(bar):
-                            return
-                        dir_path = path.join(root, name)
-                        if path.islink(dir_path) or path.isjunction(dir_path):
-                            dirs.remove(name)
-                            if not remove_file(dir_path):
-                                return
+                if shutil.rmtree.avoids_symlink_attacks:
+                    size = work_size(file)
+
+                    def onexc(
+                        func: Callable[..., Any], item: str, exc: BaseException
+                    ) -> None:
+                        if isinstance(exc, Exception):
+                            errors.append((item, exc))
                         else:
-                            directories.append(dir_path)
-                for dir_path in reversed(directories):
-                    bar.set_text(dir_path)
-                    try:
-                        os.rmdir(dir_path)
-                        bar.advance()
-                    except OSError as exc:
-                        # check if it is because non-empty directory, if so, ignore
-                        # because relevant exception is from the file deletion above
-                        if exc.errno != errno.ENOTEMPTY:
-                            errors.append((dir_path, exc))
-                    except Exception as exc:
-                        errors.append((dir_path, exc))
+                            raise exc
+
+                    shutil.rmtree(file, onexc=onexc)
+                    bar.advance(size)
+                    continue
+                else:
+                    directories: list[str] = []
+                    for root, dirs, file_names in os.walk(file, topdown=True):
+                        for name in file_names:
+                            if panic_cancel(bar):
+                                return
+                            file_path = path.join(root, name)
+                            if not remove_file(file_path):
+                                return
+                        for name in list(dirs):
+                            if panic_cancel(bar):
+                                return
+                            dir_path = path.join(root, name)
+                            if path.islink(dir_path) or path.isjunction(dir_path):
+                                dirs.remove(name)
+                                if not remove_file(dir_path):
+                                    return
+                            else:
+                                directories.append(dir_path)
+                    for dir_path in reversed(directories):
+                        bar.set_text(dir_path)
+                        try:
+                            os.rmdir(dir_path)
+                            bar.advance()
+                        except OSError as exc:
+                            if exc.errno != errno.ENOTEMPTY:
+                                errors.append((dir_path, exc))
                 if panic_cancel(bar):
                     break
                 bar.set_text(file)
@@ -542,9 +557,8 @@ class ProcessContainer(Actionable, VerticalScroll):
                 except OSError as exc:
                     if exc.errno != errno.ENOTEMPTY:
                         errors.append((file, exc))
-            elif path.isfile(file):
-                if not remove_file(file):
-                    return
+            elif not remove_file(file):
+                return
         if not files:
             # this cannot happen, but just as an easter egg
             bar.ok("Successfully deleted nothing!")
@@ -676,6 +690,13 @@ class ProcessContainer(Actionable, VerticalScroll):
         files_to_archive: list[path_utils.FileObj] = []
         for file in files:
             objs = path_utils.get_recursive_files(file, True)
+            if objs == ([], []):
+                # likely because empty folder, if so, add the folder itself
+                files_to_archive.append({
+                    "path": file,
+                    "relative_loc": path.relpath(file, start),
+                })
+                continue
             files_to_archive.extend(objs[0])
             files_to_archive.extend(
                 {
@@ -700,7 +721,7 @@ class ProcessContainer(Actionable, VerticalScroll):
 
         with (
             dump_on_exc(self, Exception, other_callers=onerr),
-            Archive(archive_name, algo, "w", level, strict_timestamps=True) as archive,
+            Archive(archive_name, algo, "w", level, strict_timestamps=False) as archive,
         ):
             for obj, size in zip(files_to_archive, sizes):
                 if panic_cancel(bar):
@@ -708,7 +729,7 @@ class ProcessContainer(Actionable, VerticalScroll):
                 bar.set_text(display_path(obj["path"], start))
                 if algo == "zip":
                     info = zipfile.ZipInfo.from_file(
-                        obj["path"], obj["relative_loc"], strict_timestamps=True
+                        obj["path"], obj["relative_loc"], strict_timestamps=False
                     )
                     info.compress_type = zipfile.ZIP_DEFLATED
                     info.compress_level = level
@@ -764,6 +785,16 @@ class ProcessContainer(Actionable, VerticalScroll):
                             border_subtitle="Escape to cancel",
                         )
                     )
+                else:
+                    bar.panic(
+                        notify={
+                            "title": "Archive Error",
+                            "message": f"Failed to open archive {archive_path} due to {e!r}",
+                        },
+                        bar_text=f"{type(e).__name__} found when opening archive",
+                        exceptions=(archive_path, e),
+                    )
+                    return
             except KeyError as e:
                 if "invalid password" in str(e).lower():
                     password_res = self.push_screen(
@@ -774,6 +805,16 @@ class ProcessContainer(Actionable, VerticalScroll):
                             allow_initial=False,
                         ),
                     )
+                else:
+                    bar.panic(
+                        notify={
+                            "title": "Archive Error",
+                            "message": f"Failed to open archive {archive_path} due to {e!r}",
+                        },
+                        bar_text=f"{type(e).__name__} found when opening archive",
+                        exceptions=(archive_path, e),
+                    )
+                    return
         del password
         members = archive.infolist()
         bar.set_progress(
@@ -886,9 +927,14 @@ class ProcessContainer(Actionable, VerticalScroll):
                     "\nDo you want to extract this?"
                 )
                 if res is None:
-                    raise ValueError(
-                        f"Unsafe archive member path {member.name!r} escapes the"
-                        " destination directory and cannot be extracted."
+                    bar.panic(
+                        bar_text=f"found unsafe member {member.name}",
+                        exceptions=(
+                            archive_path,
+                            ValueError(
+                                f"Unsafe archive member path {member.name!r} escapes the destination directory and cannot be extracted."
+                            ),
+                        ),
                     )
             if res is None and (not is_path_in_directory(destination_path, final_path)):
                 res = confirm_unsafe_member(
@@ -897,9 +943,15 @@ class ProcessContainer(Actionable, VerticalScroll):
                     "\nDo you want to extract this?"
                 )
                 if res is None:
-                    raise ValueError(
-                        f"Unsafe archive member path {member.name!r} escapes"
-                        " destination via a symbolic link."
+                    bar.panic(
+                        bar_text=f"found unsafe member {member.name}",
+                        exceptions=(
+                            archive_path,
+                            ValueError(
+                                f"Unsafe archive member path {member.name!r} escapes"
+                                " destination via a symbolic link."
+                            ),
+                        ),
                     )
             if res is False:
                 bar.advance(member.uncompressed_size)
@@ -1194,7 +1246,10 @@ class ProcessContainer(Actionable, VerticalScroll):
                 continue
             destination = path.join(dest, path.basename(path.normpath(source)))
             # Copying into a descendant would recursively consume the new copy.
-            if is_real_dir(source) and is_path_in_directory(source, dest, False):
+            if is_real_dir(source) and (
+                is_path_in_directory(source, dest, False)
+                or is_path_in_directory(source, dest)
+            ):
                 errors.append((
                     source,
                     ValueError("Cannot paste a directory inside itself"),
@@ -1269,7 +1324,7 @@ class ProcessContainer(Actionable, VerticalScroll):
                 for uri in uris
             )
 
-            opened: list[tuple[Any, str]] = []
+            opened: list[tuple[Any, str, int]] = []
             failures: list[tuple[str, Exception]] = []
             for req, filename in zip(reqs, paths):
                 full_path = (
@@ -1278,7 +1333,7 @@ class ProcessContainer(Actionable, VerticalScroll):
                 bar.set_text(display_path(full_path, dest))
                 try:
                     resp: Any = stack.enter_context(request.urlopen(req, timeout=5))
-                    opened.append((resp, full_path))
+                    opened.append((resp, full_path, resp.length))
                 except Exception as e:
                     failures.append((filename, e))
                     if isinstance(e, error.HTTPError):
@@ -1291,9 +1346,11 @@ class ProcessContainer(Actionable, VerticalScroll):
                         bar.set_text(f"Failed to open {filename}: {e}. Skipping...")
 
             # set the max of progress bar to be total size of all successfully opened files
-            bar.set_progress(sum((r.length or 0) for r, _ in opened) + len(failures) + 1)
+            bar.set_progress(
+                sum((size or 1) for _, _, size in opened) + len(failures) + 1
+            )
 
-            for resp, filename in opened:
+            for resp, filename, size in opened:
                 bar.set_text(display_path(filename, dest))
                 try:
                     with open(filename, "wb") as file:
@@ -1302,7 +1359,10 @@ class ProcessContainer(Actionable, VerticalScroll):
                                 bar.panic(bar_text="Download cancelled.")
                                 return
                             file.write(chunk)
-                            bar.advance(len(chunk))
+                            if size:
+                                bar.advance(len(chunk))
+                    if not size:
+                        bar.advance()
                 except (error.URLError, error.HTTPError, OSError) as e:
                     # Handles network drops midway through an active stream or disk write errors
                     failures.append((filename, e))

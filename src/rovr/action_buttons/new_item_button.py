@@ -17,7 +17,7 @@ from rovr.footer.process_container import ProcessContainer, ProgressBarContainer
 from rovr.functions.cwd import getcwd
 from rovr.functions.icons import get_icon
 from rovr.functions.path import dump_exc, normalise
-from rovr.functions.utils import command, dump_on_exc, run_command
+from rovr.functions.utils import command, dump_on_exc, run_command, s
 from rovr.variables.constants import config
 
 
@@ -186,14 +186,16 @@ class NewItemButton(Button):
         self.app.query_one(ProcessContainer).mount(bar, before=0)
         worker = self._bulk_creator(entries, cwd, bar)
         try:
-            first_created, errors = await worker.wait()
+            first_created, errors, exists = await worker.wait()
         except WorkerCancelled:
             bar.panic(notify={"title": "Bulk Create", "message": "Operation cancelled"})
             return
 
         total = len(entries)
         if errors:
-            bar.panic(bar_text=f"Created {total - len(errors)} of {total} items")
+            bar.panic(
+                bar_text=f"Created {total - len(errors) - exists} + {exists}/{total} items"
+            )
         else:
             bar.ok()
 
@@ -216,7 +218,8 @@ class NewItemButton(Button):
             )
         if first_created:
             self.notify(
-                f"Created {total - len(errors)} item(s).",
+                f"Created {(it := (total - len(errors) - exists))} item{s(it)}"
+                + (f"\n{exists} already existed" if exists else ""),
                 title="Bulk Create",
                 severity="information",
                 markup=False,
@@ -227,8 +230,9 @@ class NewItemButton(Button):
     @work(thread=True)
     def _bulk_creator(
         self, entries: list[str], cwd: str, bar: ProgressBarContainer
-    ) -> tuple[str | None, list[str]]:
+    ) -> tuple[str | None, list[str], int]:
         first_created: str | None = None
+        exists: int = 0
         errors: list[str] = []
         flags = os.O_CREAT | os.O_EXCL | os.O_WRONLY
         for entry in entries:
@@ -250,7 +254,14 @@ class NewItemButton(Button):
                     first_created = location
                 bar.advance()
             except FileExistsError:
-                bar.advance()
+                # check if it is a conflict of type (file vs directory)
+                if is_dir and not path.isdir(location):
+                    errors.append(f"{entry}: Path exists but not a directory")
+                elif not is_dir and not path.isfile(location):
+                    errors.append(f"{entry}: Path exists but not a file")
+                else:
+                    exists += 1
+                    bar.advance()
             except Exception as exc:
                 errors.append(f"{entry}: {type(exc).__name__}: {exc}")
-        return first_created, errors
+        return first_created, errors, exists

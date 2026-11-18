@@ -171,7 +171,7 @@ async def test_move_and_delete_broken_symlink(tmp_path: Path) -> None:
     async with app.run_test(size=(143, 37)):
         process_container = app.query_one(ProcessContainer)
         worker = process_container.paste_items(
-            [], [link.as_posix()], destination.as_posix()
+            "cut", [link.as_posix()], destination.as_posix()
         )
         await worker.wait()
 
@@ -268,7 +268,7 @@ def test_bulk_creator_uses_cwd_snapshot_and_updates_progress(tmp_path: Path) -> 
     entries = ["nested/relative.txt", absolute.as_posix()]
     bar = Bar()
 
-    first_created, errors = cast(Any, NewItemButton._bulk_creator).__wrapped__(
+    first_created, errors, exists = cast(Any, NewItemButton._bulk_creator).__wrapped__(
         object(), entries, cwd.as_posix(), bar
     )
 
@@ -278,6 +278,7 @@ def test_bulk_creator_uses_cwd_snapshot_and_updates_progress(tmp_path: Path) -> 
     assert absolute.is_file()
     assert bar.labels == entries
     assert bar.progress == len(entries)
+    assert exists == 0
 
 
 @pytest.mark.asyncio

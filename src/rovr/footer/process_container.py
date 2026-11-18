@@ -290,7 +290,7 @@ class ProgressBarContainer(VerticalGroup, inherit_bindings=False):
             exceptions(list): A list of tuples containing the file and the exception that occurred
             action(str): The action that was being performed when the error occurred
         """
-        was_running = self.__state != "running"
+        was_running = self.__state == "running"
         if was_running:
             self.__state = "error"
             self.call_safe(self._set_panic_state, bar_text, notify)
@@ -623,15 +623,19 @@ class ProcessContainer(Actionable, VerticalScroll):
             except (PermissionError, OSError) as exc:
                 is_file_in_use = is_being_used(exc)
                 if is_file_in_use and WIN32:
-                    action, action_on_file_in_use = self.handle_file_in_use_error(
-                        action_on_file_in_use,
-                        file,
-                        lambda: recycle_bin.recycle([file]),
-                    )
-                    if action == "cancel":
-                        bar.panic(bar_text="Trashing cancelled.")
-                        return
-                    bar.advance()
+                    try:
+                        action, action_on_file_in_use = self.handle_file_in_use_error(
+                            action_on_file_in_use,
+                            file,
+                            lambda: recycle_bin.recycle([file]),
+                        )
+                        if action == "cancel":
+                            bar.panic(bar_text="Trashing cancelled.")
+                            return
+                        bar.advance()
+                    except Exception as retry_exc:
+                        retry_exc.__cause__ = exc
+                        failed.append((file, retry_exc))
                 elif path_utils.force_obtain_write_permission(file):
                     try:
                         recycle_bin.recycle([file])
@@ -754,10 +758,6 @@ class ProcessContainer(Actionable, VerticalScroll):
         Args:
             archive_path (str): Path to the zip archive.
             destination_path (str): Path to the destination folder.
-
-        Raises:
-            ValueError: If the archive contains unsafe paths that could lead to path traversal vulnerabilities.
-                      ╰─ this is automatically caught
         """
         from multiarchive import Archive
 
@@ -906,6 +906,7 @@ class ProcessContainer(Actionable, VerticalScroll):
             # do some pre checks like absolute path and escaping destination
             normalised = path.normpath(member.name)
             res: bool | None = None
+            exc: ValueError | None = None
             if path.isabs(normalised):
                 res = confirm_unsafe_member(
                     f"{member.name!r} is an absolute path"
@@ -913,7 +914,7 @@ class ProcessContainer(Actionable, VerticalScroll):
                     "\nDo you want to extract this?"
                 )
                 if res is None:
-                    raise ValueError(
+                    exc = ValueError(
                         f"Unsafe archive member path {member.name!r} is an absolute"
                         " path and cannot be extracted."
                     )
@@ -927,14 +928,8 @@ class ProcessContainer(Actionable, VerticalScroll):
                     "\nDo you want to extract this?"
                 )
                 if res is None:
-                    bar.panic(
-                        bar_text=f"found unsafe member {member.name}",
-                        exceptions=(
-                            archive_path,
-                            ValueError(
-                                f"Unsafe archive member path {member.name!r} escapes the destination directory and cannot be extracted."
-                            ),
-                        ),
+                    exc = ValueError(
+                        f"Unsafe archive member path {member.name!r} escapes the destination directory and cannot be extracted."
                     )
             if res is None and (not is_path_in_directory(destination_path, final_path)):
                 res = confirm_unsafe_member(
@@ -943,16 +938,21 @@ class ProcessContainer(Actionable, VerticalScroll):
                     "\nDo you want to extract this?"
                 )
                 if res is None:
-                    bar.panic(
-                        bar_text=f"found unsafe member {member.name}",
-                        exceptions=(
-                            archive_path,
-                            ValueError(
-                                f"Unsafe archive member path {member.name!r} escapes"
-                                " destination via a symbolic link."
-                            ),
-                        ),
+                    exc = ValueError(
+                        f"Unsafe archive member path {member.name!r} escapes"
+                        " destination via a symbolic link."
                     )
+            if exc is not None:
+                bar.panic(
+                    notify={
+                        "message": f"Failed to extract {member.name} due to {exc!r}",
+                        "title": "Archive Error",
+                    },
+                    bar_text="Rejected extracting unsafe archive member",
+                    exceptions=(member.name, exc),
+                )
+                archive.close()
+                return
             if res is False:
                 bar.advance(member.uncompressed_size)
                 continue

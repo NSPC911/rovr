@@ -1,3 +1,4 @@
+import errno
 import os
 import re
 import subprocess
@@ -73,7 +74,8 @@ def is_being_used(exc: OSError) -> bool:
 
     # This is genuinely pissing me off so much, I keep getting false positives, so you know what
     # I will check whether the exception's strerror matches the full sentence
-    return "being used by another process" in str(exc.strerror)
+    # return "being used by another process" in str(exc.strerror)
+    return exc.errno == errno.EACCES
 
 
 def should_cancel() -> bool:

@@ -8,6 +8,7 @@ import subprocess
 import sys
 import time
 import zipfile
+from contextlib import closing
 from functools import partial
 from os import path
 from threading import get_ident
@@ -35,6 +36,7 @@ from rovr.functions import icons as icons
 from rovr.functions import path as path_utils
 from rovr.functions.cwd import getcwd
 from rovr.functions.utils import dump_on_exc, is_being_used, should_cancel
+from rovr.screens.yes_or_no import YesOrNo
 from rovr.variables.constants import config
 
 WIN32 = sys.platform == "win32"
@@ -760,13 +762,24 @@ class ProcessContainer(Actionable, VerticalScroll):
             archive_path (str): Path to the zip archive.
             destination_path (str): Path to the destination folder.
         """
-        from multiarchive import Archive
+        from multiarchive._archive import Archive, BadArchiveError
 
         bar = ProgressBarContainer(label="Preparing to extract...", classes="active")
         self.mount_bar(bar)
         bar.set_icon(icons.get_icon("general", "open")[0])
         destination_path = path.abspath(destination_path)
-        os.makedirs(destination_path, exist_ok=True)
+        try:
+            os.makedirs(destination_path, exist_ok=True)
+        except OSError as e:
+            bar.panic(
+                notify={
+                    "title": "Destination Error",
+                    "message": f"Failed to create destination {destination_path} due to {e!r}",
+                },
+                bar_text=f"Couldn't create {destination_path}",
+                exceptions=(destination_path, e),
+            )
+            return
         archive: Archive | None = None
         password: bytes | None = None
         password_res: str | UnusedParameter | None = UNUSED
@@ -959,7 +972,7 @@ class ProcessContainer(Actionable, VerticalScroll):
 
         item = archive_path
         try:
-            with archive:
+            with closing(archive):
                 members = archive.infolist()
                 bar.set_progress(
                     total=sum(member.uncompressed_size for member in members) + 1,
@@ -1041,14 +1054,18 @@ class ProcessContainer(Actionable, VerticalScroll):
                         partial(extract_member, final_path), final_path
                     ):
                         bar.advance(member.uncompressed_size - extracted_bytes)
-        except ExitNow:
-            bar.panic(bar_text="Extraction cancelled.")
-        except (OSError, ValueError, zipfile.BadZipFile) as exc:
+        except (BadArchiveError, OSError, ValueError, zipfile.BadZipFile) as exc:
             bar.panic(
-                bar_text="Extraction failed",
+                notify={
+                    "message": f"Failed to extract archive {archive_path} due to {exc!r}",
+                    "title": "Archive Error",
+                },
+                bar_text=f"{type(exc).__name__} found when extracting archive",
                 exceptions=(item, exc),
                 action="extract",
             )
+        except ExitNow:
+            bar.panic(bar_text="Extraction cancelled.")
         else:
             bar.ok()
 
@@ -1156,7 +1173,7 @@ class ProcessContainer(Actionable, VerticalScroll):
 
             def copy_link() -> None:
                 if path.isjunction(source):
-                    # luv windows
+                    # #luv_windows
                     target = path.realpath(source)
                     if target.startswith("\\\\?\\UNC\\"):
                         target = f"\\\\{target[8:]}"
@@ -1206,7 +1223,7 @@ class ProcessContainer(Actionable, VerticalScroll):
                             exceptions=[(source, exc)],
                             action="paste",
                         )
-                        return
+                        raise ExitNow from exc
                     if RESOURCE_PACKAGE != "rovr":
                         pyexec: str | None = (
                             shutil.which("python")
@@ -1224,22 +1241,46 @@ class ProcessContainer(Actionable, VerticalScroll):
                                 exceptions=[(source, exc)],
                                 action="paste",
                             )
-                            return
+                            raise ExitNow from exc
                     else:
                         pyexec = sys.executable
-                    subprocess.run(
-                        [
-                            sudo,
-                            pyexec,
-                            "-c",
-                            "import os,sys;os.symlink(sys.argv[1],sys.argv[2],target_is_directory=sys.argv[3]=='1')",
-                            target,
-                            destination,
-                            str(int(target_is_directory)),
-                        ],
-                        check=True,
-                        capture_output=True,
-                    )
+                    command = [
+                        sudo,
+                        pyexec,
+                        "-c",
+                        "import os,sys;os.symlink(sys.argv[1],sys.argv[2],target_is_directory=sys.argv[3]=='1')",
+                        target,
+                        destination,
+                        str(int(target_is_directory)),
+                    ]
+                    if self.push_screen(
+                        YesOrNo(
+                            "Creating a symbolic link requires elevated privileges."
+                            "\nI'm going to run this command, and UAC will prompt you."
+                            f"\n{subprocess.list2cmdline(command)}"
+                            "\nYou can reject this prompt or UAC and the symlink creation will be cancelled.",
+                            border_title=f"{type_of_selection.capitalize()} a symlink",
+                            destructive=False,
+                        )
+                    ):
+                        out = subprocess.run(
+                            command,
+                            capture_output=True,
+                        )
+                        if out.returncode:
+                            bar.panic(
+                                bar_text="UAC declined elevation to create a symlink",
+                                exceptions=[(source, exc)],
+                                action="paste",
+                            )
+                            raise ExitNow from exc
+                    else:
+                        bar.panic(
+                            bar_text="Declined elevation to create a symlink",
+                            exceptions=[(source, exc)],
+                            action="paste",
+                        )
+                        raise ExitNow from exc
 
             if path.lexists(destination):
                 destination_is_dir = is_real_dir(destination)

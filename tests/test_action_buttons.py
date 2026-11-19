@@ -439,7 +439,7 @@ async def test_unzip_button_modal(tmp_path: Path) -> None:
     zip_path = tmp_path / "test_archive.zip"
     with zipfile.ZipFile(zip_path, "w") as zf:
         zf.writestr("dummy.txt", "hello")
-    app = Application(startup_path=tmp_path.as_posix())
+    app = Application(startup_path=zip_path.as_posix())
     async with app.run_test(size=(143, 37)) as pilot:
         await pilot.pause()
         await pilot.click(UnzipButton)

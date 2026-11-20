@@ -154,7 +154,7 @@ def test_get_recursive_files(tmp_path: Path) -> None:
 
 
 def test_resolved_path_is_not_allowed_to_escape_destination(tmp_path: Path) -> None:
-    from rovr.footer.process_container import ProcessContainer
+    from rovr.footer.process_container import is_path_in_directory
 
     destination = tmp_path / "destination"
     outside = tmp_path / "outside"
@@ -165,9 +165,11 @@ def test_resolved_path_is_not_allowed_to_escape_destination(tmp_path: Path) -> N
     except (OSError, NotImplementedError):
         pytest.skip("Symlink creation failed")
 
-    assert ProcessContainer.is_path_within_directory(
-        destination.as_posix(), (destination / "link" / "file.txt").as_posix()
+    assert is_path_in_directory(
+        destination.as_posix(),
+        (destination / "link" / "file.txt").as_posix(),
+        resolve=False,
     )
-    assert not ProcessContainer.is_resolved_path_within_directory(
+    assert not is_path_in_directory(
         destination.as_posix(), (destination / "link" / "file.txt").as_posix()
     )

@@ -186,14 +186,11 @@ async def test_conn_copies_existing_items(
 
 
 @pytest.mark.parametrize(
-    ("operation", "copied", "cut"),
-    [("copy", ["item"], []), ("cut", [], ["item"])],
+    ("operation", "items"),
+    [("copy", ["item"]), ("cut", ["item"])],
 )
 async def test_conn_pastes_clipboard_block(
-    monkeypatch: pytest.MonkeyPatch,
-    operation: str,
-    copied: list[str],
-    cut: list[str],
+    monkeypatch: pytest.MonkeyPatch, operation: str, items: list[str]
 ) -> None:
     calls: list[tuple[list[str], list[str]]] = []
 
@@ -230,7 +227,7 @@ async def test_conn_pastes_clipboard_block(
         "secret",
     )
 
-    assert calls == [(copied, cut)]
+    assert calls == [(operation, items)]
 
 
 async def test_conn_selects_and_unselects_clipboard_block(

@@ -15,6 +15,7 @@ from typing import Awaitable, Callable, Literal, TypeVar, cast, overload
 import textual_image.renderable
 import textual_image.widget
 from PIL import Image, UnidentifiedImageError
+from PIL.Image import Image as PILImage
 from rich.text import Text
 from textual import events, on, work
 from textual.app import ComposeResult
@@ -24,12 +25,19 @@ from textual.css.query import NoMatches
 from textual.dom import DOMNode
 from textual.geometry import Region
 from textual.timer import Timer
+from textual.widget import Widget
 from textual.widgets import Static
 from textual.widgets.selection_list import Selection
 from textual.worker import Worker
 
 from rovr.classes.mixins import Action, Actionable
-from rovr.classes.preview_mixins import BatMixin, PDFHandler, PDFMixin
+from rovr.classes.preview_mixins import (
+    BatMixin,
+    PDFHandler,
+    PDFMixin,
+    VideoHandler,
+    VideoMixin,
+)
 from rovr.classes.textual_options import (
     ArchiveFileListSelection,
     FileListSelectionWidget,
@@ -50,6 +58,9 @@ from rovr.variables.constants import (
     RESAMPLING_METHOD,
     RESVG_CACHE_SIGNATURE,
     TEXT_PREVIEW_CACHE_VERSION,
+    VIDEO_FPS,
+    VIDEO_PAGE_SEEK_SECONDS,
+    VIDEO_SEEK_SECONDS,
     config,
     file_one,
     titles,
@@ -108,8 +119,9 @@ class LoadingPreview(Static):
         self.on_mount()
 
 
-class PreviewContainer(Actionable, PDFMixin, BatMixin, Container):
+class PreviewContainer(Actionable, PDFMixin, BatMixin, VideoMixin, Container):
     key_contexts = ("preview", "scroll")
+    ALLOW_MAXIMIZE = True
     LOADER_WIDGET = LoadingPreview()
 
     ACTIONS: list[Action] = [
@@ -126,6 +138,7 @@ class PreviewContainer(Actionable, PDFMixin, BatMixin, Container):
 
     def __init__(self) -> None:
         super().__init__(id="preview_sidebar")
+        self.can_focus = True
         self._loading_timer: Timer | None = None
         self._pending_preview_args: tuple[str, int | float] | None = None
         self._current_content: str | list[str] | None = None
@@ -137,9 +150,30 @@ class PreviewContainer(Actionable, PDFMixin, BatMixin, Container):
         self._preview_texts = config["interface"]["preview_text"]
         self._active_preview_token = object()
         self.pdf = PDFHandler()
+        self.video = VideoHandler()
 
     def compose(self) -> ComposeResult:
         yield Static(self._preview_texts["start"], classes="special")
+
+    def on_mount(self) -> None:
+        self.watch(self.screen, "maximized", self._on_maximized, init=False)
+
+    def _on_maximized(self, widget: Widget | None) -> None:
+        if widget is None or (widget is not self and self not in widget.ancestors):
+            return
+        if widget is not self:
+            # Maximizing a focused image would leave the rest of the preview behind.
+            self.screen.maximized = self
+        else:
+            self.call_after_refresh(self._focus_if_maximized)
+
+    def _focus_if_maximized(self) -> None:
+        if (
+            self.screen.is_active
+            and self.screen.maximized is self
+            and not self.has_focus_within
+        ):
+            self.focus()
 
     def get_loading_widget(self) -> LoadingPreview:
         """Get a widget to display a loading indicator.
@@ -164,6 +198,31 @@ class PreviewContainer(Actionable, PDFMixin, BatMixin, Container):
             return self.query_one(selector)
         except NoMatches:
             return None
+
+    async def _display_image(self, image: PILImage) -> None:
+        if widget := self.get_child(".image_preview"):
+            setattr(widget, "image", image)
+        else:
+            was_focused = self.has_focus_within
+            token = self._active_preview_token
+            if was_focused:
+                # Keep focus here while the focused child is removed.
+                self.focus()
+            await self.remove_children()
+            if token is not self._active_preview_token:
+                raise utils.ExitNow()
+            widget = self.NewImage(image)
+            widget.can_focus = True
+            await self.mount(widget)
+            if was_focused and self.has_focus:
+                # The new widget needs a layout pass before it can take focus.
+                self.call_after_refresh(self._focus_mounted_image, widget, token)
+        if self._file_type == "video" and self.has_focus_within:
+            self.call_after_refresh(self._start_video)
+
+    def _focus_mounted_image(self, widget: Widget, token: object) -> None:
+        if token is self._active_preview_token and self.has_focus and widget.is_mounted:
+            widget.focus()
 
     def set_border(self, title: Literal["title", "subtitle"], to: str) -> None:
         """Set the border title or subtitle of this widget.
@@ -296,17 +355,11 @@ class PreviewContainer(Actionable, PDFMixin, BatMixin, Container):
             return
         sig = (
             f"{preview_utils.MAX_FONT_SIZE}:{config['interface']['font_preview']['font_size']}",
-            f"{self._preview_texts['font_text']}:{fg_color.hex}:{bg_color.hex}:{self.NewImage.func.__name__}",
+            f"{self._preview_texts['font_text']}:{fg_color.hex}:{bg_color.hex}:{self.self.NewImage.func.__name__}",
         )
         img = cache._load_image(realpath, "font", stat_res, sig)
         if img is not None:
-            if image_widget := self.get_child(".image_preview"):
-                self.call_from_thread(setattr, image_widget, "image", img)
-            else:
-                self.call_from_thread(self.remove_children)
-                image_widget = self.NewImage(img)
-                image_widget.can_focus = True
-                self.call_from_thread(self.mount, image_widget)
+            self.call_from_thread(self._display_image, img)
             return
 
         text_fill: tuple[int, ...]
@@ -314,7 +367,7 @@ class PreviewContainer(Actionable, PDFMixin, BatMixin, Container):
         # so just check whether auto renderer is sixel, and config configured
         # to use auto (empty string) or sixel (explicitly)
         if (
-            self.NewImage.func is textual_image.renderable.sixel.Image
+            self.self.NewImage.func is textual_image.renderable.sixel.Image
             # image_viewer.protocol shouldn't be "Auto" because it is replaced early on
             # when loading the config, but just for the sake of shutting AI
             # up, I'm going to leave this here.
@@ -370,17 +423,7 @@ class PreviewContainer(Actionable, PDFMixin, BatMixin, Container):
         utils.check_cancel()
 
         try:
-            if image_widget := self.get_child(".image_preview"):
-                self.call_from_thread(setattr, image_widget, "image", img)
-            else:
-                self.call_from_thread(self.remove_children)
-
-                utils.check_cancel()
-
-                image_widget = self.NewImage(img)
-                # no need to resample, already ensured that canvas is max size
-                image_widget.can_focus = True
-                self.call_from_thread(self.mount, image_widget)
+            self.call_from_thread(self._display_image, img)
         except utils.ExitNow:
             raise
         except Exception as exc:
@@ -470,16 +513,7 @@ class PreviewContainer(Actionable, PDFMixin, BatMixin, Container):
 
             utils.check_cancel()
 
-            if image_widget := self.get_child(".image_preview"):
-                self.call_from_thread(setattr, image_widget, "image", pil_object)
-            else:
-                self.call_from_thread(self.remove_children)
-
-                utils.check_cancel()
-
-                image_widget = self.NewImage(pil_object)
-                image_widget.can_focus = True
-                self.call_from_thread(self.mount, image_widget)
+            self.call_from_thread(self._display_image, pil_object)
         except ValueError as exc:
             utils.check_cancel()
             self.call_from_thread(self.remove_children)
@@ -606,19 +640,8 @@ class PreviewContainer(Actionable, PDFMixin, BatMixin, Container):
             )
             return
 
-        if image_widget := self.get_child(".image_preview"):
-            utils.check_cancel()
-            self.call_from_thread(setattr, image_widget, "image", pil_object)
-        else:
-            self.call_from_thread(self.remove_children)
-
-            utils.check_cancel()
-
-            image_widget = self.NewImage(pil_object)
-            image_widget.can_focus = True
-            self.call_from_thread(self.mount, image_widget)
-
-            utils.check_cancel()
+        utils.check_cancel()
+        self.call_from_thread(self._display_image, pil_object)
 
     def show_normal_file_preview(self) -> None:
         """Show normal file preview with syntax highlighting. Runs in a thread.
@@ -699,14 +722,13 @@ class PreviewContainer(Actionable, PDFMixin, BatMixin, Container):
             utils.check_cancel()
 
             self.call_from_thread(
-                lambda: self.mount(
-                    WindowedTextPreview(
-                        lines,
-                        language=language,
-                        line_numbers=config["interface"]["show_line_numbers"],
-                        classes="text_preview",
-                    ).data_bind(type(self.app).ansi_color)
-                )
+                self.mount,
+                WindowedTextPreview(
+                    lines,
+                    language=language,
+                    line_numbers=config["interface"]["show_line_numbers"],
+                    classes="text_preview",
+                ).data_bind(type(self.app).ansi_color),
             )
 
         utils.check_cancel()
@@ -849,6 +871,14 @@ class PreviewContainer(Actionable, PDFMixin, BatMixin, Container):
 
     def show_preview(self, file_path: str, mtime: int | float) -> None:
         """Public method to show preview."""
+        self._stop_video()
+        if file_path != self.video.file or mtime != self.video.mtime:
+            self.video.file = file_path
+            self.video.mtime = mtime
+            self.video.position = 0.0
+            self.video.duration = None
+            self.video.size = None
+            self.video.ended = False
         token = self._active_preview_token = object()
         if (
             "hide" in self.classes
@@ -860,6 +890,7 @@ class PreviewContainer(Actionable, PDFMixin, BatMixin, Container):
             return
         self._pending_preview_args = None
         self.perform_show_preview(file_path, mtime, token)
+        self.call_after_refresh(self._start_video)
 
     @overload
     def call_from_thread(
@@ -1102,6 +1133,9 @@ class PreviewContainer(Actionable, PDFMixin, BatMixin, Container):
         elif file_type == "image":
             self.log("Showing image preview")
             self.show_image_preview()
+        elif file_type == "video":
+            self.log("Showing video preview")
+            self.show_video_preview()
         elif file_type == "archive":
             self.log("Showing archive preview")
             self.show_archive_preview()
@@ -1450,6 +1484,41 @@ class PreviewContainer(Actionable, PDFMixin, BatMixin, Container):
         if event.widget is self and self.children:
             self.children[-1].focus()
 
+    def on_descendant_focus(self) -> None:
+        if self._file_type == "video":
+            self.call_after_refresh(self._start_video)
+
+    def on_descendant_blur(self) -> None:
+        self.call_after_refresh(
+            lambda: (not self.has_focus_within) and self._stop_video()
+        )
+
+    #   ------------------------------------- video stuff -----------------------------------------
+
+    @on(events.Hide)
+    @on(events.Unmount)
+    def _stop_video(self) -> None:
+        # Invalidate workers that have not yet started their FFmpeg process.
+        if self._file_type != "video":
+            return
+        self.video.token = object()
+        self.video.running = False
+        process, self.video.process = self.video.process, None
+        if process is not None:
+            with contextlib.suppress(OSError):
+                if process.poll() is None:
+                    process.terminate()
+                try:
+                    process.wait(timeout=0.3)
+                except subprocess.TimeoutExpired:
+                    process.kill()
+                    process.wait()
+            if process.stdout is not None:
+                with contextlib.suppress(OSError):
+                    process.stdout.close()
+        if self.is_mounted:
+            self._update_video_subtitle()
+
     def _is_pdf(self) -> bool:
         return (
             self._file_type == "pdf"
@@ -1459,6 +1528,8 @@ class PreviewContainer(Actionable, PDFMixin, BatMixin, Container):
             .get("type")
             == "pdf"
         )
+
+    #   ------------------------------------- actions ---------------------------------------------
 
     def action_up(self) -> None:
         if self._is_pdf() and self.pdf.images is not None:
@@ -1489,13 +1560,19 @@ class PreviewContainer(Actionable, PDFMixin, BatMixin, Container):
             filelist.action_cursor_down()
 
     def action_left(self) -> None:
-        if self._is_pdf() and self.pdf.images is not None:
+        if self._file_type == "video":
+            self.video.seeking = "backward"
+            self._seek_video(self.video.position - VIDEO_SEEK_SECONDS)
+        elif self._is_pdf() and self.pdf.images is not None:
             self.update_current_pdf_page_by_diff(-1)
         elif text_preview := self.get_child(WindowedTextPreview):
             text_preview.scroll_left(animate=False)
 
     def action_right(self) -> None:
-        if self._is_pdf() and self.pdf.images is not None:
+        if self._file_type == "video":
+            self.video.seeking = "forward"
+            self._seek_video(self.video.position + VIDEO_SEEK_SECONDS)
+        elif self._is_pdf() and self.pdf.images is not None:
             self.update_current_pdf_page_by_diff(1)
         elif text_preview := self.get_child(WindowedTextPreview):
             text_preview.scroll_right(animate=False)
@@ -1529,19 +1606,27 @@ class PreviewContainer(Actionable, PDFMixin, BatMixin, Container):
             filelist.action_page_down()
 
     def action_page_left(self) -> None:
-        if self._is_pdf() and self.pdf.images is not None:
+        if self._file_type == "video":
+            self.video.seeking = "backward"
+            self._seek_video(self.video.position - VIDEO_PAGE_SEEK_SECONDS)
+        elif self._is_pdf() and self.pdf.images is not None:
             self.update_current_pdf_page_by_diff(-1)
         elif text_preview := self.get_child(WindowedTextPreview):
             text_preview.scroll_page_left(animate=False)
 
     def action_page_right(self) -> None:
-        if self._is_pdf() and self.pdf.images is not None:
+        if self._file_type == "video":
+            self.video.seeking = "forward"
+            self._seek_video(self.video.position + VIDEO_PAGE_SEEK_SECONDS)
+        elif self._is_pdf() and self.pdf.images is not None:
             self.update_current_pdf_page_by_diff(1)
         elif text_preview := self.get_child(WindowedTextPreview):
             text_preview.scroll_page_right(animate=False)
 
     def action_home(self) -> None:
-        if self._is_pdf() and self.pdf.images is not None:
+        if self._file_type == "video":
+            self._seek_video(0)
+        elif self._is_pdf() and self.pdf.images is not None:
             self.update_current_pdf_page(0)
         elif text_preview := self.get_child(WindowedTextPreview):
             text_preview.scroll_home(animate=False)
@@ -1555,7 +1640,9 @@ class PreviewContainer(Actionable, PDFMixin, BatMixin, Container):
             filelist.action_home()
 
     def action_end(self) -> None:
-        if self._is_pdf() and self.pdf.images is not None:
+        if self._file_type == "video" and self.video.duration is not None:
+            self._seek_video(self.video.duration - 1 / VIDEO_FPS)
+        elif self._is_pdf() and self.pdf.images is not None:
             self.update_current_pdf_page(self.pdf.total_pages - 1)
         elif text_preview := self.get_child(WindowedTextPreview):
             text_preview.scroll_end(animate=False)

@@ -101,6 +101,11 @@ ASCII_ICONS = {
         "delete": ("D", ""),
         "trash": ("T", "#8A8A8A"),
         "zip": ("Z", ""),
+        "playing": ("Playing", ""),
+        "paused": ("Paused", ""),
+        "ended": ("Ended", ""),
+        "fast_forward": (">>", ""),
+        "fast_backward": ("<<", ""),
     },
     "folder": {
         "default": ("D", "#DAA520"),
@@ -140,6 +145,11 @@ ICONS = {
         "symlink": ("\uf481", ""),
         "broken_symlink": ("\uf127", ""),
         "special": ("\uf2dc", ""),
+        "playing": ("\uf04b", ""),
+        "paused": ("\uf04c", ""),
+        "ended": ("\uf04d", ""),
+        "fast_forward": ("\uf050", ""),
+        "fast_backward": ("\uf049", ""),
     },
     "sorting": {
         "alpha_asc": ("\uf15d", "white"),

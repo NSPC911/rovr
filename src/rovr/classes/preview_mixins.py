@@ -1,14 +1,19 @@
 from __future__ import annotations
 
+import contextlib
 import os
 import subprocess
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from functools import partial
+from io import BytesIO
 from os import path
-from typing import TYPE_CHECKING, cast
+from shutil import which
+from typing import TYPE_CHECKING, Literal, cast
 
+from PIL import Image
 from PIL.Image import Image as PILImage
 from rich.text import Text
+from textual import work
 from textual.widgets import Static
 
 from rovr.classes.type_aliases import CacheSource
@@ -16,7 +21,7 @@ from rovr.components.text_preview import (
     LazyTextLines,
     WindowedTextPreview,
 )
-from rovr.functions import cache, preview_utils, utils
+from rovr.functions import cache, icons, preview_utils, utils
 from rovr.functions.ansi import ansi_to_rich_text
 from rovr.functions.path import dump_exc
 from rovr.variables.constants import (
@@ -24,7 +29,10 @@ from rovr.variables.constants import (
     BAT_PREVIEW_PAGE_SIZE,
     BAT_PREVIEWER_GROUP,
     PREVIEWER_GROUP,
+    VIDEO_FPS,
+    VIDEO_SCALE_FILTER,
     config,
+    ffconf,
     titles,
 )
 
@@ -556,3 +564,281 @@ class BatMixin:
             )
             dump_exc(self, exc)
             return False
+
+
+ffmpeg = ffconf["ffmpeg_path"]
+ffprobe = ffconf["ffprobe_path"]
+can_ffmpeg = ffconf["enabled"]
+
+
+@dataclass
+class VideoHandler:
+    file: str | None = None
+    mtime: int | float | None = None
+    position: float = 0.0
+    duration: float | None = None
+    size: tuple[int, int] | None = None
+    process: subprocess.Popen[bytes] | None = None
+    running: bool = False
+    ended: bool = False
+    token: object = field(default_factory=object)
+    seeking: Literal["forward", "backward"] | None = None
+
+
+class VideoMixin:
+    @staticmethod
+    def _probe_video_duration(source: str, stat_res: os.stat_result) -> float | None:
+        realpath = path.realpath(source)
+        sig = (ffprobe, "duration")
+        cached = cache.load(realpath, "video-duration", stat_res, sig)
+        if cached is not None:
+            with contextlib.suppress(ValueError):
+                duration = float(cached)
+                if 0 < duration < float("inf"):
+                    return duration
+        try:
+            result = subprocess.run(
+                [ffprobe, "-v", "error", "-show_entries", "format=duration"]
+                + ["-of", "default=noprint_wrappers=1:nokey=1", source],
+                capture_output=True,
+                timeout=3,
+                check=True,
+            )
+            duration = float(result.stdout)
+        except FileNotFoundError:
+            return None
+        except (OSError, ValueError, subprocess.SubprocessError):
+            return None
+        if 0 < duration < float("inf"):
+            cache.save(realpath, "video-duration", stat_res, sig, str(duration))
+            return duration
+        return None
+
+    def _update_video_subtitle(self: PreviewContainer) -> None:
+        if self._file_type != "video":
+            return
+        if self.video.seeking:
+            status = (
+                icons.get_icon("general", "fast_forward")
+                if self.video.seeking == "forward"
+                else icons.get_icon("general", "fast_backward")
+            )[0]
+        else:
+            status = (
+                icons.get_icon("general", "ended")
+                if self.video.ended
+                else icons.get_icon("general", "playing")
+                if self.video.running
+                else icons.get_icon("general", "paused")
+            )[0]
+        subtitle = status
+        if self.video.duration is not None:
+            position = int(min(self.video.position, self.video.duration))
+            duration = int(self.video.duration)
+            subtitle += f" {position // 60:02}:{position % 60:02} / {duration // 60:02}:{duration % 60:02}"
+        if self.border_subtitle != subtitle:
+            self.border_subtitle = subtitle
+
+    def _start_video(self: PreviewContainer) -> None:
+        if (
+            self._file_type != "video"
+            or not self.has_focus_within
+            or (self.video.running or self.video.ended)
+            or not can_ffmpeg
+            or not self.get_child(".image_preview")
+            or self.video.size is None
+            or ((not self.video.file) or self.video.file != self._current_file_path)
+            or not which(ffmpeg)
+        ):
+            return
+        self.video.running = True
+        self.video.token = object()
+        self._update_video_subtitle()
+        self._play_video(
+            self.video.file,
+            self.video.position,
+            self.video.token,
+            self._active_preview_token,
+        )
+
+    @work(thread=True, exclusive=True, group="video-playback")
+    def _play_video(
+        self: PreviewContainer,
+        source: str,
+        position: float,
+        token: object,
+        preview: object,
+    ) -> None:
+        context_token = self.preview_token.set(preview)
+        process: subprocess.Popen[bytes] | None = None
+        try:
+            if self.video.duration is None:
+                duration = self._probe_video_duration(source, os.stat(source))
+                if duration is not None:
+                    self.call_from_thread(self._set_video_duration, duration, token)
+            if token is not self.video.token:
+                return
+            size = self.video.size
+            if size is None:
+                return
+            process = subprocess.Popen(
+                [ffmpeg, "-hide_banner", "-loglevel"]
+                + ["error", "-nostdin", "-re", "-ss", str(position), "-i"]
+                + [source, "-map", "0:v:0", "-an", "-sn", "-pix_fmt"]
+                + ["rgb24", "-vf", f"fps={VIDEO_FPS},{VIDEO_SCALE_FILTER}"]
+                + ["-f", "rawvideo", "pipe:1"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.DEVNULL,
+            )
+            if not self.call_from_thread(self._register_video_process, process, token):
+                return
+            assert process.stdout is not None
+            # length * height * 3 (rgb)
+            frame_size = size[0] * size[1] * 3
+            frames = 0
+            while True:
+                data = bytearray()
+                while len(data) < frame_size:
+                    chunk = process.stdout.read(frame_size - len(data))
+                    if not chunk:
+                        # A partial frame or a terminated process is not a clean ending.
+                        if not data and frames:
+                            with contextlib.suppress(subprocess.TimeoutExpired):
+                                if process.wait(timeout=0.5) == 0:
+                                    self.call_from_thread(self._finish_video, token)
+                        return
+                    data.extend(chunk)
+                frames += 1
+                image = Image.frombytes("RGB", size, bytes(data))
+                if not self.call_from_thread(
+                    self._show_video_frame, image, position + frames / VIDEO_FPS, token
+                ):
+                    return
+        except FileNotFoundError:
+            self.notify(
+                f"FFmpeg executable not found: {config['plugins']['ffmpeg']['ffmpeg_path']}.",
+                title="Plugins: FFmpeg",
+                severity="warning",
+                markup=False,
+            )
+        except (utils.ExitNow, OSError, ValueError):
+            pass
+        finally:
+            if process is not None:
+                if process.poll() is None:
+                    process.terminate()
+                    try:
+                        process.wait(timeout=0.3)
+                    except subprocess.TimeoutExpired:
+                        process.kill()
+                        process.wait()
+                if process.stdout is not None:
+                    with contextlib.suppress(OSError):
+                        process.stdout.close()
+            with contextlib.suppress(RuntimeError):
+                self.app.call_from_thread(self._clear_video_process, process, token)
+            self.preview_token.reset(context_token)
+
+    def _set_video_duration(
+        self: PreviewContainer, duration: float, token: object
+    ) -> None:
+        if token is self.video.token:
+            self.video.duration = duration
+            self._update_video_subtitle()
+
+    def _finish_video(self: PreviewContainer, token: object) -> None:
+        if token is self.video.token:
+            self.video.ended = True
+            self.video.running = False
+            if self.video.duration is not None:
+                self.video.position = self.video.duration
+            self._update_video_subtitle()
+
+    def _register_video_process(
+        self: PreviewContainer, process: subprocess.Popen[bytes], token: object
+    ) -> bool:
+        if token is not self.video.token or not self.has_focus_within:
+            return False
+        self.video.process = process
+        return True
+
+    def _clear_video_process(
+        self: PreviewContainer, process: subprocess.Popen[bytes] | None, token: object
+    ) -> None:
+        # An older worker must not clear the process started after a seek.
+        if self.video.process is process:
+            self.video.process = None
+        if token is self.video.token:
+            self.video.running = False
+            self._update_video_subtitle()
+
+    def _show_video_frame(
+        self: PreviewContainer, image: PILImage, position: float, token: object
+    ) -> bool:
+        if token is not self.video.token or not self.has_focus_within:
+            return False
+        widget = self.get_child(".image_preview")
+        if widget is None:
+            return False
+        widget.image = image
+        self.video.position = position
+        self._update_video_subtitle()
+        return True
+
+    def _seek_video(self: PreviewContainer, position: float) -> None:
+        if self.video.duration is not None:
+            position = min(position, max(0.0, self.video.duration - 1 / VIDEO_FPS))
+        self.video.position = max(0.0, position)
+        self.video.ended = False
+        self._stop_video()
+        self.call_after_refresh(self._start_video)
+        self.set_timer(1, lambda: setattr(self.video, "seeking", None))
+
+    def show_video_preview(self) -> None:
+        if utils.should_cancel() or self._current_file_path is None:
+            return
+        self.set_border("title", "Video Preview")
+        if not can_ffmpeg:
+            self._current_content = "Video previews are disabled."
+            self.mount_special_messages()
+            return
+
+        source = self._current_file_path
+        realpath = path.realpath(source)
+        stat_res = os.stat(realpath)
+        sig = (ffmpeg, VIDEO_SCALE_FILTER)
+        image = cache._load_image(realpath, "video", stat_res, sig)
+        if image is None:
+            try:
+                result = subprocess.run(
+                    [ffmpeg, "-hide_banner", "-loglevel", "error", "-nostdin"]
+                    + ["-i", source, "-map", "0:v:0", "-frames:v", "1", "-vf"]
+                    + [VIDEO_SCALE_FILTER, "-c:v", "png", "-f", "image2pipe", "pipe:1"],
+                    capture_output=True,
+                    check=True,
+                    timeout=15,
+                )
+                with Image.open(BytesIO(result.stdout)) as frame:
+                    image = frame.copy()
+            except FileNotFoundError:
+                self._current_content = (
+                    f"Cannot preview video: FFmpeg executable not found: {ffmpeg}"
+                )
+                self.mount_special_messages()
+                return
+            except (OSError, ValueError, subprocess.SubprocessError) as exc:
+                if utils.should_cancel():
+                    return
+                self._current_content = f"Cannot preview video: {exc}"
+                self.mount_special_messages()
+                return
+            if utils.should_cancel():
+                return
+            cache._save_image(realpath, "video", stat_res, image, sig)
+            utils.check_cancel()
+        duration = self._probe_video_duration(source, stat_res)
+        self.call_from_thread(setattr, self.video, "duration", duration)
+        # The scaled thumbnail tells us how many RGB bytes each playback frame has.
+        self.call_from_thread(setattr, self.video, "size", image.size)
+        self.call_from_thread(self._display_image, image)
+        self.call_from_thread(self._update_video_subtitle)

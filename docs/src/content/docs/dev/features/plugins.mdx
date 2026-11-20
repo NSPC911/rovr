@@ -89,7 +89,6 @@ uses [ripgrep](https://github.com/BurntSushi/ripgrep) to search inside files
   </TabItem>
 </Tabs>
 
-
 ### poppler
 
 <img src="/rovr/screenshots/preview-pdf.png" alt="rovr's poppler integration" />
@@ -134,10 +133,27 @@ image_rendering = "optimize_quality"
 
 ### imagemagick
 
-uses the [`imagemagick`](https://imagemagick.org) command to provide image preview support for unsupported image formats (like jxl, heic, etc.)
+uses [`imagemagick`](https://imagemagick.org) to provide image preview support for unsupported image formats (like jxl, heic, etc.)
 
 ```toml title="config.toml"
 [plugins.magick]
 enabled = true
 executable = "magick"
+```
+
+### ffmpeg
+
+uses [`ffmpeg`](https://ffmpeg.org) to provide video preview support for unsupported video formats (like webm, mkv, etc.)
+```toml title="config.toml"
+[plugins.ffmpeg]
+enabled = true
+ffmpeg_path = "ffmpeg"
+ffprobe_path = "ffprobe"
+fps = 30
+# thumbnailed, so max of one side is 500, the other side is scaled accordingly
+size = [500, 500]
+# seeking is done with scroll left and right
+seek_seconds = 10
+# page seeking is done with page scroll left and right
+page_seek_seconds = 60
 ```

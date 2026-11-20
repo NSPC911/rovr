@@ -1,12 +1,14 @@
 import asyncio
 import pickle
 import subprocess
+from io import BytesIO
 from pathlib import Path
 from threading import Event
 from typing import Any, cast
 from unittest.mock import Mock, patch
 
 import pytest
+from PIL import Image
 from rich.console import Console
 from rich.text import Text
 from textual.app import App, ComposeResult
@@ -20,10 +22,11 @@ from rovr.components.text_preview import (
     _decode_text_preview,
 )
 from rovr.core.preview_container import PreviewContainer
+from rovr.functions import icons
 from rovr.functions.cache import _load_text, _save_text
 from rovr.functions.preview_utils import MimeResult
 from rovr.functions.utils import ExitNow
-from rovr.variables.constants import config
+from rovr.variables.constants import VIDEO_SIZE, config
 
 
 class PreviewTestApp(App[None]):
@@ -40,6 +43,235 @@ class WindowedPreviewTestApp(App[None]):
         )
 
 
+async def test_video_frames_seek_and_stop_reaps_old_process(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    processes = []
+
+    class Pipe:
+        def __init__(self, process: "Process") -> None:
+            self.process = process
+
+        def read(self, size: int) -> bytes:
+            return bytes(min(size, 1024)) if not self.process.reaped else b""
+
+        def close(self) -> None:
+            pass
+
+    class Process:
+        def __init__(self, command: list[str], **kwargs: Any) -> None:
+            self.command = command
+            self.stdout = Pipe(self)
+            self.reaped = False
+            processes.append(self)
+
+        def poll(self) -> int | None:
+            return 0 if self.reaped else None
+
+        def terminate(self) -> None:
+            self.reaped = True
+
+        def kill(self) -> None:
+            self.reaped = True
+
+        def wait(self, timeout: float | None = None) -> int:
+            self.reaped = True
+            return 0
+
+    monkeypatch.setattr(
+        "shutil.which",
+        lambda name: "ffmpeg" if name == "ffmpeg" else None,
+    )
+    monkeypatch.setattr("rovr.core.preview_container.subprocess.Popen", Process)
+    app = PreviewTestApp()
+    async with app.run_test() as pilot:
+        preview = app.query_one(PreviewContainer)
+        preview.video.file = preview._current_file_path = "video.mp4"
+        preview.video.duration = 120
+        preview.video.size = (32, 18)
+        preview._file_type = "video"
+        image = preview.NewImage(Image.new("RGB", preview.video.size))
+        image.can_focus = True
+        await preview.mount(image)
+        image.focus()
+        await pilot.pause()
+        for _ in range(40):
+            if preview.video.position > 0:
+                break
+            await asyncio.sleep(0.02)
+        assert preview.video.position > 0
+        assert preview.border_subtitle.startswith(icons.get_icon("general", "playing")[0])
+        preview.action_right()
+        await pilot.pause()
+        assert processes[0].reaped
+        for _ in range(40):
+            if len(processes) >= 2:
+                break
+            await asyncio.sleep(0.02)
+        assert len(processes) >= 2
+        assert "-ss" in processes[1].command
+        assert "pad=" not in " ".join(processes[1].command)
+        assert isinstance(image.image, Image.Image) and image.image.size == (32, 18)
+        assert float(processes[1].command[processes[1].command.index("-ss") + 1]) >= 10
+        app.set_focus(None)
+        await pilot.pause()
+        assert processes[1].reaped
+        assert not preview.video.ended
+
+
+async def test_video_clean_eof_shows_end_and_stays_stopped(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    processes = []
+
+    class Process:
+        def __init__(self, command: list[str], **kwargs: Any) -> None:
+            self.stdout = BytesIO(bytes(VIDEO_SIZE[0] * VIDEO_SIZE[1] * 3))
+            self.returncode: int | None = None
+            processes.append(self)
+
+        def poll(self) -> int | None:
+            return self.returncode
+
+        def terminate(self) -> None:
+            self.returncode = -15
+
+        def kill(self) -> None:
+            self.returncode = -9
+
+        def wait(self, timeout: float | None = None) -> int:
+            self.returncode = 0
+            return 0
+
+    monkeypatch.setattr("shutil.which", lambda name: name)
+    monkeypatch.setattr("rovr.core.preview_container.subprocess.Popen", Process)
+    app = PreviewTestApp()
+    async with app.run_test() as pilot:
+        preview = app.query_one(PreviewContainer)
+        preview.video.file = preview._current_file_path = "video.mp4"
+        preview.video.duration = 2.2
+        preview.video.size = VIDEO_SIZE
+        preview._file_type = "video"
+        image = preview.NewImage(Image.new("RGB", VIDEO_SIZE))
+        image.can_focus = True
+        await preview.mount(image)
+        image.focus()
+        for _ in range(80):
+            if preview.video.ended:
+                break
+            await asyncio.sleep(0.02)
+        assert preview.video.ended
+        assert (
+            preview.border_subtitle
+            == f"{icons.get_icon('general', 'ended')[0]} 00:02 / 00:02"
+        )
+
+        app.set_focus(None)
+        await pilot.pause()
+        image.focus()
+        await pilot.pause()
+        assert len(processes) == 1
+        assert (
+            preview.border_subtitle
+            == f"{icons.get_icon('general', 'ended')[0]} 00:02 / 00:02"
+        )
+
+        preview.action_home()
+        assert not preview.video.ended
+
+
+async def test_replacing_focused_preview_and_maximizing_child() -> None:
+    app = PreviewTestApp()
+    async with app.run_test() as pilot:
+        preview = app.query_one(PreviewContainer)
+        await preview.remove_children()
+        old = Static("old")
+        old.can_focus = True
+        await preview.mount(old)
+        old.focus()
+
+        await preview._display_image(Image.new("RGB", (32, 18)))
+        await pilot.pause()
+        image = preview.query_one(".image_preview")
+        assert app.focused is image
+        assert preview.has_focus_within
+
+        assert app.screen.maximize(image)
+        assert app.screen.maximized is preview
+
+        app.set_focus(None)
+        app.screen.maximized = None
+        app.screen.maximized = image
+        await pilot.pause()
+        assert app.screen.maximized is preview
+        assert app.focused is preview
+
+
+async def test_builtin_video_thumbnail_uses_ffmpeg_and_cache(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    source = tmp_path / "video.mp4"
+    source.write_bytes(b"video")
+    data = Image.new("RGB", (32, 18))
+    output = BytesIO()
+    data.save(output, format="PNG")
+    monkeypatch.setattr("rovr.classes.preview_mixins.ffmpeg", "my-ffmpeg")
+    monkeypatch.setattr("shutil.which", lambda name: name)
+    app = PreviewTestApp()
+    async with app.run_test():
+        preview = app.query_one(PreviewContainer)
+        preview._current_file_path = str(source)
+        preview._file_type = "video"
+        token = preview._active_preview_token
+        preview_token = preview.preview_token
+
+        def show() -> None:
+            context = preview_token.set(token)
+            try:
+                preview.show_video_preview()
+            finally:
+                preview_token.reset(context)
+
+        with (
+            patch("rovr.functions.cache._load_image", return_value=None),
+            patch("rovr.functions.cache._save_image") as save,
+            patch("rovr.functions.cache.load", return_value=None),
+            patch("rovr.functions.cache.save"),
+            patch("subprocess.run") as run,
+        ):
+            run.side_effect = lambda command, **kwargs: subprocess.CompletedProcess(
+                command, 0, b"5.0" if command[0] == "ffprobe" else output.getvalue()
+            )
+            await asyncio.to_thread(show)
+            assert run.call_args_list[0].args[0][0] == "my-ffmpeg"
+            assert run.call_args_list[0].args[0][
+                run.call_args_list[0].args[0].index("-i") + 1
+            ] == str(source)
+            assert save.call_args.args[1] == "video"
+            assert preview.video.size == (32, 18)
+            assert (
+                preview.border_subtitle
+                == f"{icons.get_icon('general', 'paused')[0]} 00:00 / 00:05"
+            )
+            assert preview._current_file_path == str(source)
+
+        with (
+            patch(
+                "rovr.functions.cache._load_image",
+                return_value=Image.new("RGB", (30, 12)),
+            ),
+            patch("rovr.functions.cache.load", return_value=b"5.0"),
+            patch("rovr.core.preview_container.subprocess.run") as run,
+        ):
+            await asyncio.to_thread(show)
+            run.assert_not_called()
+            assert preview.video.size == (30, 12)
+
+        preview.video.duration = None
+        preview._update_video_subtitle()
+        assert preview.border_subtitle == icons.get_icon("general", "paused")[0]
+
+
 def test_cached_text_uses_pickle() -> None:
     text = Text.from_markup("[bold red]cached[/]")
 
@@ -50,6 +282,25 @@ def test_cached_text_uses_pickle() -> None:
     assert pickle.loads(data) == text
     with patch("rovr.functions.cache.load", return_value=data):
         assert _load_text("file", "bat-page", cast(Any, None), ("v2", "bat")) == text
+
+
+def test_video_seek_actions_use_configured_intervals(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    preview = PreviewContainer()
+    preview._file_type = "video"
+    preview.video.position = 100
+    targets: list[float] = []
+    monkeypatch.setattr(preview, "_seek_video", targets.append)
+    monkeypatch.setattr("rovr.core.preview_container.VIDEO_SEEK_SECONDS", 7)
+    monkeypatch.setattr("rovr.core.preview_container.VIDEO_PAGE_SEEK_SECONDS", 35)
+
+    preview.action_left()
+    preview.action_right()
+    preview.action_page_left()
+    preview.action_page_right()
+
+    assert targets == [93, 107, 65, 135]
 
 
 @pytest.mark.parametrize("exit_code", [0, 21])

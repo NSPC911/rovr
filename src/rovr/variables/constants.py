@@ -159,3 +159,11 @@ BAT_PREVIEW_CACHE_VERSION = "paged-v3"
 BAT_PREVIEW_PAGE_SIZE = 256
 BAT_PREVIEWER_GROUP = "bat-pages"
 RESVG_CACHE_SIGNATURE = (str(config["plugins"]["resvg"]), "resvg-v2")
+ffconf = config["plugins"]["ffmpeg"]
+VIDEO_FPS = ffconf["fps"]
+VIDEO_SEEK_SECONDS = ffconf["seek_seconds"]
+VIDEO_PAGE_SEEK_SECONDS = ffconf["page_seek_seconds"]
+VIDEO_SIZE: tuple[int, int] = (ffconf["size"][0], ffconf["size"][1])
+VIDEO_SCALE_FILTER = (
+    f"scale={VIDEO_SIZE[0]}:{VIDEO_SIZE[1]}:force_original_aspect_ratio=decrease"
+)

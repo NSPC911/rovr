@@ -242,6 +242,9 @@ class FirstLaunchApp(App, inherit_bindings=False):
                 # issue #356
                 yield Switch(bool(which("bat") or which("batcat")))
                 yield Static("[u]bat[/] integration")
+            with HorizontalGroup(id="plugins-ffmpeg"):
+                yield Switch(which("ffmpeg") is not None)
+                yield Static("[u]FFmpeg[/] video previews")
             with HorizontalGroup(id="plugins-poppler"):
                 yield Switch(which("pdftoppm") is not None)
                 yield Static("[u]poppler[/] integration")
@@ -313,6 +316,7 @@ class FirstLaunchApp(App, inherit_bindings=False):
             "#plugins-rg": "Uses ripgrep to search all files for content quickly",
             "#plugins-fd": "Uses fd to quickly search for files and directories (and other weird path types)",
             "#plugins-bat": "Uses bat as an alternate previewer",
+            "#plugins-ffmpeg": "Uses FFmpeg to show video thumbnails and play videos in the preview pane",
             "#plugins-zoxide": "Uses zoxide to zip around directories quickly",
             "#plugins-poppler": "Uses poppler-utils to preview PDF files",
             "#plugins-file": "Uses the file(1) command to get better file type information",
@@ -454,6 +458,9 @@ enabled = {str(self.query_one("#plugins-fd Switch", Switch).value).lower()}
 [plugins.bat]
 enabled = {str(self.query_one("#plugins-bat Switch", Switch).value).lower()}
 {f'executable = "{"batcat" if which("batcat") is not None else "bat"}"' if self.query_one("#plugins-bat Switch", Switch).value else ""}
+
+[plugins.ffmpeg]
+enabled = {str(self.query_one("#plugins-ffmpeg Switch", Switch).value).lower()}
 
 [plugins.zoxide]
 enabled = {str(self.query_one("#plugins-zoxide Switch", Switch).value).lower()}

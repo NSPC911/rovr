@@ -120,6 +120,7 @@ drive_exclude = ["/var/*"]
 
 "application/(x-)?font-.*" = "font"
 "image/.*" = "image"
+"video/.*" = "video"
 "text/.*" = "text"
 "font/.*" = "font"
 
@@ -320,6 +321,15 @@ show_scores = false
 [plugins.bat]
 enabled = false
 executable = "bat"
+
+[plugins.ffmpeg]
+enabled = true
+ffmpeg_path = "ffmpeg"
+ffprobe_path = "ffprobe"
+fps = 30
+size = [500, 500]
+seek_seconds = 10
+page_seek_seconds = 60
 
 [plugins.fd]
 enabled = true

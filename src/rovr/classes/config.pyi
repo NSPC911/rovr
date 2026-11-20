@@ -25,6 +25,7 @@ _DefaultPreviews = (
     | Literal["folder"]
     | Literal["resvg"]
     | Literal["font"]
+    | Literal["video"]
     | Literal["details"]
 )
 _DEFAULTPREVIEWS_TEXT: Literal["text"] = "text"
@@ -40,6 +41,8 @@ r"""The values for the '_DefaultPreviews' enum"""
 _DEFAULTPREVIEWS_RESVG: Literal["resvg"] = "resvg"
 r"""The values for the '_DefaultPreviews' enum"""
 _DEFAULTPREVIEWS_FONT: Literal["font"] = "font"
+r"""The values for the '_DefaultPreviews' enum"""
+_DEFAULTPREVIEWS_VIDEO: Literal["video"] = "video"
 r"""The values for the '_DefaultPreviews' enum"""
 _DEFAULTPREVIEWS_DETAILS: Literal["details"] = "details"
 r"""The values for the '_DefaultPreviews' enum"""
@@ -236,6 +239,27 @@ r""" Default value of the field path 'Rovr Config plugins fd threads' """
 
 _ROVR_CONFIG_PLUGINS_FD_TIMEOUT_DEFAULT = 15
 r""" Default value of the field path 'Rovr Config plugins fd timeout' """
+
+_ROVR_CONFIG_PLUGINS_FFMPEG_ENABLED_DEFAULT = True
+r""" Default value of the field path 'Rovr Config plugins ffmpeg enabled' """
+
+_ROVR_CONFIG_PLUGINS_FFMPEG_FFMPEG_PATH_DEFAULT = "ffmpeg"
+r""" Default value of the field path 'Rovr Config plugins ffmpeg ffmpeg_path' """
+
+_ROVR_CONFIG_PLUGINS_FFMPEG_FFPROBE_PATH_DEFAULT = "ffprobe"
+r""" Default value of the field path 'Rovr Config plugins ffmpeg ffprobe_path' """
+
+_ROVR_CONFIG_PLUGINS_FFMPEG_FPS_DEFAULT = 20
+r""" Default value of the field path 'Rovr Config plugins ffmpeg fps' """
+
+_ROVR_CONFIG_PLUGINS_FFMPEG_PAGE_SEEK_SECONDS_DEFAULT = 60
+r""" Default value of the field path 'Rovr Config plugins ffmpeg page_seek_seconds' """
+
+_ROVR_CONFIG_PLUGINS_FFMPEG_SEEK_SECONDS_DEFAULT = 10
+r""" Default value of the field path 'Rovr Config plugins ffmpeg seek_seconds' """
+
+_ROVR_CONFIG_PLUGINS_FFMPEG_SIZE_DEFAULT = [960, 540]
+r""" Default value of the field path 'Rovr Config plugins ffmpeg size' """
 
 _ROVR_CONFIG_PLUGINS_FILE_ONE_ENABLED_DEFAULT = False
 r""" Default value of the field path 'Rovr Config plugins file_one enabled' """
@@ -456,6 +480,7 @@ _ROVR_CONFIG_SETTINGS_PREVIEW_RULES_DEFAULT = {
     "application/font-.*": "font",
     "application/x-font-.*": "font",
     "image/.*": "image",
+    "video/.*": "video",
     "text/.*": "text",
     "font/.*": "font",
     "application/(x-)?gzip": {"default": "archive", "extensions": {"svgz": "resvg"}},
@@ -1343,6 +1368,7 @@ r"""The values for the 'The filesize suffix to follow' enum"""
 class _RovrConfigPlugins(TypedDict, total=False):
     zoxide: "_RovrConfigPluginsZoxide"
     bat: "_RovrConfigPluginsBat"
+    ffmpeg: "_RovrConfigPluginsFfmpeg"
     fd: "_RovrConfigPluginsFd"
     rg: "_RovrConfigPluginsRg"
     poppler: "_RovrConfigPluginsPoppler"
@@ -1469,6 +1495,70 @@ _ROVRCONFIGPLUGINSFDDEFAULTFILTERTYPESITEM_BLOCK_DEVICE: Literal["block-device"]
     "block-device"
 )
 r"""The values for the '_RovrConfigPluginsFdDefaultFilterTypesItem' enum"""
+
+class _RovrConfigPluginsFfmpeg(TypedDict, total=False):
+    enabled: bool
+    r"""
+    Enable video thumbnails and playback using FFmpeg.
+
+    default: True
+    """
+
+    ffmpeg_path: str
+    r"""
+    FFmpeg executable name or path.
+
+    default: ffmpeg
+    """
+
+    ffprobe_path: str
+    r"""
+    FFprobe executable name or path.
+
+    default: ffprobe
+    """
+
+    fps: int
+    r"""
+    Maximum frames per second during video playback.
+
+    minimum: 1
+    maximum: 30
+    default: 20
+    """
+
+    size: list["_RovrConfigPluginsFfmpegSizeItem"]
+    r"""
+    Width and height in pixels for video thumbnails and playback frames.
+
+    minItems: 2
+    maxItems: 2
+    default:
+      - 960
+      - 540
+    """
+
+    seek_seconds: int
+    r"""
+    Seconds to seek with Left and Right in a video preview.
+
+    minimum: 1
+    default: 10
+    """
+
+    page_seek_seconds: int
+    r"""
+    Seconds to seek with Page Left and Page Right in a video preview.
+
+    minimum: 1
+    default: 60
+    """
+
+_RovrConfigPluginsFfmpegSizeItem = int
+r"""
+minimum: 16
+maximum: 1920
+"""
 
 class _RovrConfigPluginsFileOne(TypedDict, total=False):
     enabled: bool
@@ -1773,6 +1863,7 @@ class _RovrConfigSettings(TypedDict, total=False):
       image/svg\+xml: resvg
       inode/directory: folder
       text/.*: text
+      video/.*: video
     """
 
     previewers: dict[str, "_RovrConfigSettingsPreviewersType"]

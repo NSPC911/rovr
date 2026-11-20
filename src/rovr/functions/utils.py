@@ -317,11 +317,12 @@ async def expand_command(
         app.file_list.highlighted_option, "dir_entry"
     ):
         highlighted = normalise(app.file_list.highlighted_option.dir_entry.path)
-    selected = app.query_one("Clipboard").selected
-    copy, cut = (
-        [item.path for item in selected if item.type_of_selection == "copy"],
-        [item.path for item in selected if item.type_of_selection == "cut"],
-    )
+    selected: tuple[Literal["copy", "cut"] | None, list[str]] = app.query_one(
+        "Clipboard"
+    ).selected
+    clipboard_type, clipboard_files = selected
+    if clipboard_type is None:
+        clipboard_files = []
 
     commands = [command] if isinstance(command, str) else command
     selected_files = (
@@ -411,8 +412,7 @@ async def expand_command(
                             "%rs": lambda: shjoin([
                                 os.path.realpath(f) for f in selected_files
                             ]),
-                            "%cut": lambda: shjoin(cut),
-                            "%copy": lambda: shjoin(copy),
+                            "%clip": lambda: shjoin(clipboard_files),
                         }.get(exp, lambda: exp)()
                         if (exp := match.group(0)) not in banned_exp
                         else exp
@@ -430,10 +430,8 @@ async def expand_command(
                 to_return.extend(selected_files)
             elif cmd == "%rs" and "%rs" not in banned_exp:
                 to_return.extend(os.path.realpath(f) for f in selected_files)
-            elif cmd == "%cut" and "%cut" not in banned_exp:
-                to_return.extend(cut)
-            elif cmd == "%copy" and "%copy" not in banned_exp:
-                to_return.extend(copy)
+            elif cmd == "%clip" and "%clip" not in banned_exp:
+                to_return.extend(clipboard_files)
             else:
                 to_return.append(_expand(cmd))
     else:

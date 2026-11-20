@@ -172,7 +172,6 @@ async def test_conn_copies_existing_items(
             "action": "clipboard",
             "args": [
                 "copy",
-                "--selection=replace",
                 str(existing),
                 str(existing),
                 "missing",
@@ -182,8 +181,104 @@ async def test_conn_copies_existing_items(
         "secret",
     )
 
-    assert calls == [([str(existing)], "reselect")]
+    assert calls == [([str(existing)], False)]
     assert response(writer) == {"ok": True, "out": ["missing"]}
+
+
+@pytest.mark.parametrize(
+    ("operation", "copied", "cut"),
+    [("copy", ["item"], []), ("cut", [], ["item"])],
+)
+async def test_conn_pastes_clipboard_block(
+    monkeypatch: pytest.MonkeyPatch,
+    operation: str,
+    copied: list[str],
+    cut: list[str],
+) -> None:
+    calls: list[tuple[list[str], list[str]]] = []
+
+    class PasteWorker:
+        result = True
+
+        async def wait(self) -> None:
+            pass
+
+    process_container = SimpleNamespace(
+        paste_items=lambda copied, cut, _dest: (
+            calls.append((copied, cut)) or PasteWorker()
+        )
+    )
+    app = SimpleNamespace(
+        Clipboard=SimpleNamespace(selected=(operation, ["item"])),
+        query_one=lambda _selector: process_container,
+    )
+    app.app = app
+
+    async def allow(_app: Any, _action: str, _args: list[str]) -> bool:
+        return True
+
+    monkeypatch.setattr(ipc_receiver, "check_permission", allow)
+    writer = Writer()
+    await ipc_receiver.conn(
+        cast(Any, app),
+        reader_for({
+            "token": "secret",
+            "action": "clipboard",
+            "args": ["paste"],
+        }),
+        cast(Any, writer),
+        "secret",
+    )
+
+    assert calls == [(copied, cut)]
+
+
+async def test_conn_selects_and_unselects_clipboard_block(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    clipboard = SimpleNamespace(options=[object()], index=None, _active=None)
+
+    def set_index(index: int | None) -> None:
+        clipboard.index = index
+        clipboard._active = None if index is None else clipboard.options[index]
+
+    clipboard.set_index = set_index
+    app = SimpleNamespace(Clipboard=clipboard)
+
+    async def allow(_app: Any, _action: str, _args: list[str]) -> bool:
+        return True
+
+    monkeypatch.setattr(ipc_receiver, "check_permission", allow)
+
+    select_writer = Writer()
+    await ipc_receiver.conn(
+        cast(Any, app),
+        reader_for({
+            "token": "secret",
+            "action": "clipboard",
+            "args": ["select", "0"],
+        }),
+        cast(Any, select_writer),
+        "secret",
+    )
+    assert clipboard.index == 0
+    assert clipboard._active is clipboard.options[0]
+    assert response(select_writer) == {"ok": True}
+
+    unselect_writer = Writer()
+    await ipc_receiver.conn(
+        cast(Any, app),
+        reader_for({
+            "token": "secret",
+            "action": "clipboard",
+            "args": ["unselect"],
+        }),
+        cast(Any, unselect_writer),
+        "secret",
+    )
+    assert clipboard.index is None
+    assert clipboard._active is None
+    assert response(unselect_writer) == {"ok": True, "out": 0}
 
 
 async def test_wrapper_reports_internal_errors_and_closes_writer() -> None:

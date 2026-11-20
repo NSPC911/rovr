@@ -1,5 +1,4 @@
 # modal tester, use when necessary
-import random
 from importlib import resources
 from time import perf_counter
 from typing import Iterable
@@ -19,7 +18,6 @@ from rovr.screens import (
     Dismissible,
     FileInUse,
     FileNameConflict,
-    PasteScreen,
     YesOrNo,
 )
 
@@ -87,32 +85,6 @@ class Test(App):
         self.push_screen(
             FileInUse(
                 "The file 'example.txt' is currently in use by another application.\nexample.txt",
-            ),
-            callback=lambda result: self.notify(str(result), markup=False),
-        )
-
-    @on(Button.Pressed, "#PasteScreen")
-    def paste_screen(self) -> None:
-        to_copy = [f"file_copy_{i}.txt" for i in range(random.randint(0, 2))]
-        if len(to_copy) == 0:
-            to_cut = [f"file_cut_{i}.txt" for i in range(random.randint(1, 3))]
-        else:
-            to_cut = [f"file_cut_{i}.txt" for i in range(random.randint(0, 2))]
-        self.push_screen(
-            PasteScreen(
-                message="Are you sure you want to "
-                + (
-                    f"copy {len(to_copy)} item{'s' if len(to_copy) != 1 else ''}{' and ' if len(to_cut) != 0 else ''}"
-                    if len(to_copy) > 0
-                    else ""
-                )
-                + (
-                    f"cut {len(to_cut)} item{'s' if len(to_cut) != 1 else ''}"
-                    if len(to_cut) > 0
-                    else ""
-                )
-                + "?",
-                paths={"copy": to_copy, "cut": to_cut},
             ),
             callback=lambda result: self.notify(str(result), markup=False),
         )

@@ -372,6 +372,15 @@ r""" Default value of the field path 'Rovr Config settings ipc permissions clipb
 _ROVR_CONFIG_SETTINGS_IPC_PERMISSIONS_CLIPBOARD_FULL_STOP_PASTE_DEFAULT = "prompt"
 r""" Default value of the field path 'Rovr Config settings ipc permissions clipboard.paste' """
 
+_ROVR_CONFIG_SETTINGS_IPC_PERMISSIONS_CLIPBOARD_FULL_STOP_REMOVE_DEFAULT = "prompt"
+r""" Default value of the field path 'Rovr Config settings ipc permissions clipboard.remove' """
+
+_ROVR_CONFIG_SETTINGS_IPC_PERMISSIONS_CLIPBOARD_FULL_STOP_SELECT_DEFAULT = "allow"
+r""" Default value of the field path 'Rovr Config settings ipc permissions clipboard.select' """
+
+_ROVR_CONFIG_SETTINGS_IPC_PERMISSIONS_CLIPBOARD_FULL_STOP_UNSELECT_DEFAULT = "allow"
+r""" Default value of the field path 'Rovr Config settings ipc permissions clipboard.unselect' """
+
 _ROVR_CONFIG_SETTINGS_IPC_PERMISSIONS_INPUT_DEFAULT = "allow"
 r""" Default value of the field path 'Rovr Config settings ipc permissions input' """
 
@@ -1893,6 +1902,9 @@ _RovrConfigSettingsIpcPermissions = TypedDict(
         "clipboard.cut": "_IpcPerms",
         "clipboard.list": "_IpcPerms",
         "clipboard.paste": "_IpcPerms",
+        "clipboard.select": "_IpcPerms",
+        "clipboard.unselect": "_IpcPerms",
+        "clipboard.remove": "_IpcPerms",
         "tab.list": "_IpcPerms",
         "tab.new": "_IpcPerms",
         "tab.focus": "_IpcPerms",

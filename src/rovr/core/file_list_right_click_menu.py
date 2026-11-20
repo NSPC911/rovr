@@ -77,7 +77,7 @@ def give_me_an_option(
         app.file_list.highlighted_option and app.file_list.highlighted_option.disabled
     )
     cannot_write: bool = app.file_list.options[0].id == "perm"
-    no_clip: bool = len(app.Clipboard.selected) == 0
+    no_clip: bool = not app.Clipboard.selected[1]
     PartialOption = partial(
         RightClickMenuOption, f" {option['label'].strip()} ", action=option["action"]
     )

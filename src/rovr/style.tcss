@@ -502,6 +502,32 @@ ProcessContainer {
   margin: 0
 }
 
+Clipboard {
+  padding: 0;
+  ClipboardBlock {
+    layout: vertical;
+    height: auto;
+    width: 1fr;
+    background: transparent;
+    ClipboardSelectionMark {
+      width: 1fr;
+      height: 1;
+    }
+    .clipboard-path {
+      height: 1;
+      text-wrap: nowrap;
+      text-overflow: ellipsis;
+    }
+    .clipboard-more { text-style: dim }
+  }
+  ClipboardBlock.-highlight
+  { color: $primary }
+  &:focus ClipboardBlock.-highlight {
+    background: $primary;
+    color: $block-cursor-foreground;
+  }
+}
+
 ProgressBarContainer {
   padding-right: 1;
   HorizontalGroup {

@@ -1,10 +1,11 @@
 from __future__ import annotations
 
+from typing import Literal, cast
+
 from textual import work
 from textual.widgets import Button
 
 import rovr.screens as screens
-from rovr.classes.textual_options import ClipboardSelectionValue
 from rovr.functions.cwd import getcwd
 from rovr.functions.icons import get_icon
 from rovr.functions.utils import s
@@ -24,36 +25,24 @@ class PasteButton(Button):
         """Paste files from clipboard"""
         if self.disabled:
             return
-        selected_items: list[ClipboardSelectionValue] = self.app.query_one(
-            "Clipboard"
-        ).selected  # dont include highlighted
-        if selected_items:
-            # split into copy/cut based on attrs
-            to_copy, to_cut = (
-                [
-                    item.path
-                    for item in selected_items
-                    if item.type_of_selection == "copy"
-                ],
-                [item.path for item in selected_items if item.type_of_selection == "cut"],
-            )
-
+        type_of_selection, paths = cast(
+            tuple[Literal["copy", "cut"] | None, list[str]],
+            self.app.query_one("Clipboard").selected,
+        )
+        if type_of_selection and paths:
+            label = "move" if type_of_selection == "cut" else "copy"
             result = await self.app.push_screen_wait(
                 screens.PasteScreen(
                     message="Are you sure you want to "
-                    + (
-                        f"copy {len(to_copy)} item{s(to_copy)}{s(to_cut, ' and ')}"
-                        if len(to_copy) > 0
-                        else ""
-                    )
-                    + (f"cut {len(to_cut)} item{s(to_cut)}" if len(to_cut) > 0 else "")
-                    + "?",
-                    paths={"copy": to_copy, "cut": to_cut},
-                    destructive=True,
+                    f"{label} {len(paths)} item{s(len(paths))}?",
+                    paths=paths,
+                    type_of_selection=type_of_selection,
                 )
             )
 
             if result:
                 self.app.query_one("ProcessContainer").paste_items(
-                    to_copy, to_cut, getcwd()
+                    paths if type_of_selection == "copy" else [],
+                    paths if type_of_selection == "cut" else [],
+                    getcwd(),
                 )

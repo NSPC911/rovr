@@ -42,13 +42,23 @@ def _build_parser() -> IPCArgumentParser:
             operation,
             help=f"{operation.capitalize()} the passed items to rovr's clipboard",
         )
-        command.add_argument(
-            "--selection",
-            choices=("keep", "add", "replace"),
-            default="keep",
-            help="Whether to keep, add, or replace the clipboard selection (default: keep)",
-        )
         command.add_argument("paths", nargs="+")
+        command.add_argument(
+            "--select", action="store_true", help="Select the new clipboard entry."
+        )
+    for op, desc in (("remove", "from"), ("select", "in")):
+        command = clipboard_commands.add_parser(
+            op,
+            help=f"{op.capitalize()} the provided entry's index {desc} rovr's clipboard.",
+        )
+        command.add_argument(
+            "index",
+            type=int,
+            help=f"The index of the entry to {op} {desc} the clipboard.",
+        )
+    clipboard_commands.add_parser(
+        "unselect", help="Unselect the currently selected entry from rovr's clipboard."
+    )
     clipboard_commands.add_parser(
         "paste", help="Paste the contents of rovr's clipboard into the current view."
     )
@@ -160,8 +170,8 @@ def _prepare_message(action: str, args: tuple[str, ...]) -> tuple[str, ...]:
     if parsed.action == "clipboard" and parsed.operation in ("copy", "cut"):
         return (
             parsed.operation,
-            f"--selection={parsed.selection}",
-            *map(p, parsed.paths),
+            *(p(path) for path in parsed.paths),
+            *(("--select",) if parsed.select else ()),
         )
     if parsed.action == "tab" and parsed.operation == "new" and parsed.path:
         return (

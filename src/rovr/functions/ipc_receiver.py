@@ -127,63 +127,49 @@ async def conn(
             match args[0]:
                 case "list":
                     if await checker():
-                        options = self.Clipboard.options
-                        selected = self.Clipboard.selected
-                        # we need to parse this as well yay
+                        items = self.Clipboard.options
                         out = [
                             {
-                                "path": option.value.path,
-                                "type": option.value.type_of_selection,
-                                "selected": option.value in selected,
+                                "type": item.type_of_selection,
+                                "paths": item.paths,
+                                "active": item.active,
                             }
-                            for option in options
+                            for item in items
                         ]
                 case "paste":
                     if await checker():
-                        selected_items = (
-                            self.Clipboard.selected
-                        )  # dont include highlighted
-                        to_copy, to_cut = (
-                            [
-                                item.path
-                                for item in selected_items
-                                if item.type_of_selection == "copy"
-                            ],
-                            [
-                                item.path
-                                for item in selected_items
-                                if item.type_of_selection == "cut"
-                            ],
-                        )
+                        # dont include highlighted
+                        type_of_selection, paths = self.Clipboard.selected
                         # we will be ignoring the prompt that PasteButton
                         # does because we are assuming that ipc paste is
                         # a prompt (default) else the person kniws what
                         # they want from rovr
-                        worker: Worker[None | Literal[True]] = self.app.query_one(
-                            "ProcessContainer"
-                        ).paste_items(to_copy, to_cut, getcwd())
-                        await worker.wait()
-                        if ok := bool(worker.result):
-                            out = {"copy": len(to_copy), "cut": len(to_cut)}
+                        if type_of_selection is None or not paths:
+                            ok = False
+                            err = "no clipboard entry selected"
                         else:
-                            err = "user intervened"
+                            worker: Worker[None | Literal[True]] = self.app.query_one(
+                                "ProcessContainer"
+                            ).paste_items(
+                                paths if type_of_selection == "copy" else [],
+                                paths if type_of_selection == "cut" else [],
+                                getcwd(),
+                            )
+                            await worker.wait()
+                            if ok := bool(worker.result):
+                                out = {
+                                    "copy": len(paths)
+                                    if type_of_selection == "copy"
+                                    else 0,
+                                    "cut": len(paths)
+                                    if type_of_selection == "cut"
+                                    else 0,
+                                }
+                            else:
+                                err = "user intervened"
                 case "copy" | "cut":
                     if await checker():
-                        selection = next(
-                            (
-                                arg.removeprefix("--selection=")
-                                for arg in args[1:]
-                                if arg.startswith("--selection=")
-                            ),
-                            "keep",
-                        )
-                        if selection not in ("keep", "add", "replace"):
-                            return assemble_and_write(
-                                writer,
-                                False,
-                                None,
-                                "invalid selection argument, must be one of keep, add, replace",
-                            )
+                        select = "--select" in args
                         avail = list(
                             dict.fromkeys(
                                 p(path)
@@ -196,19 +182,40 @@ async def conn(
                             for path in args[1:]
                             if not (path in avail or path.startswith("--"))
                         ]
-                        func = (
+                        w = (
                             self.Clipboard.copy_to_clipboard
                             if args[0] == "copy"
                             else self.Clipboard.cut_to_clipboard
-                        )
-                        select: Literal["reselect", "select", "no"] = "no"
-                        if selection == "add":
-                            select = "select"
-                        elif selection == "replace":
-                            select = "reselect"
-                        w = func(avail, select)
+                        )(avail, select)
                         if isinstance(w, Worker):
                             await w.wait()
+                case "remove" | "select":
+                    if await checker():
+                        try:
+                            index = int(args[1])
+                        except (IndexError, ValueError):
+                            ok = False
+                            err = "index must be an integer"
+                        else:
+                            if index < 0 or index >= len(self.Clipboard.options):
+                                ok = False
+                                err = "index out of range"
+                            elif args[0] == "remove":
+                                await self.Clipboard.remove_block(index)
+                            else:
+                                self.Clipboard.set_index(index)
+                case "unselect":
+                    if await checker():
+                        if self.Clipboard._active is None:
+                            ok = False
+                            err = "no selection to unselect"
+                        else:
+                            try:
+                                out = self.Clipboard.options.index(self.Clipboard._active)
+                                self.Clipboard.set_index(None)
+                            except ValueError:
+                                ok = False
+                                err = "active selection not found somehow"
                 case _:
                     ok = False
                     err = "clipboard action is not valid"

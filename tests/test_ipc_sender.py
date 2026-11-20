@@ -51,12 +51,12 @@ def test_prepare_cd_rejects_missing_path(tmp_path: Path) -> None:
 
 def test_prepare_clipboard_and_new_tab_paths(tmp_path: Path) -> None:
     assert ipc_sender._prepare_message(
-        "clipboard", ("copy", "--selection=replace", "one", "two")
+        "clipboard", ("copy", "one", "two", "--select")
     ) == (
         "copy",
-        "--selection=replace",
         str(tmp_path / "one"),
         str(tmp_path / "two"),
+        "--select",
     )
     assert ipc_sender._prepare_message("tab", ("new", "folder", "--focus")) == (
         "new",

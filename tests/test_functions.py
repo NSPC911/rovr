@@ -184,7 +184,7 @@ async def test_expand_command_tab_highlights(tmp_path: Path) -> None:
             get_selected_objects=_empty_selection,
         ),
         tabWidget=SimpleNamespace(active_tab=tabs[1], query=lambda _tab_type: tabs),
-        query_one=lambda _selector: SimpleNamespace(selected=[]),
+        query_one=lambda _selector: SimpleNamespace(selected=(None, [])),
         notify=lambda *_args, **_kwargs: None,
         log=lambda *_args: None,
     )

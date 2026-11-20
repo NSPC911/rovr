@@ -1184,7 +1184,7 @@ class PreviewContainer(Actionable, PDFMixin, BatMixin, Container):
                     utils.expand_command,
                     self.app,
                     previewer["command"],
-                    ["%cut", "%copy", "%s", "%rs", "%tab"],
+                    ["%clip", "%s", "%rs", "%tab"],
                 )
                 if output in ("__stdout__", "__stderr__") and "%file" in str(command):
                     raise ValueError("%file requires a previewer output path")

@@ -272,7 +272,7 @@ def test_bulk_creator_uses_cwd_snapshot_and_updates_progress(tmp_path: Path) -> 
         object(), entries, cwd.as_posix(), bar
     )
 
-    assert first_created == (cwd / entries[0]).as_posix()
+    assert first_created == str(cwd / entries[0])
     assert not errors
     assert (cwd / entries[0]).is_file()
     assert absolute.is_file()

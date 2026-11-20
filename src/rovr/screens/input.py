@@ -10,6 +10,7 @@ from textual.widgets import Input, Label
 
 from rovr.classes.textual_validators import ControlHighlighter
 from rovr.functions import icons as icon_utils
+from rovr.functions.path import PATH_SEPARATORS, sanitize_path_input
 from rovr.functions.utils import dismiss
 
 
@@ -101,7 +102,7 @@ class ModalInput(ModalScreen, inherit_bindings=False):
                 # valid_empty = False
                 self.horizontal_group.border_subtitle = "The value must not be empty!"
         if self.is_path:
-            if event.value.replace("\\", "/").endswith("/"):
+            if event.value.endswith(PATH_SEPARATORS):
                 # dir
                 icon = icon_utils.get_icon_for_folder(event.value[:-1])
             elif self.is_folder:
@@ -133,8 +134,6 @@ class ModalInput(ModalScreen, inherit_bindings=False):
             dismiss(self, event.input.value, event)
             return
 
-        from pathvalidate import sanitize_filepath
-
         if (
             not self.query_one(Input).is_valid
             and event.validation_result
@@ -147,14 +146,9 @@ class ModalInput(ModalScreen, inherit_bindings=False):
                 self.horizontal_group.styles.offset = (0, 0)
                 await sleep(0.1)
             return
-        return_path = (
-            sanitize_filepath(event.input.value) if self.is_path else event.input.value
-        )
-        if event.input.value.endswith(("/", "\\")) and not return_path.endswith((
-            "/",
-            "\\",
-        )):
-            return_path += "/"
+        return_path = event.input.value
+        if self.is_path:
+            return_path = sanitize_path_input(return_path)
 
         dismiss(self, return_path, event)
 

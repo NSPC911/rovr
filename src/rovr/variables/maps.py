@@ -60,23 +60,23 @@ VALID_KEY_CONTEXTS = frozenset({
 
 
 class RovrVars:
-    ROVRCONFIG = environ.get("ROVR_CONFIG_FOLDER") or dirs.user_config_dir
-    ROVRTHEMES = ROVRCONFIG + "/themes"
+    ROVRCONFIG = path.normpath(environ.get("ROVR_CONFIG_FOLDER") or dirs.user_config_dir)
+    ROVRTHEMES = path.join(ROVRCONFIG, "themes")
     ROVRSTATE = (
-        path.expanduser("~/.local/state/rovr")
+        path.join(path.expanduser("~"), ".local", "state", "rovr")
         if dirs.user_state_dir == dirs.user_config_dir
         else dirs.user_state_dir
     )
-    ROVRTEMP = dirs.user_runtime_dir.replace("\\", "/")
-    DOCUMENTS = general.user_documents_dir.replace("\\", "/")
-    DOWNLOADS = general.user_downloads_dir.replace("\\", "/")
-    PICTURES = general.user_pictures_dir.replace("\\", "/")
-    DESKTOP = general.user_desktop_dir.replace("\\", "/")
-    VIDEOS = general.user_videos_dir.replace("\\", "/")
-    CONFIG = general.user_config_dir.replace("\\", "/")
-    CACHE = general.user_cache_dir.replace("\\", "/")
-    MUSIC = general.user_music_dir.replace("\\", "/")
-    HOME = path.expanduser("~").replace("\\", "/")
+    ROVRTEMP = path.normpath(dirs.user_runtime_dir)
+    DOCUMENTS = path.normpath(general.user_documents_dir)
+    DOWNLOADS = path.normpath(general.user_downloads_dir)
+    PICTURES = path.normpath(general.user_pictures_dir)
+    DESKTOP = path.normpath(general.user_desktop_dir)
+    VIDEOS = path.normpath(general.user_videos_dir)
+    CONFIG = path.normpath(general.user_config_dir)
+    CACHE = path.normpath(general.user_cache_dir)
+    MUSIC = path.normpath(general.user_music_dir)
+    HOME = path.normpath(path.expanduser("~"))
 
 
 ASCII_ICONS = {

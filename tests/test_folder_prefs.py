@@ -22,7 +22,7 @@ def test_set_and_load_folder_preferences_round_trip(tmp_path: Path) -> None:
     }
 
     loaded = load_folder_prefs()
-    assert loaded[target_folder] == {
+    assert loaded[str(tmp_path / "project")] == {
         "sort_by": "size",
         "sort_descending": True,
     }
@@ -54,4 +54,4 @@ def test_load_folder_prefs_expands_variable_paths() -> None:
         )
 
     loaded = load_folder_prefs()
-    assert f"{RovrVars.HOME}/fixture" in loaded
+    assert str(Path(RovrVars.HOME) / "fixture") in loaded

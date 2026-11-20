@@ -32,7 +32,25 @@ from rovr.variables.maps import CONTROL_PICTURES
 from .drive_workers import normalise
 from .icons import get_icon_for_file, get_icon_for_folder
 
+PATH_SEPARATORS = (path.sep, path.altsep) if path.altsep else (path.sep,)
 natsort_compiled = re.compile(r"(\d+)")
+
+
+def sanitize_path_input(value: str) -> str:
+    from pathvalidate import sanitize_filename, sanitize_filepath
+
+    if altsep := path.altsep:
+        value = value.replace(altsep, path.sep)
+        sanitized = sanitize_filepath(value, platform="auto")
+        if value.endswith(path.sep) and not sanitized.endswith(path.sep):
+            sanitized += path.sep
+        return sanitized
+
+    # pathvalidate's filepath sanitizer treats backslashes as separators on POSIX too.
+    return path.sep.join(
+        sanitize_filename(part, platform="auto") if part not in ("", ".", "..") else part
+        for part in value.split(path.sep)
+    )
 
 
 @lru_cache(maxsize=2048)
@@ -468,7 +486,7 @@ def get_recursive_files(
                     FileObj(
                         path=full_path,
                         relative_loc=normalise(
-                            path.relpath(full_path, object_path + "/..")
+                            path.relpath(full_path, path.join(object_path, ".."))
                         ),
                     )
                 )

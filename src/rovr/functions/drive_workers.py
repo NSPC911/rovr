@@ -7,7 +7,7 @@ import subprocess
 import sys
 from fnmatch import fnmatch
 from multiprocessing.synchronize import Event
-from os import path
+from os import fsdecode, path
 from time import monotonic
 from typing import cast
 
@@ -40,10 +40,7 @@ def normalise(*location: str | bytes) -> str:
     """
     if not location:
         raise ValueError("At least one path component must be provided")
-    # path.normalise fixes the relative references
-    # replace \\ with / on windows
-    # by any chance if somehow a \\\\ was to enter, fix that
-    return str(path.normpath(path.join(*location))).replace("\\", "/").replace("//", "/")
+    return path.normpath(path.join(*(fsdecode(part) for part in location)))
 
 
 def _get_linux_drives() -> list[str]:
@@ -128,9 +125,8 @@ def get_mounted_drives(platform: str, config: "RovrConfig") -> list[str]:
         if platform == "win32":
             from string import ascii_uppercase
 
-            drives: list[str] = [
-                f"{letter}:/" for letter in ascii_uppercase if path.isdir(f"{letter}:\\")
-            ]
+            roots = (f"{letter}:{path.sep}" for letter in ascii_uppercase)
+            drives = [root for root in roots if path.isdir(root)]
         else:
             drives = ["/"]  # root should definitely exist right
     exclude_patterns: list[str] = config.get("settings", {}).get("drive_exclude", [])

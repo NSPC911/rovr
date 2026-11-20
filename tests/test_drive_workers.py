@@ -1,4 +1,3 @@
-import ctypes
 import sys
 from pathlib import Path
 from typing import cast
@@ -120,18 +119,6 @@ def test_get_posix_drives_filters_non_device_mounts(
     drives = drive_workers._get_posix_drives()
 
     assert drives == ["/", "/System/Volumes/Data"]
-
-
-def test_get_windows_drives_reads_bitmask(monkeypatch: pytest.MonkeyPatch) -> None:
-    fake_kernel32 = MagicMock()
-    # bits 0 (A) and 2 (C) set
-    fake_kernel32.GetLogicalDrives.return_value = 0b101
-    fake_windll = MagicMock(kernel32=fake_kernel32)
-    monkeypatch.setattr(ctypes, "windll", fake_windll, raising=False)
-
-    drives = drive_workers._get_windows_drives()
-
-    assert drives == ["A:/", "C:/"]
 
 
 def test_get_mounted_drives_applies_exclude_patterns(

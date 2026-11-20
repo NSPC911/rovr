@@ -1,5 +1,4 @@
 import os
-from collections.abc import Iterator
 from functools import lru_cache
 from itertools import batched
 
@@ -12,10 +11,6 @@ from rich.text import Span, Text
 @lru_cache(maxsize=256)  # obviously 256 because of the 256-color palette
 def get_ansi_color(number: int) -> Color:
     return Color.from_ansi(number)
-
-
-def _bat_preview_chunks(lines: list[str], chunk_line_count: int) -> Iterator[str]:
-    return ("".join(chunk) for chunk in batched(lines, chunk_line_count))
 
 
 def ansi_to_rich_text_parallel(
@@ -39,7 +34,7 @@ def ansi_to_rich_text_parallel(
     if max_workers <= 1:
         return ansi_to_rich_text(terminal_text)
 
-    chunks = _bat_preview_chunks(lines, chunk_line_count)
+    chunks = ("".join(chunk) for chunk in batched(lines, chunk_line_count))
     combined = Text()
     with safe_path_process_pool(max_workers=max_workers) as executor:
         for text in executor.map(ansi_to_rich_text, chunks):

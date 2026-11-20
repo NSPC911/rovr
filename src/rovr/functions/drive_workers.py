@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import multiprocessing
+import os
 import re
 import subprocess
 import sys
@@ -43,13 +44,6 @@ def normalise(*location: str | bytes) -> str:
     # replace \\ with / on windows
     # by any chance if somehow a \\\\ was to enter, fix that
     return str(path.normpath(path.join(*location))).replace("\\", "/").replace("//", "/")
-
-
-def _get_windows_drives() -> list[str]:
-    import ctypes
-
-    bitmask = ctypes.windll.kernel32.GetLogicalDrives()
-    return [f"{chr(ord('A') + i)}:/" for i in range(26) if bitmask & (1 << i)]
 
 
 def _get_linux_drives() -> list[str]:
@@ -118,7 +112,7 @@ def get_mounted_drives(platform: str, config: "RovrConfig") -> list[str]:
     drives = []
     try:
         if platform == "win32":
-            raw_drives = _get_windows_drives()
+            raw_drives = os.listdrives()
         elif platform == "linux":
             try:
                 raw_drives = _get_linux_drives()

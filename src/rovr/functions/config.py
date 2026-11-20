@@ -201,45 +201,41 @@ def get_version() -> str:
         return "master"
 
 
-def toml_dump(doc_path: str, exception: tomli.TOMLDecodeError) -> None:
-    """
-    Dump an error message for anything related to TOML loading
-
-    Args:
-        doc_path (str): the path to the document
-        exception (tomli.TOMLDecodeError): the exception that occurred
-    """
+def _print_toml_context(
+    doc_path: str, source: str, lineno: int, colno: int | None = None
+) -> int:
+    # lineno is one-based, matching the location printed in the header.
     from rich.syntax import Syntax
 
-    doc: list = exception.doc.splitlines()
-    start: int = max(exception.lineno - 3, 0)
-    end: int = min(len(doc), exception.lineno + 2)
-    rjust: int = len(str(end + 1))
-    has_past = False
+    start = max(lineno - 3, 0)
+    end = min(len(source.splitlines()), lineno + 2)
+    width = len(str(end + 1))
     highlighted = (
         Syntax("", "toml", background_color="default", theme="ansi_dark")
-        .highlight(exception.doc)
+        .highlight(source)
         .split("\n")
     )
-    pprint(
-        rjust * " "
-        + f"  [bright_blue]-->[/] [white]{path.realpath(doc_path)}:{exception.lineno}:{exception.colno}[/]"
-    )
+    location = f"{path.realpath(doc_path)}:{lineno}"
+    if colno is not None:
+        location += f":{colno}"
+    pprint(" " * width + f"  [bright_blue]-->[/] [white]{location}[/]")
     for line in range(start, end):
-        if line + 1 == exception.lineno:
-            startswith = "╭╴"
-            has_past = True
-            pprint(
-                f"[bright_red]{startswith}{str(line + 1).rjust(rjust)}[/][bright_blue] │[/]",
-                end=" ",
-            )
+        number = f"{line + 1:>{width}}"
+        if line + 1 == lineno:
+            gutter = f"[bright_red]╭╴{number}[/][bright_blue] │[/]"
         else:
-            startswith = "│ " if has_past else "  "
-            pprint(
-                f"[bright_red]{startswith}[/][bright_blue]{str(line + 1).rjust(rjust)} │[/]",
-                end=" ",
-            )
+            prefix = "│ " if line + 1 > lineno else "  "
+            gutter = f"[bright_red]{prefix}[/][bright_blue]{number} │[/]"
+        pprint(gutter, end=" ")
         pprint(highlighted[line])
+    return width
+
+
+def toml_dump(doc_path: str, exception: tomli.TOMLDecodeError) -> None:
+    """Print a TOML parse error and exit."""
+    rjust = _print_toml_context(
+        doc_path, exception.doc, exception.lineno, exception.colno
+    )
     # check if it is an interesting error message
     if exception.msg.startswith("What? "):
         # What? <key> already exists?<dict>
@@ -332,7 +328,6 @@ def schema_dump(
 
     from rich import box
     from rich.padding import Padding
-    from rich.syntax import Syntax
     from rich.table import Table
 
     # i dont know what sort of mental illness the package has
@@ -379,8 +374,6 @@ def schema_dump(
                 failed = True
         return (f"schema\\[{exception.rule}]: {error_msg}", failed)
 
-    doc: list = config_content.splitlines()
-
     # minor fix for additionalProperties
     if exception.rule == "additionalProperties":
         # the current message is like `<name> must not contain {<value>, <value>, ...} properties.`
@@ -407,7 +400,7 @@ def schema_dump(
     path_str = ".".join(str(p) for p in exception.path) if exception.path else "root"
     if path_str.startswith("data"):
         path_str = path_str[5:] if len(path_str) > 5 else "root"
-    lineno = find_path_line(doc, exception.path)
+    lineno = find_path_line(config_content.splitlines(), exception.path)
 
     rjust: int = 0
 
@@ -420,35 +413,7 @@ def schema_dump(
         else:
             pprint(msg)
     else:
-        start: int = max(lineno - 2, 0)
-        end: int = min(len(doc), lineno + 3)
-        rjust = len(str(end + 1))
-        has_past = False
-        highlighted = (
-            Syntax("", "toml", background_color="default", theme="ansi_dark")
-            .highlight(config_content)
-            .split("\n")
-        )
-
-        pprint(
-            rjust * " "
-            + f"  [bright_blue]-->[/] [white]{path.realpath(doc_path)}:{lineno + 1}[/]"
-        )
-        for line in range(start, end):
-            if line == lineno:
-                startswith = "╭╴"
-                has_past = True
-                pprint(
-                    f"[bright_red]{startswith}{str(line + 1).rjust(rjust)}[/][bright_blue] │[/]",
-                    end=" ",
-                )
-            else:
-                startswith = "│ " if has_past else "  "
-                pprint(
-                    f"[bright_red]{startswith}[/][bright_blue]{str(line + 1).rjust(rjust)} │[/]",
-                    end=" ",
-                )
-            pprint(highlighted[line])
+        rjust = _print_toml_context(doc_path, config_content, lineno + 1)
 
         # Format the error message based on validator type
         error_msg, _ = get_message(exception)

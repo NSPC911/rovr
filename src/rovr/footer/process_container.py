@@ -11,6 +11,7 @@ import zipfile
 from contextlib import closing
 from functools import partial
 from os import path
+from tempfile import TemporaryDirectory
 from threading import get_ident
 from typing import Any, Callable, Literal, TypeVar
 
@@ -234,7 +235,7 @@ class ProgressBarContainer(VerticalGroup, inherit_bindings=False):
         total: float | UnusedParameter = UNUSED,
         progress: float | UnusedParameter = UNUSED,
     ) -> None:
-        self.progress_bar.update(total=total, progress=progress)
+        self.call_safe(self.progress_bar.update, total=total, progress=progress)
 
     def advance(self, amount: float = 1) -> None:
         if self.__state != "running":
@@ -1171,7 +1172,7 @@ class ProcessContainer(Actionable, VerticalScroll):
             source_is_dir = is_real_dir(source)
             created_directory = False
 
-            def copy_link() -> None:
+            def copy_link(link_path: str) -> None:
                 if path.isjunction(source):
                     # #luv_windows
                     target = path.realpath(source)
@@ -1185,7 +1186,7 @@ class ProcessContainer(Actionable, VerticalScroll):
                         capture_output=True,
                         env=os.environ
                         | {
-                            "ROVR_JUNCTION_DESTINATION": destination,
+                            "ROVR_JUNCTION_DESTINATION": link_path,
                             "ROVR_JUNCTION_TARGET": target,
                         },
                         text=True,
@@ -1202,7 +1203,7 @@ class ProcessContainer(Actionable, VerticalScroll):
                 try:
                     os.symlink(
                         target,
-                        destination,
+                        link_path,
                         target_is_directory=target_is_directory,
                     )
                 except OSError as exc:
@@ -1250,7 +1251,7 @@ class ProcessContainer(Actionable, VerticalScroll):
                         "-c",
                         "import os,sys;os.symlink(sys.argv[1],sys.argv[2],target_is_directory=sys.argv[3]=='1')",
                         target,
-                        destination,
+                        link_path,
                         str(int(target_is_directory)),
                     ]
                     if self.push_screen(
@@ -1305,6 +1306,25 @@ class ProcessContainer(Actionable, VerticalScroll):
                     destination = helper_rename(destination)
                     bar.set_text(display_path(destination, dest))
                 elif not (source_is_dir and destination_is_dir):
+                    if path.islink(source):
+                        if type_of_selection == "cut":
+                            try:
+                                os.replace(source, destination)
+                            except OSError as exc:
+                                if exc.errno != errno.EXDEV:
+                                    raise
+                            else:
+                                bar.advance()
+                                return True
+
+                        with TemporaryDirectory(dir=path.dirname(destination)) as tmp:
+                            temp_link = path.join(tmp, "link")
+                            copy_link(temp_link)
+                            os.replace(temp_link, destination)
+                        if type_of_selection == "cut":
+                            os.unlink(source)
+                        bar.advance()
+                        return True
                     if path.isjunction(destination):
                         os.rmdir(destination)
                     else:
@@ -1322,7 +1342,7 @@ class ProcessContainer(Actionable, VerticalScroll):
                     created_directory = True
                 else:
                     if path.islink(source) or path.isjunction(source):
-                        copy_link()
+                        copy_link(destination)
                     else:
                         copy_func(source, destination)
                     bar.advance()
@@ -1411,6 +1431,9 @@ class ProcessContainer(Actionable, VerticalScroll):
 
         Args:
             uris (list[str]): A list of uris to download from
+
+        Raises:
+            HTTPError: If the request fails
         """
         from contextlib import ExitStack
         from urllib import error, request
@@ -1439,15 +1462,21 @@ class ProcessContainer(Actionable, VerticalScroll):
                 bar.set_text(display_path(full_path, dest))
                 try:
                     resp: Any = stack.enter_context(request.urlopen(req, timeout=5))
+                    if resp.status != 200:
+                        raise error.HTTPError(
+                            resp.url,
+                            resp.status,
+                            resp.reason,
+                            resp.headers,
+                            None,
+                        )
                     opened.append((resp, full_path, resp.length))
                 except Exception as e:
                     failures.append((filename, e))
                     if isinstance(e, error.HTTPError):
-                        bar.set_text(f"HTTP Error {e.code} for {filename}. Skipping...")
+                        bar.set_text(e.msg)
                     elif isinstance(e, error.URLError):
-                        bar.set_text(
-                            f"Network Error: {e.reason} for {filename}. Skipping..."
-                        )
+                        bar.set_text(str(e.reason))
                     else:
                         bar.set_text(f"Failed to open {filename}: {e}. Skipping...")
 

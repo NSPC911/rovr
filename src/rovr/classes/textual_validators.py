@@ -6,7 +6,7 @@ from rich.text import Text
 from textual.validation import ValidationResult, Validator
 
 from rovr.functions.cwd import getcwd
-from rovr.functions.path import control, normalise
+from rovr.functions.path import control, normalise, sanitize_path_input
 
 
 class IsValidFilePath(Validator):
@@ -15,18 +15,10 @@ class IsValidFilePath(Validator):
         self.strict = strict
 
     def validate(self, value: str) -> ValidationResult:
-        from pathvalidate import sanitize_filepath
+        normalized_value = normalise(getcwd(), value)
 
-        # Handle absolute paths correctly
-        if path.isabs(value):
-            normalized_value = normalise(value)
-        else:
-            normalized_value = normalise(str(getcwd()) + "/" + value)
-
-        if normalized_value == normalise(sanitize_filepath(normalized_value)):
-            return self.success()
-        else:
-            return self.failure()
+        sanitized = normalise(sanitize_path_input(normalized_value))
+        return self.success() if normalized_value == sanitized else self.failure()
 
 
 class PathNoLongerExists(Validator):
@@ -38,11 +30,7 @@ class PathNoLongerExists(Validator):
         self.accept_equal = accept_equal
 
     def validate(self, value: str) -> ValidationResult:
-        # Handle absolute paths correctly
-        if path.isabs(value):
-            item_path = normalise(value)
-        else:
-            item_path = normalise(str(getcwd()) + "/" + value)
+        item_path = normalise(getcwd(), value)
 
         if path.exists(item_path):
             # check for acceptance
@@ -70,7 +58,7 @@ class AllowsExistingFiles(Validator):
         super().__init__(failure_description="Path does not exist.")
 
     def validate(self, value: str) -> ValidationResult:
-        item_path = str(normalise(str(getcwd()) + "/" + value))
+        item_path = normalise(getcwd(), value)
         if path.exists(item_path):
             if path.isfile(item_path):
                 return self.success()

@@ -12,6 +12,7 @@ from rovr.classes.mixins import (
     CheckboxRenderingMixin,
     SelectionNavigationMixin,
 )
+from rovr.functions.path import sanitize_path_input
 from rovr.functions.utils import dismiss
 from rovr.variables.constants import bindings
 
@@ -143,8 +144,6 @@ class ArchiveCreationScreen(ModalInput):
     @work
     async def on_input_submitted(self, event: Input.Submitted) -> None:
         """Handle input submission."""
-        from pathvalidate import sanitize_filepath
-
         event.prevent_default()
         event.stop()
         if (
@@ -159,14 +158,9 @@ class ArchiveCreationScreen(ModalInput):
                 self.horizontal_group.styles.offset = (0, 0)
                 await sleep(0.1)
             return
-        return_path = (
-            sanitize_filepath(event.input.value) if self.is_path else event.input.value
-        )
-        if event.input.value.endswith(("/", "\\")) and not return_path.endswith((
-            "/",
-            "\\",
-        )):
-            return_path += "/"
+        return_path = event.input.value
+        if self.is_path:
+            return_path = sanitize_path_input(return_path)
         compression_selection = self.query_one(ArchiveCompression).selected
         dismiss(
             self,

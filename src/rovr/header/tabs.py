@@ -58,11 +58,7 @@ class TablineTab(Tab):
             directory = getcwd()
         directory = normalise(directory)
         if label == "":
-            label = str(
-                path.basename(directory)
-                if path.basename(directory) != ""
-                else directory.strip("/")
-            )
+            label = path.basename(directory) or directory.rstrip(path.sep) or directory
         super().__init__(label=label, id=f"id_{id(self)}")
         self.directory = directory
         self.focus_on = focus_on

@@ -391,41 +391,32 @@ example_function(10)"""
     from rovr.variables.maps import RovrVars
 
     if args.show_config_path:
+        import json
 
-        def _normalise(location: str | bytes) -> str:
-            from os import path
-
-            return str(path.normpath(location)).replace("\\", "/").replace("//", "/")
-
-        _conf = _normalise(RovrVars.ROVRCONFIG)
-        _state = _normalise(RovrVars.ROVRSTATE)
-        _temp = _normalise(RovrVars.ROVRTEMP)
+        paths = {
+            "main_config": os.path.join(RovrVars.ROVRCONFIG, "config.toml"),
+            "keys": os.path.join(RovrVars.ROVRCONFIG, "keys.toml"),
+            "global_styles": os.path.join(RovrVars.ROVRCONFIG, "style.tcss"),
+            "themes": os.path.join(RovrVars.ROVRCONFIG, "themes", ""),
+            "pinned_folders": os.path.join(RovrVars.ROVRCONFIG, "pins.json"),
+            "persistent_state": os.path.join(RovrVars.ROVRSTATE, "state.toml"),
+            "logs": os.path.join(RovrVars.ROVRTEMP, "logs", ""),
+        }
 
         if sys.stdout.isatty():
             from rich import box
             from rich.table import Table
+            from rich.text import Text
 
             table = Table(title="", border_style="blue", box=box.ROUNDED)
             table.add_column("type")
             table.add_column("path")
-            table.add_row("[cyan]main config[/]", f"{_conf}/config.toml")
-            table.add_row("[green]keys[/]", f"{_conf}/keys.toml")
-            table.add_row("[hot_pink]global styles[/]", f"{_conf}/style.tcss")
-            table.add_row("[magenta1]themes[/]", f"{_conf}/themes/")
-            table.add_row("[yellow]pinned folders[/]", f"{_conf}/pins.json")
-            table.add_row("[grey69]persistent state[/]", f"{_state}/state.toml")
-            table.add_row("[red]logs[/]", f"{_temp}/logs/")
+            colors = ("cyan", "green", "hot_pink", "magenta1", "yellow", "grey69", "red")
+            for (key, location), color in zip(paths.items(), colors, strict=True):
+                table.add_row(Text(key.replace("_", " "), style=color), Text(location))
             pprint(table)
         else:
-            print(f"""{{
-    "main_config": "{_conf}/config.toml",
-    "keys": "{_conf}/keys.toml",
-    "global_styles": "{_conf}/style.tcss",
-    "themes": "{_conf}/themes/",
-    "pinned_folders": "{_conf}/pins.json",
-    "persistent_state": "{_state}/state.toml",
-    "logs": "{_temp}/logs/"
-}}""")
+            print(json.dumps(paths, indent=4, ensure_ascii=False))
         return
     if args.show_version:
 

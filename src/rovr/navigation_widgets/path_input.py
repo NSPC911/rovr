@@ -17,7 +17,7 @@ from rovr.classes.textual_options import PathDropdownItem
 from rovr.classes.textual_validators import ControlHighlighter
 from rovr.functions.cwd import getcwd
 from rovr.functions.icons import get_icon
-from rovr.functions.path import is_hidden_file
+from rovr.functions.path import PATH_SEPARATORS, is_hidden_file
 from rovr.functions.utils import check_key
 from rovr.variables.constants import config
 
@@ -68,10 +68,22 @@ def should_exclude_hidden(path_str: str) -> bool:
     return not tail.startswith(".")
 
 
+def _list_directory_candidates(ppath: Path, path_str: str) -> list[DropdownItem]:
+    parent = ppath if ppath.is_dir() else ppath.parent
+    items: list[DropdownItem] = []
+    should_filter = should_exclude_hidden(path_str)
+    for entry in get_subdirectories(parent):
+        if should_filter and is_hidden_file(entry):
+            continue
+        items.append(PathDropdownItem(f"{entry.name}{path.sep}", entry.path))
+    items.sort(key=lambda x: x.path.lower())
+    return items
+
+
 def _unix_get_candidates(path_str: str) -> list[DropdownItem]:
     # Case 1: nothing
     if not path_str:
-        return [PathDropdownItem("/", "/")]
+        return [PathDropdownItem(path.sep, path.sep)]
 
     # Reject relative paths - must be absolute
     if not path.isabs(path_str):
@@ -90,25 +102,13 @@ def _unix_get_candidates(path_str: str) -> list[DropdownItem]:
     # User typed path of a particular folder already (but without the trailing "/")
     if (
         not path_str.endswith(".")
-        and not path_str.endswith("/")
+        and not path_str.endswith(path.sep)
         and ppath.exists()
         and ppath.is_dir()
     ):
-        return [PathDropdownItem(f"{ppath.name}/", str(ppath))]
+        return [PathDropdownItem(f"{ppath.name}{path.sep}", str(ppath))]
 
-    # Case 3: list contents of parent
-    # - User typed a directory path with trailing "/" -> show subdirectories
-    # - User typed a partial directory path (like "/home/user/.local/sh")
-    #   -> we determine the parent ("~/.local") then show subdirectories ("share")
-    parent = ppath if ppath.is_dir() else ppath.parent
-    items: list[DropdownItem] = []
-    should_filter = should_exclude_hidden(path_str)
-    for entry in get_subdirectories(parent):
-        if should_filter and is_hidden_file(entry):
-            continue
-        items.append(PathDropdownItem(f"{entry.name}/", entry.path))
-    items.sort(key=lambda x: x.path.lower())
-    return items
+    return _list_directory_candidates(ppath, path_str)
 
 
 def _win_get_candidates(path_str: str) -> list[DropdownItem]:
@@ -129,7 +129,7 @@ def _win_get_candidates(path_str: str) -> list[DropdownItem]:
     if not path_str:
         drives = []
         for letter in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
-            drive = f"{letter}:/"
+            drive = f"{letter}:{path.sep}"
             if path.exists(drive):
                 drives.append(PathDropdownItem(drive, drive))
         return drives
@@ -139,41 +139,25 @@ def _win_get_candidates(path_str: str) -> list[DropdownItem]:
         if len(path_str) == 2 and path_str[1] != ":":
             return []  # invalid format
         drive_letter = path_str[0].upper()
-        drive = f"{drive_letter}:/"
+        drive = f"{drive_letter}:{path.sep}"
         if path.exists(drive):
             return [PathDropdownItem(drive, drive)]
         return []
 
-    # Reject relative paths - must be absolute (has drive letter)
+    # Reject relative paths; both drive and UNC paths can be absolute.
     if not path.isabs(path_str):
         return []
 
-    ppath = Path(path_str).expanduser().resolve()
     if path_str.endswith(".."):
         return []
+    ppath = Path(path_str)
 
     # Case 3: exact directory match
     # User typed path of a particular folder already (but without the trailing "\")
-    if (
-        not path_str.endswith(".")
-        and not path_str.endswith(("\\", "/"))
-        and ppath.exists()
-        and ppath.is_dir()
-    ):
-        return [PathDropdownItem(f"{ppath.name}{os.path.sep}", str(ppath))]
+    if ppath.name and not path_str.endswith((".", *PATH_SEPARATORS)) and ppath.is_dir():
+        return [PathDropdownItem(f"{ppath.name}{path.sep}", str(ppath))]
 
-    # Case 4: list contents of parent
-    # - Path ends with "/" -> show subdirectories
-    # - Partial path like "C:\Users\Admin\Doc" -> parent is "C:\Users\Admin"
-    parent = ppath if ppath.exists() else ppath.parent
-    items: list[DropdownItem] = []
-    should_filter = should_exclude_hidden(path_str)
-    for entry in get_subdirectories(parent):
-        if should_filter and is_hidden_file(entry):
-            continue
-        items.append(PathDropdownItem(f"{entry.name}\\", entry.path))
-    items.sort(key=lambda x: x.path.lower())
-    return items
+    return _list_directory_candidates(ppath, path_str)
 
 
 class PathAutoCompleteInput(PathAutoComplete):
@@ -185,7 +169,7 @@ class PathAutoCompleteInput(PathAutoComplete):
         """
         super().__init__(
             target=target,
-            path=getcwd().split(path.sep)[0],
+            path=Path(getcwd()).anchor,
             id="path_autocomplete",
             sort_key=lambda item: item.lower(),
         )
@@ -212,7 +196,7 @@ class PathAutoCompleteInput(PathAutoComplete):
             return super().get_search_string(target_state)
 
         current_input = target_state.text[: target_state.cursor_position]
-        separator_index = max(current_input.rfind("/"), current_input.rfind("\\"))
+        separator_index = max(current_input.rfind(sep) for sep in PATH_SEPARATORS)
         return current_input[separator_index + 1 :]
 
     def apply_completion(self, value: str, state: TargetState) -> None:
@@ -221,14 +205,14 @@ class PathAutoCompleteInput(PathAutoComplete):
             return
 
         current_input = state.text[: state.cursor_position]
-        separator_index = max(current_input.rfind("/"), current_input.rfind("\\"))
+        separator_index = max(current_input.rfind(sep) for sep in PATH_SEPARATORS)
         path_prefix = current_input[: separator_index + 1]
         with self.prevent(Input.Changed):
             self.target.value = path_prefix + value
             self.target.cursor_position = len(self.target.value)
 
     def post_completion(self) -> None:
-        if not self.target.value.endswith(("/", os.sep)):
+        if not self.target.value.endswith(PATH_SEPARATORS):
             self.action_hide()
 
     def _compute_matches(

@@ -63,9 +63,9 @@ def resample_file_worker(
     try:
         with Image.open(file_path) as img:
             img.load()
-            pil = img.copy()
-        pil = _depalette(pil)
-        pil.thumbnail(max_size, resample=Image.Resampling(resample_method))
+            pil = _depalette(img)
+            pil.thumbnail(max_size, resample=Image.Resampling(resample_method))
+            pil = pil.copy()
         conn.send((pil.tobytes(), pil.mode, pil.size))
     except Exception as exc:
         conn.send(exc)

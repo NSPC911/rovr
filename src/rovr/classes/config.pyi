@@ -1523,7 +1523,6 @@ class _RovrConfigPluginsFfmpeg(TypedDict, total=False):
     Maximum frames per second during video playback.
 
     minimum: 1
-    maximum: 30
     default: 20
     """
 

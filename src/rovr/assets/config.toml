@@ -326,8 +326,8 @@ executable = "bat"
 enabled = true
 ffmpeg_path = "ffmpeg"
 ffprobe_path = "ffprobe"
-fps = 30
-size = [500, 500]
+fps = 20
+size = [960, 540]
 seek_seconds = 10
 page_seek_seconds = 60
 

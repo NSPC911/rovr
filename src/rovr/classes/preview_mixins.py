@@ -549,6 +549,7 @@ class BatMixin:
                 exc.stderr.decode("utf-8", errors="ignore"),
                 title="Plugins: Bat",
                 severity="warning",
+                markup=False,
             )
             return False
         except utils.ExitNow:
@@ -826,10 +827,16 @@ class VideoMixin:
                 )
                 self.mount_special_messages()
                 return
-            except (OSError, ValueError, subprocess.SubprocessError) as exc:
+            except (OSError, ValueError) as exc:
                 if utils.should_cancel():
                     return
                 self._current_content = f"Cannot preview video: {exc}"
+                self.mount_special_messages()
+                return
+            except subprocess.CalledProcessError as exc:
+                if utils.should_cancel():
+                    return
+                self._current_content = f"Cannot preview video: FFmpeg returned {exc.returncode} with stderr:\n{exc.stderr.decode('utf-8', errors='ignore')}"
                 self.mount_special_messages()
                 return
             if utils.should_cancel():

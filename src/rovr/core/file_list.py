@@ -1,3 +1,4 @@
+import gc
 from contextlib import contextmanager, suppress
 from functools import lru_cache
 from os import path, scandir
@@ -5,12 +6,13 @@ from typing import Callable, ClassVar, Generator, Literal, Sequence
 
 import oslex
 from rich.segment import Segment
-from textual import events, work
+from textual import events, on, work
 from textual.actions import SkipAction
 from textual.binding import BindingType
 from textual.css.query import NoMatches
 from textual.errors import NoWidget
 from textual.strip import Strip
+from textual.timer import Timer
 from textual.widgets import Button, Input, OptionList, SelectionList
 from textual.widgets.option_list import OptionDoesNotExist
 from textual.widgets.selection_list import Selection
@@ -64,11 +66,22 @@ class FileList(
     SelectionList,
     inherit_bindings=False,
 ):
-    """
-    OptionList but can multi-select files and folders.
-    """
-
     key_contexts = ("file_list", "selectionlists", "lists")
+    _resume_gc_timer: Timer | None = None
+
+    def _pause_gc(self) -> None:
+        if self._resume_gc_timer is not None or gc.isenabled():
+            if self._resume_gc_timer is not None:
+                self._resume_gc_timer.cancel()
+            self._resume_gc_timer = self.set_timer(0.5, self._resume_gc)
+            gc.disable()
+
+    @on(events.Unmount)
+    def _resume_gc(self) -> None:
+        if self._resume_gc_timer is not None:
+            self._resume_gc_timer.cancel()
+            self._resume_gc_timer = None
+            gc.enable()
 
     COMPONENT_CLASSES: ClassVar[set[str]] = CheckboxRenderingMixin.COMPONENT_CLASSES | {
         "filelist--cut",
@@ -751,6 +764,7 @@ class FileList(
             return
         if self.dummy:
             return
+        self._pause_gc()
         if isinstance(event.option, Selection) and not isinstance(
             event.option, FileListSelectionWidget
         ):

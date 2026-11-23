@@ -5,6 +5,57 @@ All notable changes to this project will be documented in this file.
 The format is sort-of based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project sort-of adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- `preview`: custom previewers [#374](https://github.com/NSPC911/rovr/pull/374) [f71d9773](https://github.com/NSPC911/rovr/commit/f71d9773d91d61328cf23f7d5331856eda3009bc) [8428579d](https://github.com/NSPC911/rovr/commit/8428579d05589fa6a7b2bdbc3108e2ad32018d89)
+- `filelist`?: include hidden selected items [2a6f4eb6](https://github.com/NSPC911/rovr/commit/2a6f4eb66413da3273abeadb4c6ad9fc62bbaee5)
+- `shellexec`: save in_bg as well across sessions [5e52f231](https://github.com/NSPC911/rovr/commit/5e52f231e23c509e3cde4cb3f39cb8e715f2660b)
+- `path`: use oslex and not shlex [1c48cc2c](https://github.com/NSPC911/rovr/commit/1c48cc2cdda06476586fb85faabb3ade779b8904)
+- `preview`: custom pdf previews [86d8ab9b](https://github.com/NSPC911/rovr/commit/86d8ab9b1c49771f004e5b5aae6f1dd56bb407d9)
+- `ipc`: theme list/query/set [11bd9f72](https://github.com/NSPC911/rovr/commit/11bd9f727384cd1e32e2f352da2c5538b524ab5b)
+- `process`: better processing + progression [#382](https://github.com/NSPC911/rovr/pull/382)
+- `clipboard`!: actual clipboard-like behaviour [#381](https://github.com/NSPC911/rovr/pull/381)
+- `system_clipboard`: make windows safer + use osascript for macos [9468d623](https://github.com/NSPC911/rovr/commit/9468d623a73287b8aecb65bda5371cd7817c3cb4)
+- `preview`: Toggle maximization of preview sidebar [#373](https://github.com/NSPC911/rovr/pull/373)
+
+### Fixed
+- `app`: handle some deadlocks [5daf78e8](https://github.com/NSPC911/rovr/commit/5daf78e8571e15f52ca3be449dce3761dc66d245)
+- `clipboard`: queue dim update (for cut objs) [cf0539d4](https://github.com/NSPC911/rovr/commit/cf0539d473e80505c51e7ede53b1cf451bde9a27)
+- `contextmenu`: use nh and not rnh for properties [c2fa44a7](https://github.com/NSPC911/rovr/commit/c2fa44a79216f802effde3a2fd285b5a4973d8e5)
+- `app`: use self.file_list directly [07e39823](https://github.com/NSPC911/rovr/commit/07e398235ec138c0e7e80d30745c361417efc724)
+- `filelist`: check full path before opening [3ac19c5d](https://github.com/NSPC911/rovr/commit/3ac19c5da30f98a1da451db960e87d8df139d8f3)
+- `metadata`: update size when scanning files [1c0c8018](https://github.com/NSPC911/rovr/commit/1c0c8018d6c29e96339046c9a869eefc6e87cf70)
+- `filelist`: allow select on dummy filelists [7fdce6b4](https://github.com/NSPC911/rovr/commit/7fdce6b48dbad3e6e41f44ad3cfe16dcb150a68a)
+- `search`: properly handle selections in search [d58d7d87](https://github.com/NSPC911/rovr/commit/d58d7d8747253476d97152b4a577e343ee0c61d1)
+- `rg+fd`: cleanup on exit [0f5fc90d](https://github.com/NSPC911/rovr/commit/0f5fc90d207e2e01e4507d588ce90a6927816423)
+- `filelist`: refresh after invert selections [ca57a2ed](https://github.com/NSPC911/rovr/commit/ca57a2edeb56165191220e6f5cb0ec4c0360ae80)
+- `app`: expand run_command + fix list expansion [d2311c6c](https://github.com/NSPC911/rovr/commit/d2311c6c3f22c84ff2bf9d04f070b4d35792193b)
+- `app`: mount statemanager earlier [3d6bec10](https://github.com/NSPC911/rovr/commit/3d6bec10bf18b6febd1b81e2e560eea7f206c8fe)
+- `filelist`: handle certain selectmode stuff [7a2ecbfa](https://github.com/NSPC911/rovr/commit/7a2ecbfa162672d27c5068150ccf36a9123da1cb)
+- `cli`: dont send ansi if notatty in --tree-dom [73c9dacc](https://github.com/NSPC911/rovr/commit/73c9dacc75c6f34d7a3fa8d2e8f0c23b9c67196b)
+- `preview`: render from cached output [78d1ca24](https://github.com/NSPC911/rovr/commit/78d1ca2439256c18252f0469acb9a4c3480fdf00)
+- `icons`: check if junction or link for smart [5b38e612](https://github.com/NSPC911/rovr/commit/5b38e612802b77b347b8797035f8fa4c03bc15bb)
+- `newitem`: thread the touch [3e563b2a](https://github.com/NSPC911/rovr/commit/3e563b2ad179478cdae425497ed0b78a0483c9c9)
+- `modalinput`: dont use icon color if unspecified [497d64f4](https://github.com/NSPC911/rovr/commit/497d64f45963fc5747a0e471a400d84775d1c6ab)
+- `config`: we dont support 7z archives... [ffff519c](https://github.com/NSPC911/rovr/commit/ffff519c1cc974568116a3cd81dcc62e58d2db0e)
+- `paste`: decode escape % in file path [6d9de3e4](https://github.com/NSPC911/rovr/commit/6d9de3e4b32257a972eebb9e78f2f4cf91c90e5a)
+- `preview`: markup=False for preview notify [5927709c](https://github.com/NSPC911/rovr/commit/5927709ca02c32c38faf56e49aa408aa429a48dc)
+- `image`: dont use unicode if --force-tty [ecb9c788](https://github.com/NSPC911/rovr/commit/ecb9c7887a7f2bf827029bc9ae0c3909c5c7788a)
+
+### Performance
+- `process`: cancel bar timer on finish [f01748c1](https://github.com/NSPC911/rovr/commit/f01748c1c12b98d676805958c7a3c959048f6470)
+- `filelist`?: use is_dir directly [e42b7523](https://github.com/NSPC911/rovr/commit/e42b752353a05f6aa203f7f1cbae331adae3da18)
+- `clipboard`?: check with namedtuple directly [e6e218c3](https://github.com/NSPC911/rovr/commit/e6e218c35f571e73c23a54bc1748be438ea11daf)
+- `dnd`: improve resolution [32f41e6c](https://github.com/NSPC911/rovr/commit/32f41e6c6628ef3aa452f1e1a7acf0fb38325738)
+- `all`: import component widgets directly [c94500a1](https://github.com/NSPC911/rovr/commit/c94500a15896c200ea92d075766ea55d770c2e4e)
+- `metadata`?: check changes before updating [945dbda9](https://github.com/NSPC911/rovr/commit/945dbda9125f036d52212909638c2541e63404bf)
+- `all`: monkeypatch to instant focus widgets [29eb0f0d](https://github.com/NSPC911/rovr/commit/29eb0f0dfcfdd2f84155ccdccf986e58e5077d84)
+- `preview`: stop stale work and reuse preview widgets [d20efae5](https://github.com/NSPC911/rovr/commit/d20efae558600ade07ae40bc5ce667e7a1d87866)
+- `unzip`: delay archive checks while navigating [0c4a6b72](https://github.com/NSPC911/rovr/commit/0c4a6b7263593d9d61074e20e257868fcbd6e011)
+- `filelist`: avoid full scans on range selection [9c92ad93](https://github.com/NSPC911/rovr/commit/9c92ad9363eb6ae1579d4f728c58786579adb334)
+- `filelist`: temp disable gc on highlight [56e745cf](https://github.com/NSPC911/rovr/commit/56e745cf297744557f41bd7a1c2d5551126e20d3)
+
 ## [0.10.3] - 2026-10-01
 
 ### Added

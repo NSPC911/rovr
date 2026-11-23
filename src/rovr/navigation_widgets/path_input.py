@@ -1,3 +1,4 @@
+import asyncio
 import os
 import sys
 from os import path
@@ -5,7 +6,7 @@ from pathlib import Path
 from typing import ClassVar, Generator, cast
 
 from rich.text import Text
-from textual import events
+from textual import events, work
 from textual.binding import Binding, BindingType
 from textual.css.query import NoMatches
 from textual.validation import Function
@@ -125,6 +126,13 @@ def _win_get_candidates(path_str: str) -> list[DropdownItem]:
         A list of DropdownItem suggestions, or an empty list when no
         candidates are available.
     """
+    unc = path_str.replace("/", "\\")
+    if unc.startswith("\\\\"):
+        host, _, rest = unc[2:].partition("\\")
+        share, separator, _ = rest.partition("\\")
+        if not (host and share and separator):
+            return []
+
     # Case 1: Empty string - return available drives
     if not path_str:
         drives = []
@@ -177,6 +185,7 @@ class PathAutoCompleteInput(PathAutoComplete):
         self.folder_prefix = " " + get_icon("folder", "default")[0] + " "
         self.file_prefix = " " + get_icon("file", "default")[0] + " "
         self._target: Input = target
+        self._scanning_unc = False
         assert isinstance(self._target, Input)
 
     def _get_target_state(self) -> TargetState:
@@ -232,6 +241,12 @@ class PathAutoCompleteInput(PathAutoComplete):
         """
         option_list = self.option_list
         if self.target.has_focus:
+            if _is_unc(target_state.text):
+                option_list.clear_options()
+                if not self._scanning_unc:
+                    self._scanning_unc = True
+                    self._scan_unc(target_state)
+                return
             matches = self._compute_matches(target_state, search_string)
             if matches:
                 option_list.set_options(matches)
@@ -239,6 +254,27 @@ class PathAutoCompleteInput(PathAutoComplete):
             elif matches == []:
                 option_list.clear_options()
                 option_list.highlighted = None
+
+    @work
+    async def _scan_unc(self, state: TargetState) -> None:
+        try:
+            while self.target.has_focus and _is_unc(state.text):
+                candidates = await asyncio.to_thread(_win_get_candidates, state.text)
+                latest = self._get_target_state()
+                if latest.text != state.text:
+                    state = latest
+                    continue
+                if self.target.has_focus and candidates:
+                    matches = self.get_matches(
+                        latest, candidates, self.get_search_string(latest)
+                    )
+                    if matches:
+                        self.option_list.set_options(matches)
+                        self.option_list.highlighted = None
+                        self.action_show()
+                break
+        finally:
+            self._scanning_unc = False
 
     def _listen_to_messages(self, event: events.Event) -> None:
         """Listen to some events of the target widget."""
@@ -375,6 +411,10 @@ class PathAutoCompleteInput(PathAutoComplete):
         self.post_completion()
 
 
+def _is_unc(value: str) -> bool:
+    return sys.platform == "win32" and value[:2].replace("/", "\\") == "\\\\"
+
+
 class PathInput(Actionable, Input, inherit_bindings=False):
     key_contexts = ("path_input", "inputs")
     ALLOW_MAXIMIZE = False
@@ -435,7 +475,7 @@ class PathInput(Actionable, Input, inherit_bindings=False):
             id="path_switcher",
             validators=[
                 Function(lambda x: path.isabs(x), "Path must be absolute"),
-                Function(lambda x: path.exists(x), "Path does not exist"),
+                Function(lambda x: _is_unc(x) or path.exists(x), "Path does not exist"),
             ],
             validate_on=["changed"],
             select_on_focus=False,
@@ -452,8 +492,22 @@ class PathInput(Actionable, Input, inherit_bindings=False):
         """Use a custom path entered as the current working directory"""
         if not path.isabs(event.value):
             self.notify("Path must be absolute.", severity="error")
+        elif _is_unc(event.value):
+            self._submit_unc(event.value)
+            return
         elif path.exists(event.value) and event.value != "":
             self.app.cd(event.value, clear_search=True)
+        else:
+            self.notify("Path provided is not valid.", severity="error")
+        self.app.file_list.focus()
+
+    @work(exclusive=True)
+    async def _submit_unc(self, value: str) -> None:
+        exists = await asyncio.to_thread(path.exists, value)
+        if self.value != value or not self.has_focus:
+            return
+        if exists:
+            self.app.cd(value, clear_search=True)
         else:
             self.notify("Path provided is not valid.", severity="error")
         self.app.file_list.focus()

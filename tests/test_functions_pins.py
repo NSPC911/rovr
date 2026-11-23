@@ -34,7 +34,10 @@ def test_load_pins_no_file_returns_defaults() -> None:
     assert result["pins"] == []
 
 
-def test_load_pins_valid_file_expands_home_variable() -> None:
+def test_load_pins_valid_file_expands_home_variable(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    monkeypatch.setattr(RovrVars, "HOME", tmp_path.anchor)
     pin_file = Path(pins_module.PIN_PATH)
     data = {
         "default": [{"name": "Home", "path": "$HOME"}],

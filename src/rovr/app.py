@@ -1369,7 +1369,9 @@ class Application(
             try:
                 return self.screen.query_one(parameters[0]).allow_maximize
             except NoMatches:
-                self.notify(f"{parameters[0]} is not available on current screen", markup=False)
+                self.notify(
+                    f"{parameters[0]} is not available on current screen", markup=False
+                )
                 return None
         return super().check_action(action, parameters)
 

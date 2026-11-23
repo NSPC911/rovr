@@ -4,16 +4,15 @@
 # You are free to copy, paste, and modify this file in your own projects,
 # provided that this copyright notice and attribution remain intact.
 
-# with reference from https://gitee.com/DreamMaoMao/clipboard.yazi
-# for the powershell, wayland and x11 side
-# macos uses ctypes (yipee) (without pyobjc bridge) or any external dependencies
-# like clippy: https://github.com/neilberkman/clippy
+# with reference from https://gitee.com/DreamMaoMao/clipboard.yazi for the wayland and x11 side
+# macOS uses osascript thanks to https://codeberg.org/deppes/yazi-plugins/src/branch/main/system-clipboard.yazi
+# windows is modified from clipboard.yazi but made slightly safer
 
 import asyncio
-import ctypes
-import ctypes.util
+import base64
 import platform
 import shutil
+from os import path
 from pathlib import Path
 from subprocess import CompletedProcess
 
@@ -84,11 +83,9 @@ async def _copy_windows(paths: list[str]) -> CompletedProcess | None:
             "powershell", "Windows", "PowerShell should be available on Windows"
         )
 
-    escaped_paths = [
-        f"'{path.replace('`', '``').replace('"', '`"').replace("'", "`'")}'"
-        for path in paths
-    ]
-    paths_list = ",".join(escaped_paths)
+    abs_paths = "\n".join(
+        base64.b64encode(path.abspath(p).encode("utf-8")).decode("ascii") for p in paths
+    ).encode("ascii")
 
     command = [
         "powershell",
@@ -96,19 +93,26 @@ async def _copy_windows(paths: list[str]) -> CompletedProcess | None:
         "-NoLogo",
         "-NonInteractive",
         "-Command",
-        f"Add-Type -AssemblyName System.Windows.Forms; "
-        f"$data = New-Object System.Collections.Specialized.StringCollection; "
-        f"$data.AddRange(@({paths_list})); "
-        "[System.Windows.Forms.Clipboard]::SetFileDropList($data)",
+        "Add-Type -AssemblyName System.Windows.Forms; "
+        "$data = [System.Collections.Specialized.StringCollection]::new(); "
+        "$lines = @($input | Where-Object { $_ -ne '' } | "
+        "ForEach-Object { [System.Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($_)) }); "
+        "if ($lines.Count -gt 0) { "
+        "  $data.AddRange([string[]]$lines); "
+        "  [System.Windows.Forms.Clipboard]::SetFileDropList($data) "
+        "}",
     ]
 
     process = await asyncio.create_subprocess_exec(
         *command,
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
+        stdin=asyncio.subprocess.PIPE,
     )
     try:
-        stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=5)
+        stdout, stderr = await asyncio.wait_for(
+            process.communicate(input=abs_paths), timeout=5
+        )
     except TimeoutError as exc:
         process.kill()
         await process.wait()
@@ -126,108 +130,34 @@ async def _copy_macos(paths: list[str]) -> CompletedProcess | None:
     if not paths:
         return None
 
-    try:
-        _copy_macos_ctypes(paths)
-    except ClipboardError:
-        raise
-    except OSError as exc:
-        raise ClipboardError(f"Failed to load macOS frameworks: {exc}")
-    except Exception as exc:
-        raise ClipboardError(f"macOS clipboard error: \\[{type(exc).__name__}]\n{exc}")
-    return CompletedProcess(
-        returncode=0, args=["ctypes:NSPasteboard"], stdout="", stderr=""
+    script = (
+        "on run argv\n"
+        "  set fileList to {}\n"
+        "  repeat with p in argv\n"
+        "    set end of fileList to POSIX file p\n"
+        "  end repeat\n"
+        "  set the clipboard to fileList\n"
+        "end run"
     )
-
-
-# no, pbcopy is not enough, here is death by ctypes
-def _copy_macos_ctypes(paths: list[str]) -> None:
-    """Copy file paths to macOS clipboard via ctypes and the Objective-C runtime.
-
-    Raises:
-        ClipboardError: If the pasteboard write operation fails.
-    """
-    objc = ctypes.util.find_library("objc")
-    if objc is None:
-        raise ClipboardError("Could not find libobjc on this system")
-    libobjc = ctypes.cdll.LoadLibrary(objc)
-    ctypes.cdll.LoadLibrary("/System/Library/Frameworks/AppKit.framework/AppKit")
-    objc_getClass = libobjc.objc_getClass
-    objc_getClass.restype = ctypes.c_void_p
-    objc_getClass.argtypes = [ctypes.c_char_p]
-
-    sel_registerName = libobjc.sel_registerName
-    sel_registerName.restype = ctypes.c_void_p
-    sel_registerName.argtypes = [ctypes.c_char_p]
-
-    # Typed objc_msgSend wrappers via CFUNCTYPE
-    _ptr = ctypes.cast(libobjc.objc_msgSend, ctypes.c_void_p).value
-    VP = ctypes.c_void_p
-    # id fn(id, SEL)
-    msg0 = ctypes.CFUNCTYPE(VP, VP, VP)(_ptr)
-    # id fn(id, SEL, id)
-    msg1 = ctypes.CFUNCTYPE(VP, VP, VP, VP)(_ptr)
-    # id fn(id, SEL, char*)
-    msg_s = ctypes.CFUNCTYPE(VP, VP, VP, ctypes.c_char_p)(_ptr)
-    # BOOL fn(id, SEL, id)
-    msg_b1 = ctypes.CFUNCTYPE(ctypes.c_bool, VP, VP, VP)(_ptr)
-    # id fn(id, SEL, NSUInteger)
-    msg_i = ctypes.CFUNCTYPE(VP, VP, VP, ctypes.c_ulong)(_ptr)
-
-    def sel(name: str) -> ctypes.c_void_p:
-        return sel_registerName(name.encode())
-
-    NSAutoreleasePool = objc_getClass(b"NSAutoreleasePool")
-    NSPasteboard = objc_getClass(b"NSPasteboard")
-    NSString = objc_getClass(b"NSString")
-    NSURL = objc_getClass(b"NSURL")
-    NSMutableArray = objc_getClass(b"NSMutableArray")
-    NSApplication = objc_getClass(b"NSApplication")
-
-    for name, cls in {
-        "NSAutoreleasePool": NSAutoreleasePool,
-        "NSPasteboard": NSPasteboard,
-        "NSString": NSString,
-        "NSURL": NSURL,
-        "NSMutableArray": NSMutableArray,
-        "NSApplication": NSApplication,
-    }.items():
-        if not cls:
-            raise ClipboardError(f"Failed to load Objective-C class: {name}")
-
-    # init appkit content for clipboard stuff
-    msg0(NSApplication, sel("sharedApplication"))
-
-    pool = msg0(msg0(NSAutoreleasePool, sel("alloc")), sel("init"))
+    command = ["osascript", "-e", script, *[str(Path(p).resolve()) for p in paths]]
+    process = await asyncio.create_subprocess_exec(
+        *command,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE,
+    )
     try:
-        pasteboard = msg0(NSPasteboard, sel("generalPasteboard"))
-        msg0(pasteboard, sel("clearContents"))
-
-        array = msg_i(NSMutableArray, sel("arrayWithCapacity:"), len(paths))
-        if not array:
-            raise ClipboardError("Failed to create NSMutableArray for clipboard")
-        failed_paths: list[str] = []
-        for path in paths:
-            resolved = str(Path(path).resolve())
-            ns_string = msg_s(NSString, sel("stringWithUTF8String:"), resolved.encode())
-            if not ns_string:
-                failed_paths.append(path)
-                continue
-            file_url = msg1(NSURL, sel("fileURLWithPath:"), ns_string)
-            if not file_url:
-                failed_paths.append(path)
-                continue
-            msg1(array, sel("addObject:"), file_url)
-
-        if failed_paths:
-            raise ClipboardError(
-                "Failed to create NSURLs for the following paths:\n"
-                + "\n".join(failed_paths)
-            )
-        success = msg_b1(pasteboard, sel("writeObjects:"), array)
-        if not success:
-            raise ClipboardError("NSPasteboard writeObjects: returned NO")
-    finally:
-        msg0(pool, sel("drain"))
+        stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=5)
+    except TimeoutError as exc:
+        process.kill()
+        await process.wait()
+        exc.add_note("osascript clipboard command timed out")
+        raise exc from None
+    return CompletedProcess(
+        args=command,
+        returncode=process.returncode or 0,
+        stdout=stdout.decode().strip(),
+        stderr=stderr.decode().strip(),
+    )
 
 
 async def _copy_linux(paths: list[str]) -> CompletedProcess | None:

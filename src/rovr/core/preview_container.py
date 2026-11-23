@@ -288,10 +288,7 @@ class PreviewContainer(Actionable, PDFMixin, BatMixin, Container):
             self.call_from_thread(self.remove_children)
             self.call_from_thread(
                 self.mount,
-                Static(
-                    self._preview_texts["error"],
-                    classes="special",
-                ),
+                Static(self._preview_texts["error"], classes="special", markup=False),
             )
             return
         sig = (
@@ -391,6 +388,7 @@ class PreviewContainer(Actionable, PDFMixin, BatMixin, Container):
                 Static(
                     f"Cannot render font preview.\n{type(exc).__name__}: {str(exc)}",
                     classes="special",
+                    markup=False,
                 ),
             )
             return
@@ -486,8 +484,7 @@ class PreviewContainer(Actionable, PDFMixin, BatMixin, Container):
             self.call_from_thread(
                 self.mount,
                 Static(
-                    f"Cannot render svg.\n{str(exc)}",
-                    classes="special",
+                    f"Cannot render svg.\n{str(exc)}", classes="special", markup=False
                 ),
             )
             return
@@ -501,6 +498,7 @@ class PreviewContainer(Actionable, PDFMixin, BatMixin, Container):
                 Static(
                     f"Cannot render svg.\n{type(exc).__name__}: {str(exc)}",
                     classes="special",
+                    markup=False,
                 ),
             )
             return
@@ -591,6 +589,7 @@ class PreviewContainer(Actionable, PDFMixin, BatMixin, Container):
                     if isinstance(exc, UnidentifiedImageError)
                     else f"Cannot render image\nContains {exc}",
                     classes="special",
+                    markup=False,
                 ),
             )
             return
@@ -599,10 +598,7 @@ class PreviewContainer(Actionable, PDFMixin, BatMixin, Container):
             self.call_from_thread(self.remove_children)
             self.call_from_thread(
                 self.mount,
-                Static(
-                    self._preview_texts["error"],
-                    classes="special",
-                ),
+                Static(self._preview_texts["error"], classes="special", markup=False),
             )
             return
 
@@ -1394,7 +1390,7 @@ class PreviewContainer(Actionable, PDFMixin, BatMixin, Container):
         else:
             self.call_from_thread(self.remove_children)
             utils.check_cancel()
-            static_widget = Static(content, classes="special")
+            static_widget = Static(content, classes="special", markup=False)
             self.call_from_thread(self.mount, static_widget)
         # not wasting an isinstance on this
         cast(Static, static_widget).can_focus = True

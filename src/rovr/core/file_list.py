@@ -72,14 +72,14 @@ class FileList(
     def _pause_gc(self) -> None:
         if self._resume_gc_timer is not None or gc.isenabled():
             if self._resume_gc_timer is not None:
-                self._resume_gc_timer.cancel()
+                self._resume_gc_timer.stop()
             self._resume_gc_timer = self.set_timer(0.5, self._resume_gc)
             gc.disable()
 
     @on(events.Unmount)
     def _resume_gc(self) -> None:
         if self._resume_gc_timer is not None:
-            self._resume_gc_timer.cancel()
+            self._resume_gc_timer.stop()
             self._resume_gc_timer = None
             gc.enable()
 

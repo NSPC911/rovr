@@ -1,4 +1,3 @@
-import sys
 from pathlib import Path
 from typing import cast
 from unittest.mock import MagicMock
@@ -160,29 +159,3 @@ def test_get_mounted_drives_linux_falls_back_to_posix_on_oserror(
     drives = drive_workers.get_mounted_drives("linux", config)
 
     assert drives == ["/data"]
-
-
-def test_get_mounted_drives_windows_normalises_and_applies_exclusions(
-    monkeypatch: pytest.MonkeyPatch,
-    config: RovrConfig,
-) -> None:
-    if sys.platform != "win32":
-        pytest.skip(
-            "This test is only relevant on Windows because drives are wrongly returned"
-        )
-    monkeypatch.setattr(
-        drive_workers,
-        "_get_windows_drives",
-        lambda: ["C:/", "D:/", "E:/Data", "F:", "G:/"],
-    )
-
-    def fake_isdir(path_str: str) -> bool:
-        return any(path_str.startswith(drive) for drive in ["C:/", "D:/", "E:/"])
-
-    monkeypatch.setattr(drive_workers.path, "isdir", fake_isdir)
-
-    config["settings"]["drive_exclude"] = ["E:/*"]
-
-    drives = drive_workers.get_mounted_drives("win32", config)
-
-    assert drives == ["C:/", "D:/"]

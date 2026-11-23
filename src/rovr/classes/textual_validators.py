@@ -17,7 +17,7 @@ class IsValidFilePath(Validator):
     def validate(self, value: str) -> ValidationResult:
         normalized_value = normalise(getcwd(), value)
 
-        sanitized = normalise(sanitize_path_input(normalized_value))
+        sanitized = normalise(getcwd(), sanitize_path_input(value))
         return self.success() if normalized_value == sanitized else self.failure()
 
 

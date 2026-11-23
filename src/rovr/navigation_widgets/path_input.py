@@ -480,10 +480,12 @@ class PathInput(Actionable, Input, inherit_bindings=False):
             validate_on=["changed"],
             select_on_focus=False,
         )
+        self.cursor_blink = False
         self.ACTIONS: list[Action] = [
             Action(self.action_delete_left, "backspace"),
             Action(self.app.file_list.focus, "escape"),
         ]
+        self.focus_event: events.Focus | None = None
 
     def on_mount(self) -> None:
         self.auto_completer = self.app.query_one(PathAutoCompleteInput)
@@ -503,8 +505,9 @@ class PathInput(Actionable, Input, inherit_bindings=False):
 
     @work(exclusive=True)
     async def _submit_unc(self, value: str) -> None:
+        event = self.focus_event
         exists = await asyncio.to_thread(path.exists, value)
-        if self.value != value or not self.has_focus:
+        if event == self.focus_event and (self.value != value or not self.has_focus):
             return
         if exists:
             self.app.cd(value, clear_search=True)
@@ -532,7 +535,8 @@ class PathInput(Actionable, Input, inherit_bindings=False):
     def on_blur(self) -> None:
         self.auto_completer.action_hide()
 
-    def on_focus(self) -> None:
+    def on_focus(self, event: events.Focus) -> None:
+        self.focus_event = event
         self.app.call_after_refresh(
             self.auto_completer._listen_to_messages, Input.Changed(self, self.value)
         )

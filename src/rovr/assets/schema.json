@@ -10,7 +10,17 @@
     },
     "default_previews": {
       "type": "string",
-      "enum": ["text", "image", "pdf", "archive", "folder", "resvg", "font", "details"]
+      "enum": [
+        "text",
+        "image",
+        "pdf",
+        "archive",
+        "folder",
+        "resvg",
+        "font",
+        "video",
+        "details"
+      ]
     },
     "preview_type": {
       "anyOf": [
@@ -576,6 +586,7 @@
             "application/font-.*": "font",
             "application/x-font-.*": "font",
             "image/.*": "image",
+            "video/.*": "video",
             "text/.*": "text",
             "font/.*": "font",
             "application/(x-)?gzip": {
@@ -592,7 +603,7 @@
           "description": "Define custom previewers for different file types.",
           "additionalProperties": false,
           "patternProperties": {
-            "^(?!archive$|text$|remime$|font$|pdf$|resvg$|folder$|file$|details$|image$).*": {
+            "^(?!archive$|text$|remime$|font$|pdf$|resvg$|folder$|file$|details$|image$|video$).*": {
               "type": "object",
               "additionalProperties": false,
               "required": ["type", "command"],
@@ -1611,6 +1622,47 @@
               "type": "string",
               "default": "bat",
               "description": "The executable for bat."
+            }
+          }
+        },
+        "ffmpeg": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": true,
+              "description": "Enable video frame previews using FFmpeg."
+            },
+            "ffmpeg_path": {
+              "type": "string",
+              "default": "ffmpeg",
+              "description": "FFmpeg executable name or path."
+            },
+            "ffprobe_path": {
+              "type": "string",
+              "default": "ffprobe",
+              "description": "FFprobe executable name or path."
+            },
+            "size": {
+              "type": "array",
+              "items": { "type": "integer", "minimum": 16, "maximum": 1920 },
+              "minItems": 2,
+              "maxItems": 2,
+              "default": [960, 540],
+              "description": "Maximum width and height in pixels for video frames."
+            },
+            "seek_seconds": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "description": "Seconds to seek with Left and Right in a video preview."
+            },
+            "page_seek_seconds": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 10,
+              "description": "Seconds to seek with Page Left and Page Right in a video preview."
             }
           }
         },

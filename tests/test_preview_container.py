@@ -40,6 +40,49 @@ class WindowedPreviewTestApp(App[None]):
         )
 
 
+async def test_video_seek_frames(tmp_path: Path) -> None:
+    from io import BytesIO
+
+    from PIL import Image
+
+    source = tmp_path / "clip.mp4"
+    source.touch()
+    png = BytesIO()
+    # The headless renderer can round a 2x2 frame down to zero terminal cells.
+    Image.new("RGB", (160, 90)).save(png, format="PNG")
+    positions = []
+
+    def run(command: list[str], **kwargs: Any) -> subprocess.CompletedProcess[bytes]:
+        if "-ss" not in command:
+            return subprocess.CompletedProcess(command, 0, b"11.5")
+        assert command[command.index("-frames:v") + 1] == "1"
+        positions.append(int(command[command.index("-ss") + 1]))
+        return subprocess.CompletedProcess(command, 0, png.getvalue())
+
+    async with PreviewTestApp().run_test() as pilot:
+        preview = pilot.app.query_one(PreviewContainer)
+        with (
+            patch("subprocess.run", side_effect=run),
+            patch(
+                "rovr.functions.preview_utils.get_mime_type",
+                return_value=MimeResult("basic", "video/mp4"),
+            ),
+        ):
+            preview.show_preview(str(source), source.stat().st_mtime)
+            await pilot.app.workers.wait_for_complete()
+            for action, second in [
+                ("right", 1),
+                ("page_right", 11),
+                ("right", 11),
+                ("page_left", 1),
+                ("left", 0),
+            ]:
+                getattr(preview, f"action_{action}")()
+                await pilot.app.workers.wait_for_complete()
+                assert preview.border_subtitle == f"00:{second:02}"
+        assert positions == [0, 1, 11, 1, 0]
+
+
 def test_cached_text_uses_pickle() -> None:
     text = Text.from_markup("[bold red]cached[/]")
 

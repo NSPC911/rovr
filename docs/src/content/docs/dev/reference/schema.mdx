@@ -1597,12 +1597,12 @@ Must be one of:
 
 ### <a name="settings_preview_rules"></a>2.7. Property `Rovr Config > settings > preview_rules`
 
-|                           |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Type**                  | `object`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| **Required**              | No                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| **Additional properties** | [Each additional property must conform to the schema](#settings_preview_rules_additionalProperties)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| **Default**               | `{"application/(debian.*-package&#124;redhat-package-manager&#124;rpm&#124;android\\.package-archive)": "archive", "application/(iso9660-image&#124;qemu-disk&#124;ms-wim&#124;apple-diskimage)": "archive", "application/(rar&#124;7z.*&#124;tar&#124;xz&#124;bzip.*&#124;lzma&#124;compress&#124;archive&#124;cpio&#124;arj&#124;xar&#124;ms-cab.*)": "archive", "application/(zip&#124;zstd&#124;bzip2&#124;vnd\\.rar)": "archive", "application/java-archive": "archive", "application/virtualbox-(vhd&#124;vhdx)": "archive", "application/x-(xz&#124;tar&#124;bzip2&#124;xz&#124;rar&#124;rar-compressed&#124;7z-compressed&#124;zstd-compressed-tar)": "archive", "application/(json&#124;javascript&#124;xml&#124;raml\\+yaml)": "text", "application/(mbox&#124;ndjson&#124;wine-extension-ini)": "text", "application/x-(yaml&#124;script&#124;pem-file&#124;subrip&#124;typescript)": "text", "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "remime", "application/ms-opentype": "font", "application/pdf": "pdf", "image/svg\\+xml": "resvg", "inode/directory": "folder", "application/font-.*": "font", "application/x-font-.*": "font", "image/.*": "image", "text/.*": "text", "font/.*": "font", "application/(x-)?gzip": {"default": "archive", "extensions": {"svgz": "resvg"}}}` |
+|                           |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Type**                  | `object`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| **Required**              | No                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| **Additional properties** | [Each additional property must conform to the schema](#settings_preview_rules_additionalProperties)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| **Default**               | `{"application/(debian.*-package&#124;redhat-package-manager&#124;rpm&#124;android\\.package-archive)": "archive", "application/(iso9660-image&#124;qemu-disk&#124;ms-wim&#124;apple-diskimage)": "archive", "application/(rar&#124;7z.*&#124;tar&#124;xz&#124;bzip.*&#124;lzma&#124;compress&#124;archive&#124;cpio&#124;arj&#124;xar&#124;ms-cab.*)": "archive", "application/(zip&#124;zstd&#124;bzip2&#124;vnd\\.rar)": "archive", "application/java-archive": "archive", "application/virtualbox-(vhd&#124;vhdx)": "archive", "application/x-(xz&#124;tar&#124;bzip2&#124;xz&#124;rar&#124;rar-compressed&#124;7z-compressed&#124;zstd-compressed-tar)": "archive", "application/(json&#124;javascript&#124;xml&#124;raml\\+yaml)": "text", "application/(mbox&#124;ndjson&#124;wine-extension-ini)": "text", "application/x-(yaml&#124;script&#124;pem-file&#124;subrip&#124;typescript)": "text", "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "remime", "application/ms-opentype": "font", "application/pdf": "pdf", "image/svg\\+xml": "resvg", "inode/directory": "folder", "application/font-.*": "font", "application/x-font-.*": "font", "image/.*": "image", "video/.*": "video", "text/.*": "text", "font/.*": "font", "application/(x-)?gzip": {"default": "archive", "extensions": {"svgz": "resvg"}}}` |
 
 **Description:** Map MIME type regex patterns to preview types. Rules containing `.*` are evaluated after rules without it, with configuration order preserved within each group. A rule can be a preview type string or a table with a default preview type and extension-specific refinements. Extension keys are lowercase and omit the leading dot.
 -&gt; Use 'remime' if you want a more accurate description from file(1)
@@ -1663,6 +1663,7 @@ Must be one of:
 - "folder"
 - "resvg"
 - "font"
+- "video"
 - "details"
 
 ###### <a name="settings_preview_rules_additionalProperties_oneOf_i0_anyOf_i2"></a>2.7.1.1.3. Property `Rovr Config > settings > preview_rules > additionalProperties > oneOf > item 0 > anyOf > item 2`
@@ -1742,7 +1743,7 @@ Must be one of:
 #### <a name="settings_previewers_pattern1"></a>2.8.1. Pattern Property `Rovr Config > settings > previewers > previewer name`
 
 > All properties whose name matches the regular expression
-> `^(?!archive$|text$|remime$|font$|pdf$|resvg$|folder$|file$|details$|image$).*` ([Test](https://regex101.com/?regex=%5E%28%3F%21archive%24%7Ctext%24%7Cremime%24%7Cfont%24%7Cpdf%24%7Cresvg%24%7Cfolder%24%7Cfile%24%7Cdetails%24%7Cimage%24%29.%2A))
+> `^(?!archive$|text$|remime$|font$|pdf$|resvg$|folder$|file$|details$|image$|video$).*` ([Test](https://regex101.com/?regex=%5E%28%3F%21archive%24%7Ctext%24%7Cremime%24%7Cfont%24%7Cpdf%24%7Cresvg%24%7Cfolder%24%7Cfile%24%7Cdetails%24%7Cimage%24%7Cvideo%24%29.%2A))
 > must respect the following conditions
 
 |                           |             |
@@ -1852,6 +1853,7 @@ Must be one of:
 - "folder"
 - "resvg"
 - "font"
+- "video"
 - "details"
 
 ### <a name="settings_openers"></a>2.9. Property `Rovr Config > settings > openers`
@@ -6019,6 +6021,7 @@ Must be one of:
 | ----------------------------- | ------ | ----------------- |
 | [zoxide](#plugins_zoxide)     | object |                   |
 | [bat](#plugins_bat)           | object |                   |
+| [ffmpeg](#plugins_ffmpeg)     | object |                   |
 | [fd](#plugins_fd)             | object |                   |
 | [rg](#plugins_rg)             | object |                   |
 | [poppler](#plugins_poppler)   | object |                   |
@@ -6123,7 +6126,116 @@ Must be one of:
 
 **Description:** The executable for bat.
 
-### <a name="plugins_fd"></a>7.3. Property `Rovr Config > plugins > fd`
+### <a name="plugins_ffmpeg"></a>7.3. Property `Rovr Config > plugins > ffmpeg`
+
+|                           |             |
+| ------------------------- | ----------- |
+| **Type**                  | `object`    |
+| **Required**              | No          |
+| **Additional properties** | Not allowed |
+
+| Property                                               | Type             | Title/Description                                                 |
+| ------------------------------------------------------ | ---------------- | ----------------------------------------------------------------- |
+| [enabled](#plugins_ffmpeg_enabled)                     | boolean          | Enable video frame previews using FFmpeg.                         |
+| [ffmpeg_path](#plugins_ffmpeg_ffmpeg_path)             | string           | FFmpeg executable name or path.                                   |
+| [ffprobe_path](#plugins_ffmpeg_ffprobe_path)           | string           | FFprobe executable name or path.                                  |
+| [size](#plugins_ffmpeg_size)                           | array of integer | Maximum width and height in pixels for video frames.              |
+| [seek_seconds](#plugins_ffmpeg_seek_seconds)           | integer          | Seconds to seek with Left and Right in a video preview.           |
+| [page_seek_seconds](#plugins_ffmpeg_page_seek_seconds) | integer          | Seconds to seek with Page Left and Page Right in a video preview. |
+
+#### <a name="plugins_ffmpeg_enabled"></a>7.3.1. Property `Rovr Config > plugins > ffmpeg > enabled`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `boolean` |
+| **Required** | No        |
+| **Default**  | `true`    |
+
+**Description:** Enable video frame previews using FFmpeg.
+
+#### <a name="plugins_ffmpeg_ffmpeg_path"></a>7.3.2. Property `Rovr Config > plugins > ffmpeg > ffmpeg_path`
+
+|              |            |
+| ------------ | ---------- |
+| **Type**     | `string`   |
+| **Required** | No         |
+| **Default**  | `"ffmpeg"` |
+
+**Description:** FFmpeg executable name or path.
+
+#### <a name="plugins_ffmpeg_ffprobe_path"></a>7.3.3. Property `Rovr Config > plugins > ffmpeg > ffprobe_path`
+
+|              |             |
+| ------------ | ----------- |
+| **Type**     | `string`    |
+| **Required** | No          |
+| **Default**  | `"ffprobe"` |
+
+**Description:** FFprobe executable name or path.
+
+#### <a name="plugins_ffmpeg_size"></a>7.3.4. Property `Rovr Config > plugins > ffmpeg > size`
+
+|              |                    |
+| ------------ | ------------------ |
+| **Type**     | `array of integer` |
+| **Required** | No                 |
+| **Default**  | `[960, 540]`       |
+
+**Description:** Maximum width and height in pixels for video frames.
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | 2                  |
+| **Max items**        | 2                  |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | See below          |
+
+| Each item of this array must be          | Description |
+| ---------------------------------------- | ----------- |
+| [size items](#plugins_ffmpeg_size_items) |             |
+
+##### <a name="plugins_ffmpeg_size_items"></a>7.3.4.1. Rovr Config > plugins > ffmpeg > size > size items
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `integer` |
+| **Required** | No        |
+
+| Restrictions |           |
+| ------------ | --------- |
+| **Minimum**  | &ge; 16   |
+| **Maximum**  | &le; 1920 |
+
+#### <a name="plugins_ffmpeg_seek_seconds"></a>7.3.5. Property `Rovr Config > plugins > ffmpeg > seek_seconds`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `integer` |
+| **Required** | No        |
+| **Default**  | `1`       |
+
+**Description:** Seconds to seek with Left and Right in a video preview.
+
+| Restrictions |        |
+| ------------ | ------ |
+| **Minimum**  | &ge; 1 |
+
+#### <a name="plugins_ffmpeg_page_seek_seconds"></a>7.3.6. Property `Rovr Config > plugins > ffmpeg > page_seek_seconds`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `integer` |
+| **Required** | No        |
+| **Default**  | `10`      |
+
+**Description:** Seconds to seek with Page Left and Page Right in a video preview.
+
+| Restrictions |        |
+| ------------ | ------ |
+| **Minimum**  | &ge; 1 |
+
+### <a name="plugins_fd"></a>7.4. Property `Rovr Config > plugins > fd`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -6144,7 +6256,7 @@ Must be one of:
 | [default_filter_types](#plugins_fd_default_filter_types) | array of enum (of string) | The default file types to show when using fd.                                    |
 | [threads](#plugins_fd_threads)                           | integer                   | The number of threads to use for fd searches.                                    |
 
-#### <a name="plugins_fd_enabled"></a>7.3.1. Property `Rovr Config > plugins > fd > enabled`
+#### <a name="plugins_fd_enabled"></a>7.4.1. Property `Rovr Config > plugins > fd > enabled`
 
 |              |           |
 | ------------ | --------- |
@@ -6154,7 +6266,7 @@ Must be one of:
 
 **Description:** Enable recursive file search using fd.
 
-#### <a name="plugins_fd_keybinds"></a>7.3.2. Property `Rovr Config > plugins > fd > keybinds`
+#### <a name="plugins_fd_keybinds"></a>7.4.2. Property `Rovr Config > plugins > fd > keybinds`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -6177,14 +6289,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>7.3.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>7.4.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="plugins_fd_executable"></a>7.3.3. Property `Rovr Config > plugins > fd > executable`
+#### <a name="plugins_fd_executable"></a>7.4.3. Property `Rovr Config > plugins > fd > executable`
 
 |              |          |
 | ------------ | -------- |
@@ -6194,7 +6306,7 @@ Must be one of:
 
 **Description:** fd executable name or path.
 
-#### <a name="plugins_fd_relative_paths"></a>7.3.4. Property `Rovr Config > plugins > fd > relative_paths`
+#### <a name="plugins_fd_relative_paths"></a>7.4.4. Property `Rovr Config > plugins > fd > relative_paths`
 
 |              |           |
 | ------------ | --------- |
@@ -6204,7 +6316,7 @@ Must be one of:
 
 **Description:** Whether to show fd results as relative path or absolute path.
 
-#### <a name="plugins_fd_follow_symlinks"></a>7.3.5. Property `Rovr Config > plugins > fd > follow_symlinks`
+#### <a name="plugins_fd_follow_symlinks"></a>7.4.5. Property `Rovr Config > plugins > fd > follow_symlinks`
 
 |              |           |
 | ------------ | --------- |
@@ -6214,7 +6326,7 @@ Must be one of:
 
 **Description:** Whether fd should follow symlinks when searching.
 
-#### <a name="plugins_fd_no_ignore_parent"></a>7.3.6. Property `Rovr Config > plugins > fd > no_ignore_parent`
+#### <a name="plugins_fd_no_ignore_parent"></a>7.4.6. Property `Rovr Config > plugins > fd > no_ignore_parent`
 
 |              |           |
 | ------------ | --------- |
@@ -6224,7 +6336,7 @@ Must be one of:
 
 **Description:** Don't use \*ignore files from parent folders when searching.
 
-#### <a name="plugins_fd_search_hidden"></a>7.3.7. Property `Rovr Config > plugins > fd > search_hidden`
+#### <a name="plugins_fd_search_hidden"></a>7.4.7. Property `Rovr Config > plugins > fd > search_hidden`
 
 |              |           |
 | ------------ | --------- |
@@ -6234,7 +6346,7 @@ Must be one of:
 
 **Description:** Whether to include hidden files in fd results by default.
 
-#### <a name="plugins_fd_timeout"></a>7.3.8. Property `Rovr Config > plugins > fd > timeout`
+#### <a name="plugins_fd_timeout"></a>7.4.8. Property `Rovr Config > plugins > fd > timeout`
 
 |              |           |
 | ------------ | --------- |
@@ -6244,7 +6356,7 @@ Must be one of:
 
 **Description:** The maximum time (in seconds) to wait for fd to return results before giving up.
 
-#### <a name="plugins_fd_default_filter_types"></a>7.3.9. Property `Rovr Config > plugins > fd > default_filter_types`
+#### <a name="plugins_fd_default_filter_types"></a>7.4.9. Property `Rovr Config > plugins > fd > default_filter_types`
 
 |              |                             |
 | ------------ | --------------------------- |
@@ -6266,7 +6378,7 @@ Must be one of:
 | -------------------------------------------------------------------- | ----------- |
 | [default_filter_types items](#plugins_fd_default_filter_types_items) |             |
 
-##### <a name="plugins_fd_default_filter_types_items"></a>7.3.9.1. Rovr Config > plugins > fd > default_filter_types > default_filter_types items
+##### <a name="plugins_fd_default_filter_types_items"></a>7.4.9.1. Rovr Config > plugins > fd > default_filter_types > default_filter_types items
 
 |              |                    |
 | ------------ | ------------------ |
@@ -6285,7 +6397,7 @@ Must be one of:
 - "char-device"
 - "block-device"
 
-#### <a name="plugins_fd_threads"></a>7.3.10. Property `Rovr Config > plugins > fd > threads`
+#### <a name="plugins_fd_threads"></a>7.4.10. Property `Rovr Config > plugins > fd > threads`
 
 |              |           |
 | ------------ | --------- |
@@ -6299,7 +6411,7 @@ Must be one of:
 | ------------ | ------ |
 | **Minimum**  | &ge; 1 |
 
-### <a name="plugins_rg"></a>7.4. Property `Rovr Config > plugins > rg`
+### <a name="plugins_rg"></a>7.5. Property `Rovr Config > plugins > rg`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -6319,7 +6431,7 @@ Must be one of:
 | [timeout](#plugins_rg_timeout)                   | integer         | The maximum time (in seconds) to wait for rg to return results before giving up. |
 | [threads](#plugins_rg_threads)                   | integer         | The number of threads to use for rg searches.                                    |
 
-#### <a name="plugins_rg_enabled"></a>7.4.1. Property `Rovr Config > plugins > rg > enabled`
+#### <a name="plugins_rg_enabled"></a>7.5.1. Property `Rovr Config > plugins > rg > enabled`
 
 |              |           |
 | ------------ | --------- |
@@ -6329,7 +6441,7 @@ Must be one of:
 
 **Description:** Enable content searching using rg.
 
-#### <a name="plugins_rg_keybinds"></a>7.4.2. Property `Rovr Config > plugins > rg > keybinds`
+#### <a name="plugins_rg_keybinds"></a>7.5.2. Property `Rovr Config > plugins > rg > keybinds`
 
 |                |                       |
 | -------------- | --------------------- |
@@ -6352,14 +6464,14 @@ Must be one of:
 | ---------------------------------------------- | ----------- |
 | [toggle_pin items](#keybinds_toggle_pin_items) |             |
 
-##### <a name="keybinds_toggle_pin_items"></a>7.4.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
+##### <a name="keybinds_toggle_pin_items"></a>7.5.2.1. Rovr Config > keybinds > toggle_pin > toggle_pin items
 
 |              |          |
 | ------------ | -------- |
 | **Type**     | `string` |
 | **Required** | No       |
 
-#### <a name="plugins_rg_executable"></a>7.4.3. Property `Rovr Config > plugins > rg > executable`
+#### <a name="plugins_rg_executable"></a>7.5.3. Property `Rovr Config > plugins > rg > executable`
 
 |              |          |
 | ------------ | -------- |
@@ -6369,7 +6481,7 @@ Must be one of:
 
 **Description:** rg executable name or path.
 
-#### <a name="plugins_rg_case_sensitive"></a>7.4.4. Property `Rovr Config > plugins > rg > case_sensitive`
+#### <a name="plugins_rg_case_sensitive"></a>7.5.4. Property `Rovr Config > plugins > rg > case_sensitive`
 
 |              |           |
 | ------------ | --------- |
@@ -6379,7 +6491,7 @@ Must be one of:
 
 **Description:** Whether the search should be case sensitive by default.
 
-#### <a name="plugins_rg_follow_symlinks"></a>7.4.5. Property `Rovr Config > plugins > rg > follow_symlinks`
+#### <a name="plugins_rg_follow_symlinks"></a>7.5.5. Property `Rovr Config > plugins > rg > follow_symlinks`
 
 |              |           |
 | ------------ | --------- |
@@ -6389,7 +6501,7 @@ Must be one of:
 
 **Description:** Whether rg should follow symlinks when searching.
 
-#### <a name="plugins_rg_no_ignore_parent"></a>7.4.6. Property `Rovr Config > plugins > rg > no_ignore_parent`
+#### <a name="plugins_rg_no_ignore_parent"></a>7.5.6. Property `Rovr Config > plugins > rg > no_ignore_parent`
 
 |              |           |
 | ------------ | --------- |
@@ -6399,7 +6511,7 @@ Must be one of:
 
 **Description:** Don't use \*ignore files from parent folders when searching.
 
-#### <a name="plugins_rg_search_hidden"></a>7.4.7. Property `Rovr Config > plugins > rg > search_hidden`
+#### <a name="plugins_rg_search_hidden"></a>7.5.7. Property `Rovr Config > plugins > rg > search_hidden`
 
 |              |           |
 | ------------ | --------- |
@@ -6409,7 +6521,7 @@ Must be one of:
 
 **Description:** Whether to search hidden files by default.
 
-#### <a name="plugins_rg_timeout"></a>7.4.8. Property `Rovr Config > plugins > rg > timeout`
+#### <a name="plugins_rg_timeout"></a>7.5.8. Property `Rovr Config > plugins > rg > timeout`
 
 |              |           |
 | ------------ | --------- |
@@ -6419,7 +6531,7 @@ Must be one of:
 
 **Description:** The maximum time (in seconds) to wait for rg to return results before giving up.
 
-#### <a name="plugins_rg_threads"></a>7.4.9. Property `Rovr Config > plugins > rg > threads`
+#### <a name="plugins_rg_threads"></a>7.5.9. Property `Rovr Config > plugins > rg > threads`
 
 |              |           |
 | ------------ | --------- |
@@ -6433,7 +6545,7 @@ Must be one of:
 | ------------ | ------ |
 | **Minimum**  | &ge; 1 |
 
-### <a name="plugins_poppler"></a>7.5. Property `Rovr Config > plugins > poppler`
+### <a name="plugins_poppler"></a>7.6. Property `Rovr Config > plugins > poppler`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -6449,7 +6561,7 @@ Must be one of:
 | [poppler_folder](#plugins_poppler_poppler_folder) | string  | Path to the folder where Poppler-related binaries are located. Leave empty to use the system PATH. |
 | [pdf_batch_size](#plugins_poppler_pdf_batch_size) | integer | Number of PDF pages to load in each batch.                                                         |
 
-#### <a name="plugins_poppler_enabled"></a>7.5.1. Property `Rovr Config > plugins > poppler > enabled`
+#### <a name="plugins_poppler_enabled"></a>7.6.1. Property `Rovr Config > plugins > poppler > enabled`
 
 |              |           |
 | ------------ | --------- |
@@ -6459,7 +6571,7 @@ Must be one of:
 
 **Description:** Enable poppler for PDF previews.
 
-#### <a name="plugins_poppler_threads"></a>7.5.2. Property `Rovr Config > plugins > poppler > threads`
+#### <a name="plugins_poppler_threads"></a>7.6.2. Property `Rovr Config > plugins > poppler > threads`
 
 |              |           |
 | ------------ | --------- |
@@ -6473,7 +6585,7 @@ Must be one of:
 | ------------ | ------ |
 | **Minimum**  | &ge; 1 |
 
-#### <a name="plugins_poppler_use_pdftocairo"></a>7.5.3. Property `Rovr Config > plugins > poppler > use_pdftocairo`
+#### <a name="plugins_poppler_use_pdftocairo"></a>7.6.3. Property `Rovr Config > plugins > poppler > use_pdftocairo`
 
 |              |           |
 | ------------ | --------- |
@@ -6483,7 +6595,7 @@ Must be one of:
 
 **Description:** Use pdftocairo instead of pdftoppm, may help performance
 
-#### <a name="plugins_poppler_poppler_folder"></a>7.5.4. Property `Rovr Config > plugins > poppler > poppler_folder`
+#### <a name="plugins_poppler_poppler_folder"></a>7.6.4. Property `Rovr Config > plugins > poppler > poppler_folder`
 
 |              |          |
 | ------------ | -------- |
@@ -6493,7 +6605,7 @@ Must be one of:
 
 **Description:** Path to the folder where Poppler-related binaries are located. Leave empty to use the system PATH.
 
-#### <a name="plugins_poppler_pdf_batch_size"></a>7.5.5. Property `Rovr Config > plugins > poppler > pdf_batch_size`
+#### <a name="plugins_poppler_pdf_batch_size"></a>7.6.5. Property `Rovr Config > plugins > poppler > pdf_batch_size`
 
 |              |           |
 | ------------ | --------- |
@@ -6507,7 +6619,7 @@ Must be one of:
 | ------------ | ------ |
 | **Minimum**  | &ge; 1 |
 
-### <a name="plugins_file_one"></a>7.6. Property `Rovr Config > plugins > file_one`
+### <a name="plugins_file_one"></a>7.7. Property `Rovr Config > plugins > file_one`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -6520,7 +6632,7 @@ Must be one of:
 | [enabled](#plugins_file_one_enabled)                 | boolean | Enable secondary file(1) type detection if both puremagic and plaintext detection fails. |
 | [get_description](#plugins_file_one_get_description) | boolean | Use file(1) to get additional information of the file type.                              |
 
-#### <a name="plugins_file_one_enabled"></a>7.6.1. Property `Rovr Config > plugins > file_one > enabled`
+#### <a name="plugins_file_one_enabled"></a>7.7.1. Property `Rovr Config > plugins > file_one > enabled`
 
 |              |           |
 | ------------ | --------- |
@@ -6530,7 +6642,7 @@ Must be one of:
 
 **Description:** Enable secondary file(1) type detection if both puremagic and plaintext detection fails.
 
-#### <a name="plugins_file_one_get_description"></a>7.6.2. Property `Rovr Config > plugins > file_one > get_description`
+#### <a name="plugins_file_one_get_description"></a>7.7.2. Property `Rovr Config > plugins > file_one > get_description`
 
 |              |           |
 | ------------ | --------- |
@@ -6540,7 +6652,7 @@ Must be one of:
 
 **Description:** Use file(1) to get additional information of the file type.
 
-### <a name="plugins_resvg"></a>7.7. Property `Rovr Config > plugins > resvg`
+### <a name="plugins_resvg"></a>7.8. Property `Rovr Config > plugins > resvg`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -6555,7 +6667,7 @@ Must be one of:
 | [text_rendering](#plugins_resvg_text_rendering)   | enum (of string) | The text rendering option to use when rendering SVGs.                      |
 | [image_rendering](#plugins_resvg_image_rendering) | enum (of string) | The image rendering option to use when rendering SVGs.                     |
 
-#### <a name="plugins_resvg_dpi"></a>7.7.1. Property `Rovr Config > plugins > resvg > dpi`
+#### <a name="plugins_resvg_dpi"></a>7.8.1. Property `Rovr Config > plugins > resvg > dpi`
 
 |              |           |
 | ------------ | --------- |
@@ -6565,7 +6677,7 @@ Must be one of:
 
 **Description:** The DPI to use when rendering SVGs. 0 means use the default DPI of the SVG
 
-#### <a name="plugins_resvg_shape_rendering"></a>7.7.2. Property `Rovr Config > plugins > resvg > shape_rendering`
+#### <a name="plugins_resvg_shape_rendering"></a>7.8.2. Property `Rovr Config > plugins > resvg > shape_rendering`
 
 |              |                         |
 | ------------ | ----------------------- |
@@ -6581,7 +6693,7 @@ Must be one of:
 - "crisp_edges"
 - "optimize_speed"
 
-#### <a name="plugins_resvg_text_rendering"></a>7.7.3. Property `Rovr Config > plugins > resvg > text_rendering`
+#### <a name="plugins_resvg_text_rendering"></a>7.8.3. Property `Rovr Config > plugins > resvg > text_rendering`
 
 |              |                         |
 | ------------ | ----------------------- |
@@ -6597,7 +6709,7 @@ Must be one of:
 - "optimize_legibility"
 - "optimize_speed"
 
-#### <a name="plugins_resvg_image_rendering"></a>7.7.4. Property `Rovr Config > plugins > resvg > image_rendering`
+#### <a name="plugins_resvg_image_rendering"></a>7.8.4. Property `Rovr Config > plugins > resvg > image_rendering`
 
 |              |                      |
 | ------------ | -------------------- |
@@ -6612,7 +6724,7 @@ Must be one of:
 - "optimize_quality"
 - "optimize_speed"
 
-### <a name="plugins_magick"></a>7.8. Property `Rovr Config > plugins > magick`
+### <a name="plugins_magick"></a>7.9. Property `Rovr Config > plugins > magick`
 
 |                           |             |
 | ------------------------- | ----------- |
@@ -6625,7 +6737,7 @@ Must be one of:
 | [enabled](#plugins_magick_enabled)       | boolean | Enable ImageMagick for converting unsupported image previews. |
 | [executable](#plugins_magick_executable) | string  | ImageMagick executable name or path.                          |
 
-#### <a name="plugins_magick_enabled"></a>7.8.1. Property `Rovr Config > plugins > magick > enabled`
+#### <a name="plugins_magick_enabled"></a>7.9.1. Property `Rovr Config > plugins > magick > enabled`
 
 |              |           |
 | ------------ | --------- |
@@ -6635,7 +6747,7 @@ Must be one of:
 
 **Description:** Enable ImageMagick for converting unsupported image previews.
 
-#### <a name="plugins_magick_executable"></a>7.8.2. Property `Rovr Config > plugins > magick > executable`
+#### <a name="plugins_magick_executable"></a>7.9.2. Property `Rovr Config > plugins > magick > executable`
 
 |              |            |
 | ------------ | ---------- |

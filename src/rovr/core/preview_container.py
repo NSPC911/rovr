@@ -25,6 +25,7 @@ from textual.css.query import NoMatches
 from textual.dom import DOMNode
 from textual.geometry import Region
 from textual.timer import Timer
+from textual.widget import Widget
 from textual.widgets import Static
 from textual.widgets.selection_list import Selection
 from textual.worker import Worker
@@ -111,6 +112,7 @@ class LoadingPreview(Static):
 
 class PreviewContainer(Actionable, PDFMixin, BatMixin, Container):
     key_contexts = ("preview", "scroll")
+    ALLOW_MAXIMIZE = True
     LOADER_WIDGET = LoadingPreview()
 
     ACTIONS: list[Action] = [
@@ -144,6 +146,26 @@ class PreviewContainer(Actionable, PDFMixin, BatMixin, Container):
 
     def compose(self) -> ComposeResult:
         yield Static(self._preview_texts["start"], classes="special")
+
+    def on_mount(self) -> None:
+        self.watch(self.screen, "maximized", self._on_maximized, init=False)
+
+    def _on_maximized(self, widget: Widget | None) -> None:
+        if widget is None or (widget is not self and self not in widget.ancestors):
+            return
+        if widget is not self:
+            # Maximizing a focused image would leave the rest of the preview behind.
+            self.screen.maximized = self
+        else:
+            self.call_after_refresh(self._focus_if_maximized)
+
+    def _focus_if_maximized(self) -> None:
+        if (
+            self.screen.is_active
+            and self.screen.maximized is self
+            and not self.has_focus_within
+        ):
+            self.focus()
 
     def get_loading_widget(self) -> LoadingPreview:
         """Get a widget to display a loading indicator.

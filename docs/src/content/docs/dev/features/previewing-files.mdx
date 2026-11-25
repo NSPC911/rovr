@@ -192,7 +192,7 @@ Paste the following script somewhere accessible and add it to your config.toml a
 <Tabs>
   <TabItem label="bash/zsh">
 
-```bash
+```bash frame="none"
 #!/usr/bin/env bash
 set -e
 to_preview=$1
@@ -205,10 +205,12 @@ fi
 mv -f -- "$pdf" "$outfile"
 ```
 
+Then `chmod +x /path/to/libreoffice-preview.sh` to make it executable.
+
   </TabItem>
   <TabItem label="powershell">
 
-```powershell
+```powershell frame="none"
 param(
     [Parameter(Mandatory = $true)][string]$ToPreview,
     [Parameter(Mandatory = $true)][string]$Outfile

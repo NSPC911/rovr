@@ -1522,8 +1522,8 @@ class PreviewContainer(Actionable, PDFMixin, BatMixin, Container):
                 timeout, start = 15, monotonic()
                 while proc.poll() is None:
                     if monotonic() - start > timeout or utils.check_cancel(False):
+                        proc.kill(), proc.communicate()
                         out, err = seek_read(stdout), seek_read(stderr)
-                        proc.kill()
                         raise subprocess.TimeoutExpired(proc.args, timeout, out, err)
                     with contextlib.suppress(subprocess.TimeoutExpired):
                         # perfectly reasonable to do this because wait can exit

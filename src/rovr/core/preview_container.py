@@ -10,7 +10,7 @@ from io import BytesIO
 from math import ceil
 from os import path
 from tempfile import NamedTemporaryFile, TemporaryDirectory
-from time import time
+from time import monotonic, time
 from typing import Awaitable, Callable, Literal, TypeVar, cast, overload
 
 import textual_image.renderable
@@ -1505,23 +1505,48 @@ class PreviewContainer(Actionable, PDFMixin, BatMixin, Container):
 
         width, height = settings["size"]
         utils.check_cancel()
-        try:
-            result = subprocess.run(
-                [settings["ffmpeg_path"], "-v", "error", "-nostdin", "-ss", str(position)]
-                + ["-i", source, "-map", "0:v:0", "-frames:v", "1", "-vf"]
-                + [f"scale={width}:{height}:force_original_aspect_ratio=decrease", "-c:v"]
-                + ["png", "-f", "image2pipe", "pipe:1"],
-                capture_output=True,
-                timeout=15,
-                check=True,
-            )
-            with Image.open(BytesIO(result.stdout)) as frame:
-                image = frame.copy()
-        except (OSError, ValueError, subprocess.SubprocessError) as exc:
-            utils.check_cancel()
-            self._current_content = f"Cannot preview video: {exc}"
-            self.mount_special_messages()
-            return
+        with contextlib.ExitStack() as stack:
+            try:
+                stdout = stack.enter_context(NamedTemporaryFile(suffix=".png"))
+                stderr = stack.enter_context(NamedTemporaryFile(suffix=".log"))
+                proc = subprocess.Popen(
+                    [settings["ffmpeg_path"], "-v", "error", "-nostdin"]
+                    + ["-ss", str(position), "-i", source]
+                    + ["-map", "0:v:0", "-frames:v", "1", "-vf"]
+                    + [f"scale={width}:{height}:force_original_aspect_ratio=decrease"]
+                    + ["-c:v", "png", "-f", "image2pipe", "pipe:1"],
+                    stdout=stdout,
+                    stderr=stderr,
+                )
+                seek_read = lambda obj: (obj.seek(0), obj.read())[0]
+                timeout, start = 15, monotonic()
+                while proc.poll() is None:
+                    if monotonic() - start > timeout or utils.check_cancel(False):
+                        out, err = seek_read(stdout), seek_read(stderr)
+                        proc.kill()
+                        raise subprocess.TimeoutExpired(proc.args, timeout, out, err)
+                    with contextlib.suppress(subprocess.TimeoutExpired):
+                        # perfectly reasonable to do this because wait can exit
+                        # unlike sleep, so we can check for cancel
+                        proc.wait(timeout=0.5)
+                proc.communicate()
+                if proc.returncode != 0:
+                    out, err = seek_read(stdout), seek_read(stderr)
+                    raise subprocess.CalledProcessError(
+                        proc.returncode, proc.args, output=out, stderr=err
+                    )
+                stdout.seek(0)
+                image = stack.enter_context(Image.open(stdout)).copy()
+            except (
+                OSError,
+                ValueError,
+                subprocess.SubprocessError,
+                subprocess.TimeoutExpired,
+            ) as exc:
+                utils.check_cancel()
+                self._current_content = f"Cannot preview video:\n{exc!r}"
+                self.mount_special_messages()
+                return
 
         if widget := self.get_child(".image_preview"):
             self.call_from_thread(setattr, widget, "image", image)

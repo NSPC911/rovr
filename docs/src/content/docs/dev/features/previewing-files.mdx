@@ -105,7 +105,7 @@ default = "previewer_name"
 extensions = { "ext1" = "previewer_name1", "ext2" = "previewer_name2" }
 ```
 
-## custom previewers
+## Custom previewers
 
 You can also create your own previewers for any file type.
 
@@ -191,18 +191,36 @@ Paste the following script somewhere accessible and add it to your config.toml a
 
 <Tabs>
   <TabItem label="bash/zsh">
-    <Code
-      code={`#!/usr/bin/env bash\nset -e\n\nto_preview=$1\noutfile=$2\nwrite_to=$(dirname "$outfile")\npdf="$write_to/$(basename "${to_preview%.*}").pdf"\nif ! libreoffice --headless --convert-to pdf "$to_preview" --outdir "$write_to"; then\n    exit $?\nfi\nmv -f -- "$pdf" "$outfile"`}
-      lang="bash"
-      frame="code"
-    />
+
+```bash
+#!/usr/bin/env bash
+set -e
+to_preview=$1
+outfile=$2
+write_to=$(dirname "$outfile")
+pdf="$write_to/$(basename "${to_preview%.*}").pdf"
+if ! libreoffice --headless --convert-to pdf "$to_preview" --outdir "$write_to"; then
+    exit 1
+fi
+mv -f -- "$pdf" "$outfile"
+```
+
   </TabItem>
   <TabItem label="powershell">
-    <Code
-      code={`param(\n    [Parameter(Mandatory = $true)][string]$ToPreview,\n    [Parameter(Mandatory = $true)][string]$Outfile\n)\n$writeTo = Split-Path -Parent $Outfile\nif (-not $writeTo) { $writeTo = '.' }\n& libreoffice --headless --convert-to pdf $ToPreview --outdir $writeTo 2>&1\nif ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }\n$pdf = Join-Path $writeTo (([IO.Path]::GetFileNameWithoutExtension($ToPreview)) + '.pdf')\nMove-Item -LiteralPath $pdf -Destination $Outfile -Force`}
-      lang="powershell"
-      frame="code"
-    />
+
+```powershell
+param(
+    [Parameter(Mandatory = $true)][string]$ToPreview,
+    [Parameter(Mandatory = $true)][string]$Outfile
+)
+$writeTo = Split-Path -Parent $Outfile
+if (-not $writeTo) { $writeTo = '.' }
+& libreoffice --headless --convert-to pdf $ToPreview --outdir $writeTo 2>&1
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+$pdf = Join-Path $writeTo (([IO.Path]::GetFileNameWithoutExtension($ToPreview)) + '.pdf')
+Move-Item -LiteralPath $pdf -Destination $Outfile -Force
+```
+
   </TabItem>
 </Tabs>
 Then add the following to your config.toml:

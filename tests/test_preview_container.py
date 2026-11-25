@@ -52,17 +52,22 @@ async def test_video_seek_frames(tmp_path: Path) -> None:
     Image.new("RGB", (160, 90)).save(png, format="PNG")
     positions = []
 
-    def run(command: list[str], **kwargs: Any) -> subprocess.CompletedProcess[bytes]:
-        if "-ss" not in command:
-            return subprocess.CompletedProcess(command, 0, b"11.5")
+    def popen(command: list[str], **kwargs: Any) -> Mock:
         assert command[command.index("-frames:v") + 1] == "1"
         positions.append(int(command[command.index("-ss") + 1]))
-        return subprocess.CompletedProcess(command, 0, png.getvalue())
+        kwargs["stdout"].write(png.getvalue())
+        process = Mock(returncode=0)
+        process.poll.return_value = 0
+        process.communicate.return_value = (None, None)
+        return process
 
     async with PreviewTestApp().run_test() as pilot:
         preview = pilot.app.query_one(PreviewContainer)
         with (
-            patch("subprocess.run", side_effect=run),
+            patch(
+                "subprocess.run", return_value=subprocess.CompletedProcess([], 0, b"11.5")
+            ),
+            patch("subprocess.Popen", side_effect=popen),
             patch(
                 "rovr.functions.preview_utils.get_mime_type",
                 return_value=MimeResult("basic", "video/mp4"),

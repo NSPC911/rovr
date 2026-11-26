@@ -467,7 +467,10 @@ async def test_unzip_button_extracts_archive(tmp_path: Path) -> None:
     app = Application(startup_path=tmp_path.as_posix())
     async with app.run_test(size=(143, 37)) as pilot:
         await pilot.pause(0.5)
-        await iter_until(pilot, lambda: not app.query_one(UnzipButton).disabled)
+        # only app's worker (which is the background thread) should be running
+        await iter_until(
+            pilot, lambda: not any(worker.node is not app for worker in app.workers)
+        )
         await pilot.click(UnzipButton)
         await iter_until(pilot, lambda: isinstance(app.screen, ModalInput))
         assert isinstance(app.screen, ModalInput)

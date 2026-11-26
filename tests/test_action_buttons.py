@@ -272,7 +272,7 @@ def test_bulk_creator_uses_cwd_snapshot_and_updates_progress(tmp_path: Path) -> 
         object(), entries, cwd.as_posix(), bar
     )
 
-    assert first_created == (cwd / entries[0]).as_posix()
+    assert first_created == str(cwd / entries[0])
     assert not errors
     assert (cwd / entries[0]).is_file()
     assert absolute.is_file()
@@ -466,7 +466,7 @@ async def test_unzip_button_extracts_archive(tmp_path: Path) -> None:
         zf.writestr("dummy.txt", "hello")
     app = Application(startup_path=tmp_path.as_posix())
     async with app.run_test(size=(143, 37)) as pilot:
-        await pilot.pause()
+        await pilot.pause(0.5)
         await iter_until(pilot, lambda: not app.query_one(UnzipButton).disabled)
         await pilot.click(UnzipButton)
         await iter_until(pilot, lambda: isinstance(app.screen, ModalInput))

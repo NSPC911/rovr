@@ -659,7 +659,7 @@ class DragAndDrop:
             etc = sdata - (files | online)
             etc_schemes = set(urlparse(uri).scheme for uri in etc)
             if files:
-                dropped_paths = sorted(Path.from_uri(uri).as_posix() for uri in files)
+                dropped_paths = sorted(str(Path.from_uri(uri)) for uri in files)
                 if drop_to_pins:
                     available_pins = pin_utils.pins or pin_utils.load_pins()
                     existing_pins = {

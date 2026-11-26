@@ -204,6 +204,9 @@ r""" Default value of the field path 'Rovr Config metadata filesize_decimals' ""
 _ROVR_CONFIG_METADATA_FILESIZE_SUFFIX_DEFAULT = "decimal"
 r""" Default value of the field path 'Rovr Config metadata filesize_suffix' """
 
+_ROVR_CONFIG_PLUGINS_BAT_CHUNK_SIZE_DEFAULT = 384
+r""" Default value of the field path 'Rovr Config plugins bat chunk_size' """
+
 _ROVR_CONFIG_PLUGINS_BAT_ENABLED_DEFAULT = False
 r""" Default value of the field path 'Rovr Config plugins bat enabled' """
 
@@ -1386,6 +1389,15 @@ class _RovrConfigPluginsBat(TypedDict, total=False):
     The executable for bat.
 
     default: bat
+    """
+
+    chunk_size: int
+    r"""
+    The number of lines to read from a file at a time when previewing with bat
+    Smaller != faster, larger != slower. You need to adjust based on your system.
+
+    default: 384
+    minimum: 1
     """
 
 class _RovrConfigPluginsFd(TypedDict, total=False):

@@ -9,15 +9,16 @@ from typing import cast
 from textual import events, work
 from textual.content import Content
 from textual.widgets import Button
-from textual.worker import Worker, WorkerCancelled, WorkerError
+from textual.worker import WorkerCancelled, WorkerError, WorkerFailed
 
 import rovr.screens as screens
 from rovr.classes.textual_validators import IsValidFilePath, PathNoLongerExists
+from rovr.classes.type_aliases import Command, RaiseNow
 from rovr.footer.process_container import ProcessContainer, ProgressBarContainer
 from rovr.functions.cwd import getcwd
 from rovr.functions.icons import get_icon
-from rovr.functions.path import dump_exc, normalise
-from rovr.functions.utils import command, dump_on_exc, run_command, s
+from rovr.functions.path import PATH_SEPARATORS, dump_exc, normalise
+from rovr.functions.utils import command, dump_on_exc, s
 from rovr.variables.constants import config
 
 
@@ -44,7 +45,7 @@ class NewItemButton(Button):
         response = await self.app.push_screen(
             screens.ModalInput(
                 border_title="Create New Item",
-                border_subtitle="End with a slash (/) to create a directory",
+                border_subtitle=f"End with {path.sep} to create a directory",
                 is_path=True,
                 validators=[PathNoLongerExists(), IsValidFilePath()],
             ),
@@ -53,10 +54,8 @@ class NewItemButton(Button):
         if not response:
             return
         response = str(response)
-        location = normalise(path.join(getcwd(), response)) + (
-            "/" if response.endswith("/") or response.endswith("\\") else ""
-        )
-        if location.endswith("/"):
+        location = normalise(getcwd(), response)
+        if response.endswith(PATH_SEPARATORS):
             # recursive directory creation
             try:
                 makedirs(location)
@@ -75,38 +74,10 @@ class NewItemButton(Button):
                     severity="error",
                     markup=False,
                 )
-        elif len(location.split("/")) > 1:
-            # recursive directory until file creation
-            location_parts = location.split("/")
-            dir_path = "/".join(location_parts[:-1])
-            try:
-                makedirs(dir_path)
-                # performance wise shouldn't be that bad, unless
-                # the file is being created in a directory with a very long path
-                # or some weird voodoo stuff happens, idk
-                with open(location, "w") as f:
-                    f.write("")  # Create an empty file
-            except FileExistsError:
-                with open(location, "w") as f:
-                    f.write("")
-            except Exception as exc:
-                # i had to force a cast, i didn't have any other choice
-                # notify supports non-string objects, but ty wasn't taking
-                # any of it, so i had to cast it
-                self.notify(
-                    message=cast(
-                        str,
-                        Content(
-                            f"Error creating file '{response}'\n{type(exc).__name__}: {exc}"
-                        ),
-                    ),
-                    title="New Item",
-                    severity="error",
-                    markup=False,
-                )
         else:
-            # normal file creation I hope
             try:
+                if dir_path := path.dirname(location):
+                    makedirs(dir_path, exist_ok=True)
                 with open(location, "w") as f:
                     f.write("")  # Create an empty file
             except Exception as exc:
@@ -118,11 +89,10 @@ class NewItemButton(Button):
                 )
         with self.app.file_list.pause_checks(), dump_on_exc(self):
             self.app.file_list.focus()
-            worker: Worker = self.app.file_list.update_file_list(
-                add_to_session=False, focus_on=path.basename(location.rstrip("/"))
-            )
             with contextlib.suppress(WorkerError):
-                await worker.wait()
+                await self.app.file_list.update_file_list(
+                    add_to_session=False, focus_on=path.basename(location)
+                ).wait()
 
     @work
     async def action_bulk_create(self) -> None:
@@ -135,37 +105,35 @@ class NewItemButton(Button):
 
         bulk_editor = config["settings"]["editor"]["bulk_editor"]
 
-        def on_error(message: str, title: str) -> None:
-            self.notify(message, title=title, severity="error", markup=False)
-
         try:
-            run_command(
-                self.app,
-                command(bulk_editor["run"], temp_path),
-                run_type="suspend",
+            await self.app.run_command(
+                Command(command(bulk_editor["run"], temp_path), "suspend"),
                 shell=bulk_editor["shell"],
-                on_error=on_error,
-            )
-        except FileNotFoundError:
-            self.notify(
-                f"Editor '{bulk_editor['run']}' not found. Check your config.",
-                title="Editor not found",
-                severity="error",
-                markup=False,
-            )
+                title="Bulk Create",
+                on_error=RaiseNow,
+            ).wait()
+            with open(temp_path, encoding="utf-8") as file_handle:
+                entries = [stripped for line in file_handle if (stripped := line.strip())]
+        except WorkerFailed as exc:
+            if isinstance(exc.error, FileNotFoundError):
+                self.notify(
+                    f"Editor '{bulk_editor['run']}' not found. Check your config.",
+                    title="Bulk Create",
+                    severity="error",
+                    markup=False,
+                )
+            else:
+                dump_exc(self, exc.error)
+                self.notify(
+                    f"{type(exc.error).__name__}: {exc.error}",
+                    title="Bulk Create",
+                    severity="error",
+                    markup=False,
+                )
             return
-        except Exception as exc:
-            dump_exc(self, exc)
-            self.notify(
-                f"{type(exc).__name__}: {exc}",
-                title="Error launching editor",
-                severity="error",
-                markup=False,
-            )
-            return
-
-        with open(temp_path, encoding="utf-8") as file_handle:
-            entries = [stripped for line in file_handle if (stripped := line.strip())]
+        finally:
+            with contextlib.suppress(OSError):
+                os.unlink(temp_path)
 
         if not entries:
             self.notify(
@@ -202,12 +170,11 @@ class NewItemButton(Button):
         if first_created:
             with self.app.file_list.pause_checks(), dump_on_exc(self):
                 self.app.file_list.focus()
-                focus_on = path.basename(first_created.rstrip("/"))
-                worker: Worker = self.app.file_list.update_file_list(
-                    add_to_session=False, focus_on=focus_on
-                )
+                focus_on = path.basename(first_created)
                 with contextlib.suppress(WorkerError):
-                    await worker.wait()
+                    await self.app.file_list.update_file_list(
+                        add_to_session=False, focus_on=focus_on
+                    ).wait()
 
         if errors:
             self.notify(
@@ -224,8 +191,6 @@ class NewItemButton(Button):
                 severity="information",
                 markup=False,
             )
-        with contextlib.suppress(OSError):
-            os.unlink(temp_path)
 
     @work(thread=True)
     def _bulk_creator(
@@ -237,10 +202,8 @@ class NewItemButton(Button):
         flags = os.O_CREAT | os.O_EXCL | os.O_WRONLY
         for entry in entries:
             bar.set_text(entry)
-            is_dir = entry.endswith(("/", "\\"))
-            location = normalise(entry if path.isabs(entry) else path.join(cwd, entry))
-            if is_dir:
-                location = location + "/"
+            is_dir = entry.endswith(PATH_SEPARATORS)
+            location = normalise(cwd, entry)
             try:
                 if is_dir:
                     makedirs(location, exist_ok=False)

@@ -15,7 +15,12 @@ preview_loc = os.path.realpath(os.path.join(RovrVars.ROVRTEMP, "previews"))
 
 
 def in_preview_loc(path_str: str) -> bool:
-    return os.path.commonpath([os.path.realpath(path_str), preview_loc]) == preview_loc
+    try:
+        return (
+            os.path.commonpath([os.path.realpath(path_str), preview_loc]) == preview_loc
+        )
+    except ValueError:
+        return False
 
 
 def _cache_path(

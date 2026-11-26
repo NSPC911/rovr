@@ -7,7 +7,7 @@ from typing import NotRequired, TypedDict, cast
 from rovr.functions.utils import dump_on_exc
 from rovr.variables.maps import RovrVars
 
-from .path import normalise
+from .path import PATH_SEPARATORS, normalise
 
 pins = {}
 raw_pins = {}
@@ -152,8 +152,17 @@ def load_pins() -> PinsDict:
                 for var in vars(RovrVars):
                     if var.startswith(("__", "ROVR")):
                         continue
-                    item["path"] = item["path"].replace(f"${var}", getattr(RovrVars, var))
-                # Normalize to forward slashes
+                    token = f"${var}"
+                    base = getattr(RovrVars, var)
+                    if item["path"].startswith(
+                        tuple(token + sep for sep in PATH_SEPARATORS)
+                    ):
+                        suffix = item["path"][len(token) :].lstrip(
+                            "".join(PATH_SEPARATORS)
+                        )
+                        item["path"] = path.join(base, suffix)
+                    else:
+                        item["path"] = item["path"].replace(token, base)
                 item["path"] = normalise(str(item["path"]))
     pins = _pins
     return _pins

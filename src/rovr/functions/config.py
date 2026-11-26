@@ -446,7 +446,7 @@ def schema_dump(
                 to_print.add_row(message)
                 to_print.add_row(f"[dim]> {item['extra']}[/]")
                 if "regex" in item and doc_path != path.join(
-                    path.dirname(__file__), "../config/config.toml"
+                    path.dirname(__file__), "..", "config", "config.toml"
                 ):
                     # bird migration
                     import re
@@ -480,8 +480,8 @@ def _config_dir() -> str:
 
         config_dir: str = vars(RovrVars).get("ROVRCONFIG", None) or user_config_dir(
             "rovr", "."
-        ).replace("\\", "/")
-    return config_dir
+        )
+    return path.normpath(config_dir)
 
 
 def load_config() -> tuple[dict, RovrConfig]:
@@ -508,7 +508,7 @@ def load_config() -> tuple[dict, RovrConfig]:
             traverser.joinpath("config.toml").read_text("utf-8")
         )
     except tomli.TOMLDecodeError as exc:
-        toml_dump(path.join(path.dirname(__file__), "../config/config.toml"), exc)
+        toml_dump(path.join(path.dirname(__file__), "..", "config", "config.toml"), exc)
 
     schema_dict, schema = get_schema_validator()
 
@@ -555,7 +555,7 @@ def load_config() -> tuple[dict, RovrConfig]:
             schema(template_config)
         except JsonSchemaValueException as template_exception:
             schema_dump(
-                path.join(path.dirname(__file__), "../config/config.toml"),
+                path.join(path.dirname(__file__), "..", "config", "config.toml"),
                 template_exception,
                 traverser.joinpath("config.toml").read_text("utf-8"),
                 schema_dict,

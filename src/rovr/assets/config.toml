@@ -321,6 +321,7 @@ show_scores = false
 [plugins.bat]
 enabled = false
 executable = "bat"
+chunk_size = 384
 
 [plugins.ffmpeg]
 enabled = true

@@ -1,3 +1,4 @@
+import asyncio
 import os
 import sys
 from os import path
@@ -5,7 +6,7 @@ from pathlib import Path
 from typing import ClassVar, Generator, cast
 
 from rich.text import Text
-from textual import events
+from textual import events, work
 from textual.binding import Binding, BindingType
 from textual.css.query import NoMatches
 from textual.validation import Function
@@ -17,7 +18,7 @@ from rovr.classes.textual_options import PathDropdownItem
 from rovr.classes.textual_validators import ControlHighlighter
 from rovr.functions.cwd import getcwd
 from rovr.functions.icons import get_icon
-from rovr.functions.path import is_hidden_file
+from rovr.functions.path import PATH_SEPARATORS, is_hidden_file
 from rovr.functions.utils import check_key
 from rovr.variables.constants import config
 
@@ -68,10 +69,22 @@ def should_exclude_hidden(path_str: str) -> bool:
     return not tail.startswith(".")
 
 
+def _list_directory_candidates(ppath: Path, path_str: str) -> list[DropdownItem]:
+    parent = ppath if ppath.is_dir() else ppath.parent
+    items: list[DropdownItem] = []
+    should_filter = should_exclude_hidden(path_str)
+    for entry in get_subdirectories(parent):
+        if should_filter and is_hidden_file(entry):
+            continue
+        items.append(PathDropdownItem(f"{entry.name}{path.sep}", entry.path))
+    items.sort(key=lambda x: x.path.lower())
+    return items
+
+
 def _unix_get_candidates(path_str: str) -> list[DropdownItem]:
     # Case 1: nothing
     if not path_str:
-        return [PathDropdownItem("/", "/")]
+        return [PathDropdownItem(path.sep, path.sep)]
 
     # Reject relative paths - must be absolute
     if not path.isabs(path_str):
@@ -90,25 +103,13 @@ def _unix_get_candidates(path_str: str) -> list[DropdownItem]:
     # User typed path of a particular folder already (but without the trailing "/")
     if (
         not path_str.endswith(".")
-        and not path_str.endswith("/")
+        and not path_str.endswith(path.sep)
         and ppath.exists()
         and ppath.is_dir()
     ):
-        return [PathDropdownItem(f"{ppath.name}/", str(ppath))]
+        return [PathDropdownItem(f"{ppath.name}{path.sep}", str(ppath))]
 
-    # Case 3: list contents of parent
-    # - User typed a directory path with trailing "/" -> show subdirectories
-    # - User typed a partial directory path (like "/home/user/.local/sh")
-    #   -> we determine the parent ("~/.local") then show subdirectories ("share")
-    parent = ppath if ppath.is_dir() else ppath.parent
-    items: list[DropdownItem] = []
-    should_filter = should_exclude_hidden(path_str)
-    for entry in get_subdirectories(parent):
-        if should_filter and is_hidden_file(entry):
-            continue
-        items.append(PathDropdownItem(f"{entry.name}/", entry.path))
-    items.sort(key=lambda x: x.path.lower())
-    return items
+    return _list_directory_candidates(ppath, path_str)
 
 
 def _win_get_candidates(path_str: str) -> list[DropdownItem]:
@@ -125,11 +126,18 @@ def _win_get_candidates(path_str: str) -> list[DropdownItem]:
         A list of DropdownItem suggestions, or an empty list when no
         candidates are available.
     """
+    unc = path_str.replace("/", "\\")
+    if unc.startswith("\\\\"):
+        host, _, rest = unc[2:].partition("\\")
+        share, separator, _ = rest.partition("\\")
+        if not (host and share and separator):
+            return []
+
     # Case 1: Empty string - return available drives
     if not path_str:
         drives = []
         for letter in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
-            drive = f"{letter}:/"
+            drive = f"{letter}:{path.sep}"
             if path.exists(drive):
                 drives.append(PathDropdownItem(drive, drive))
         return drives
@@ -139,41 +147,25 @@ def _win_get_candidates(path_str: str) -> list[DropdownItem]:
         if len(path_str) == 2 and path_str[1] != ":":
             return []  # invalid format
         drive_letter = path_str[0].upper()
-        drive = f"{drive_letter}:/"
+        drive = f"{drive_letter}:{path.sep}"
         if path.exists(drive):
             return [PathDropdownItem(drive, drive)]
         return []
 
-    # Reject relative paths - must be absolute (has drive letter)
+    # Reject relative paths; both drive and UNC paths can be absolute.
     if not path.isabs(path_str):
         return []
 
-    ppath = Path(path_str).expanduser().resolve()
     if path_str.endswith(".."):
         return []
+    ppath = Path(path_str)
 
     # Case 3: exact directory match
     # User typed path of a particular folder already (but without the trailing "\")
-    if (
-        not path_str.endswith(".")
-        and not path_str.endswith(("\\", "/"))
-        and ppath.exists()
-        and ppath.is_dir()
-    ):
-        return [PathDropdownItem(f"{ppath.name}{os.path.sep}", str(ppath))]
+    if ppath.name and not path_str.endswith((".", *PATH_SEPARATORS)) and ppath.is_dir():
+        return [PathDropdownItem(f"{ppath.name}{path.sep}", str(ppath))]
 
-    # Case 4: list contents of parent
-    # - Path ends with "/" -> show subdirectories
-    # - Partial path like "C:\Users\Admin\Doc" -> parent is "C:\Users\Admin"
-    parent = ppath if ppath.exists() else ppath.parent
-    items: list[DropdownItem] = []
-    should_filter = should_exclude_hidden(path_str)
-    for entry in get_subdirectories(parent):
-        if should_filter and is_hidden_file(entry):
-            continue
-        items.append(PathDropdownItem(f"{entry.name}\\", entry.path))
-    items.sort(key=lambda x: x.path.lower())
-    return items
+    return _list_directory_candidates(ppath, path_str)
 
 
 class PathAutoCompleteInput(PathAutoComplete):
@@ -185,7 +177,7 @@ class PathAutoCompleteInput(PathAutoComplete):
         """
         super().__init__(
             target=target,
-            path=getcwd().split(path.sep)[0],
+            path=Path(getcwd()).anchor,
             id="path_autocomplete",
             sort_key=lambda item: item.lower(),
         )
@@ -193,6 +185,7 @@ class PathAutoCompleteInput(PathAutoComplete):
         self.folder_prefix = " " + get_icon("folder", "default")[0] + " "
         self.file_prefix = " " + get_icon("file", "default")[0] + " "
         self._target: Input = target
+        self._scanning_unc = False
         assert isinstance(self._target, Input)
 
     def _get_target_state(self) -> TargetState:
@@ -212,7 +205,7 @@ class PathAutoCompleteInput(PathAutoComplete):
             return super().get_search_string(target_state)
 
         current_input = target_state.text[: target_state.cursor_position]
-        separator_index = max(current_input.rfind("/"), current_input.rfind("\\"))
+        separator_index = max(current_input.rfind(sep) for sep in PATH_SEPARATORS)
         return current_input[separator_index + 1 :]
 
     def apply_completion(self, value: str, state: TargetState) -> None:
@@ -221,14 +214,14 @@ class PathAutoCompleteInput(PathAutoComplete):
             return
 
         current_input = state.text[: state.cursor_position]
-        separator_index = max(current_input.rfind("/"), current_input.rfind("\\"))
+        separator_index = max(current_input.rfind(sep) for sep in PATH_SEPARATORS)
         path_prefix = current_input[: separator_index + 1]
         with self.prevent(Input.Changed):
             self.target.value = path_prefix + value
             self.target.cursor_position = len(self.target.value)
 
     def post_completion(self) -> None:
-        if not self.target.value.endswith(("/", os.sep)):
+        if not self.target.value.endswith(PATH_SEPARATORS):
             self.action_hide()
 
     def _compute_matches(
@@ -248,6 +241,12 @@ class PathAutoCompleteInput(PathAutoComplete):
         """
         option_list = self.option_list
         if self.target.has_focus:
+            if _is_unc(target_state.text):
+                option_list.clear_options()
+                if not self._scanning_unc:
+                    self._scanning_unc = True
+                    self._scan_unc(target_state)
+                return
             matches = self._compute_matches(target_state, search_string)
             if matches:
                 option_list.set_options(matches)
@@ -255,6 +254,27 @@ class PathAutoCompleteInput(PathAutoComplete):
             elif matches == []:
                 option_list.clear_options()
                 option_list.highlighted = None
+
+    @work
+    async def _scan_unc(self, state: TargetState) -> None:
+        try:
+            while self.target.has_focus and _is_unc(state.text):
+                candidates = await asyncio.to_thread(_win_get_candidates, state.text)
+                latest = self._get_target_state()
+                if latest.text != state.text:
+                    state = latest
+                    continue
+                if self.target.has_focus and candidates:
+                    matches = self.get_matches(
+                        latest, candidates, self.get_search_string(latest)
+                    )
+                    if matches:
+                        self.option_list.set_options(matches)
+                        self.option_list.highlighted = None
+                        self.action_show()
+                break
+        finally:
+            self._scanning_unc = False
 
     def _listen_to_messages(self, event: events.Event) -> None:
         """Listen to some events of the target widget."""
@@ -391,6 +411,10 @@ class PathAutoCompleteInput(PathAutoComplete):
         self.post_completion()
 
 
+def _is_unc(value: str) -> bool:
+    return sys.platform == "win32" and value[:2].replace("/", "\\") == "\\\\"
+
+
 class PathInput(Actionable, Input, inherit_bindings=False):
     key_contexts = ("path_input", "inputs")
     ALLOW_MAXIMIZE = False
@@ -451,15 +475,17 @@ class PathInput(Actionable, Input, inherit_bindings=False):
             id="path_switcher",
             validators=[
                 Function(lambda x: path.isabs(x), "Path must be absolute"),
-                Function(lambda x: path.exists(x), "Path does not exist"),
+                Function(lambda x: _is_unc(x) or path.exists(x), "Path does not exist"),
             ],
             validate_on=["changed"],
             select_on_focus=False,
         )
+        self.cursor_blink = False
         self.ACTIONS: list[Action] = [
             Action(self.action_delete_left, "backspace"),
             Action(self.app.file_list.focus, "escape"),
         ]
+        self.focus_event: events.Focus | None = None
 
     def on_mount(self) -> None:
         self.auto_completer = self.app.query_one(PathAutoCompleteInput)
@@ -468,8 +494,23 @@ class PathInput(Actionable, Input, inherit_bindings=False):
         """Use a custom path entered as the current working directory"""
         if not path.isabs(event.value):
             self.notify("Path must be absolute.", severity="error")
+        elif _is_unc(event.value):
+            self._submit_unc(event.value)
+            return
         elif path.exists(event.value) and event.value != "":
             self.app.cd(event.value, clear_search=True)
+        else:
+            self.notify("Path provided is not valid.", severity="error")
+        self.app.file_list.focus()
+
+    @work(exclusive=True)
+    async def _submit_unc(self, value: str) -> None:
+        event = self.focus_event
+        exists = await asyncio.to_thread(path.exists, value)
+        if event == self.focus_event and (self.value != value or not self.has_focus):
+            return
+        if exists:
+            self.app.cd(value, clear_search=True)
         else:
             self.notify("Path provided is not valid.", severity="error")
         self.app.file_list.focus()
@@ -494,7 +535,8 @@ class PathInput(Actionable, Input, inherit_bindings=False):
     def on_blur(self) -> None:
         self.auto_completer.action_hide()
 
-    def on_focus(self) -> None:
+    def on_focus(self, event: events.Focus) -> None:
+        self.focus_event = event
         self.app.call_after_refresh(
             self.auto_completer._listen_to_messages, Input.Changed(self, self.value)
         )

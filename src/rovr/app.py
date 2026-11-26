@@ -7,9 +7,9 @@ import threading
 from contextlib import suppress
 from io import TextIOWrapper
 from os import path
-from subprocess import Popen, TimeoutExpired
+from subprocess import CompletedProcess, Popen, TimeoutExpired
 from time import monotonic
-from typing import Callable, Iterable
+from typing import Any, Callable, Iterable
 
 from rich.console import RenderableType
 from rich.protocol import is_renderable
@@ -54,7 +54,7 @@ from rovr.action_buttons.sort_order import SortOrderButton
 from rovr.classes.app_mixins import DragAndDrop, KeyHandler, ThemeHandler
 from rovr.classes.mixins import Action, Actionable
 from rovr.classes.theme import RovrStylesheet
-from rovr.classes.type_aliases import KeysConfig, ShellRunTypes
+from rovr.classes.type_aliases import Command, KeysConfig, RaiseNow, ShellRunTypes
 from rovr.components.popup_option_list import PopupOptionList
 from rovr.core import (
     FileList,
@@ -233,7 +233,7 @@ class Application(
         self._pinned_sidebar_container = PinnedSidebarContainer()
         # shutdown event for bg thread
         self._shutdown_event = threading.Event()
-        self._background_processes: set[Popen] = set()
+        self._background_processes: set[Popen[str | bytes]] = set()
         # cannot use self.clipboard, reserved for Textual's clipboard
         self.Clipboard = Clipboard()
         if startup_path is None:
@@ -483,50 +483,84 @@ class Application(
             event.prevent_default()
             await self._on_key(event)
 
-    def on_shell_exec_response(
-        self, response: screens.ShellExec.ReturnType | None, shell: bool = True
-    ) -> None:
+    @work(thread=True, group="run_command", exit_on_error=False)
+    def run_command(
+        self,
+        response: Command | None,
+        shell: bool = True,
+        title: str | None = "Shell Command",
+        on_error: Callable[[Exception], Any] | type[RaiseNow] | None = None,
+    ) -> int | None:
         if response is None or response.command == "":
-            return
+            return None
 
-        proc = run_command(
-            self, response.command, run_type=response.run_type, shell=shell
-        )
-        if response.run_type == "background":
-            self.shell_thread(proc, "Shell Exec")
-
-    @work(thread=True)
-    def shell_thread(self, proc: Popen, title: str = "") -> None:
-        self._background_processes.add(proc)
         try:
-            while True:
+            proc = run_command(
+                self, response.command, run_type=response.run_type, shell=shell
+            )
+            if isinstance(proc, Popen) and response.run_type == "background":
+                self._background_processes.add(proc)
                 try:
-                    stdout_bytes, stderr_bytes = proc.communicate(timeout=0.2)
-                    break
-                except TimeoutExpired:
-                    if should_cancel() or self._shutdown_event.is_set():
-                        self._stop_background_process(proc)
-                        return
-        finally:
-            self._background_processes.discard(proc)
-        if should_cancel() or self._shutdown_event.is_set():
-            return
-        stdout = stdout_bytes.decode().strip()
-        stderr = stderr_bytes.decode().strip()
-        if stdout and stderr:
-            msg = f"stdout = {stdout}\nstderr = {stderr}\n"
-        elif stdout and not stderr:
-            msg = str(stdout)
-        elif not stdout and stderr:
-            msg = str(stderr)
-        else:
-            msg = f"Process completed with code {proc.returncode}"
-        self.notify(
-            msg.strip(),
-            title=title,
-            severity="information" if proc.returncode == 0 else "error",
-            markup=False,
-        )
+                    while True:
+                        try:
+                            stdout_bytes, stderr_bytes = proc.communicate(timeout=0.2)
+                            break
+                        except TimeoutExpired:
+                            if should_cancel() or self._shutdown_event.is_set():
+                                self._stop_background_process(proc)
+                                return None
+                finally:
+                    self._background_processes.discard(proc)
+                if should_cancel() or self._shutdown_event.is_set():
+                    return None
+                if title is None:
+                    return proc.returncode
+                stdout: str = stdout_bytes.decode().strip()
+                stderr: str = stderr_bytes.decode().strip()
+                if stdout and stderr:
+                    msg = f"stdout = {stdout}\nstderr = {stderr}\n"
+                elif stdout and not stderr:
+                    msg = str(stdout)
+                elif not stdout and stderr:
+                    msg = str(stderr)
+                else:
+                    msg = f"Process completed with code {proc.returncode}"
+            elif isinstance(proc, CompletedProcess):
+                if title is None:
+                    return proc.returncode
+                stdout: str = proc.stdout.strip() if proc.stdout else ""
+                stderr: str = proc.stderr.strip() if proc.stderr else ""
+                if stdout and stderr:
+                    msg = f"stdout = {stdout}\nstderr = {stderr}\n"
+                elif stdout and not stderr:
+                    msg = str(stdout)
+                elif not stdout and stderr:
+                    msg = str(stderr)
+                else:
+                    msg = f"Process completed with code {proc.returncode}"
+            else:
+                return None
+            self.notify(
+                msg.strip(),
+                title=title,
+                severity="information" if proc.returncode == 0 else "error",
+                markup=False,
+            )
+            return proc.returncode
+        except Exception as exc:
+            if isinstance(on_error, type) and issubclass(on_error, RaiseNow):
+                raise exc
+            elif on_error is not None:
+                on_error(exc)
+            else:
+                self.notify(
+                    f"{type(exc).__name__}: {exc}\ncmd: {response.command}",
+                    title=title or "",
+                    severity="error",
+                    markup=False,
+                )
+            dump_exc(self, exc)
+            return None
 
     def on_app_blur(self) -> None:
         self.app_blurred = True
@@ -1295,7 +1329,7 @@ class Application(
     def action_show_shell_screen(self) -> None:
         self.push_screen(
             screens.ShellExec(),
-            callback=lambda response: self.on_shell_exec_response(response),
+            callback=lambda response: self.run_command(response),
         )
 
     def action_print_dom(self) -> None:
@@ -1322,10 +1356,8 @@ class Application(
                 severity="error",
             )
         else:
-            self.on_shell_exec_response(
-                screens.ShellExec.ReturnType(
-                    command=await expand_command(self, command), run_type=run_type
-                ),
+            self.run_command(
+                Command(command=await expand_command(self, command), run_type=run_type),
                 shell=False,
             )
 
@@ -1346,11 +1378,8 @@ class Application(
                 severity="error",
             )
         else:
-            self.on_shell_exec_response(
-                screens.ShellExec.ReturnType(
-                    command=await expand_command(self, command),
-                    run_type=run_type,
-                ),
+            self.run_command(
+                Command(command=await expand_command(self, command), run_type=run_type),
                 shell=True,
             )
 

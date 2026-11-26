@@ -1,5 +1,20 @@
 import os
-from typing import Callable, Literal, NotRequired, TypeAlias, TypedDict
+from typing import Callable, Literal, NamedTuple, NotRequired, TypeAlias, TypedDict
+
+KeyMap: TypeAlias = "dict[str, KeyBinding | KeyMap | str]"
+
+
+SortByOptions: TypeAlias = Literal[
+    "name", "size", "modified", "created", "extension", "natural"
+]
+
+ShellRunTypes: TypeAlias = Literal["suspend", "background", "orphan"]
+
+KeysConfig: TypeAlias = dict[str, KeyMap]
+
+type CacheSource = tuple[str, os.stat_result, tuple[str, str]]
+
+CallableNone: TypeAlias = Callable[[], None]
 
 
 class BarPanicDismissible(TypedDict):
@@ -17,17 +32,9 @@ class KeyBinding(TypedDict):
     desc: NotRequired[str]
 
 
-KeyMap: TypeAlias = "dict[str, KeyBinding | KeyMap | str]"
+class Command(NamedTuple):
+    command: str | list[str]
+    run_type: ShellRunTypes
 
 
-SortByOptions: TypeAlias = Literal[
-    "name", "size", "modified", "created", "extension", "natural"
-]
-
-ShellRunTypes: TypeAlias = Literal["suspend", "background", "orphan"]
-
-KeysConfig: TypeAlias = dict[str, KeyMap]
-
-type CacheSource = tuple[str, os.stat_result, tuple[str, str]]
-
-CallableNone: TypeAlias = Callable[[], None]
+class RaiseNow(object): ...

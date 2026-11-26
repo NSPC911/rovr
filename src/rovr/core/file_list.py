@@ -29,6 +29,7 @@ from rovr.classes.mixins import (
 )
 from rovr.classes.session_manager import SessionManager, SessionOptionDict
 from rovr.classes.textual_options import FileListSelectionWidget
+from rovr.classes.type_aliases import Command
 from rovr.functions import details as detail_utils
 from rovr.functions import path as path_utils
 from rovr.functions import pins as pin_utils
@@ -555,7 +556,7 @@ class FileList(
                 self.select_mode = False
             # session handler
             self.app.query_one("#path_switcher", PathInput).value = cwd + (
-                "" if cwd.endswith("/") else "/"
+                "" if cwd.endswith(path.sep) else path.sep
             )
             if add_to_session:
                 if session.lastHighlighted.get(cwd) is None and isinstance(
@@ -617,7 +618,7 @@ class FileList(
             else:
                 self.scroll_to_highlight()
             self.app.tabWidget.active_tab.label = (
-                path.basename(cwd) if path.basename(cwd) != "" else cwd.strip("/")
+                path.basename(cwd) or cwd.rstrip(path.sep) or cwd
             )
             self.app.tabWidget.active_tab.directory = cwd
             self.app.tabWidget.parent.on_resize()
@@ -657,37 +658,21 @@ class FileList(
         if config["settings"]["editor"].get("open_all_in_editor", False):
             editor_config = config["settings"]["editor"]["file"]
 
-            def on_error(message: str, title: str) -> None:
-                self.notify(message, title=title, severity="error", markup=False)
-
-            try:
-                if isinstance(editor_config["run"], str):
-                    cmd = (
-                        editor_config["run"]
-                        + " "
-                        + " ".join(oslex.quote(p) for p in paths)
-                    )
-                else:
-                    cmd = editor_config["run"] + paths
-                utils.run_command(
-                    self.app,
+            if isinstance(editor_config["run"], str):
+                cmd = editor_config["run"] + " " + " ".join(oslex.quote(p) for p in paths)
+            else:
+                cmd = editor_config["run"] + paths
+            await self.app.run_command(
+                Command(
                     cmd,
                     run_type="orphan" if editor_config.get("orphan", True) else "suspend",
-                    on_error=on_error,
-                    shell=editor_config["shell"],
-                )
-            except Exception as exc:
-                path_utils.dump_exc(self, exc)
-                self.notify(
-                    f"{type(exc).__name__}: {exc}",
-                    title="Error launching editor",
-                    severity="error",
-                    markup=False,
-                )
+                ),
+                shell=editor_config["shell"],
+            ).wait()
             return
 
         for target in paths:
-            path_utils.run_opener(self.app, path_utils.normalise(target))
+            await path_utils.run_opener(self.app, path_utils.normalise(target))
 
     @work(exclusive=True, group="selectedHandler")
     async def on_selection_list_selected_changed(
@@ -724,7 +709,7 @@ class FileList(
                 return
             # before opening, check whether the basedir is cwd
             full_path = selected_option.dir_entry.path
-            if path.dirname(full_path) != cwd:
+            if full_path != path.join(cwd, file_name):
                 return
             if path.isdir(full_path):
                 self.app.cd(full_path, clear_search=True)
@@ -1252,24 +1237,14 @@ class FileList(
             else:
                 editor_config = config["settings"]["editor"]["file"]
 
-            try:
-                utils.run_command(
-                    self.app,
+            self.app.run_command(
+                Command(
                     utils.command(editor_config["run"], target_path),
                     run_type="orphan" if editor_config.get("orphan", True) else "suspend",
-                    on_error=lambda message, title: self.notify(
-                        message=message, title=title, severity="error", markup=False
-                    ),
-                    shell=editor_config["shell"],
-                )
-            except Exception as exc:
-                path_utils.dump_exc(self, exc)
-                self.notify(
-                    f"{type(exc).__name__}: {exc}",
-                    title="Error launching editor",
-                    severity="error",
-                    markup=False,
-                )
+                ),
+                shell=editor_config["shell"],
+                title="Editor",
+            )
 
     async def action_open_right_click_menu(
         self, event: events.Click | None = None

@@ -4,6 +4,7 @@ from asyncio import sleep
 from importlib import resources
 from importlib.metadata import PackageNotFoundError, version
 from io import BytesIO
+from pathlib import Path
 from shutil import which
 from typing import Callable
 from urllib import error, request
@@ -156,8 +157,8 @@ class AskWrite(ModalScreen[bool]):
             yield Static("Write config and keys to disk?")
             yield Static(
                 "The following content will be written to "
-                f"[u]{os.path.realpath(f'{RovrVars.ROVRCONFIG}/config.toml')}[/] and "
-                f"[u]{os.path.realpath(f'{RovrVars.ROVRCONFIG}/keys.toml')}[/]:"
+                f"[u]{os.path.join(RovrVars.ROVRCONFIG, 'config.toml')}[/] and "
+                f"[u]{os.path.join(RovrVars.ROVRCONFIG, 'keys.toml')}[/]:"
             )
             yield Static(classes="padding")
             with ScrollableContainer():
@@ -477,11 +478,10 @@ enabled = {str(self.query_one("#plugins-magick Switch", Switch).value).lower()}
 """
         # trust me it loads properly
         if await self.push_screen_wait(AskWrite(config_toml, keys_toml)):
-            os.makedirs(RovrVars.ROVRCONFIG, exist_ok=True)
-            with open(f"{RovrVars.ROVRCONFIG}/config.toml", "w", encoding="utf-8") as f:
-                f.write(config_toml)
-            with open(f"{RovrVars.ROVRCONFIG}/keys.toml", "w", encoding="utf-8") as f:
-                f.write(keys_toml)
+            config_dir = Path(RovrVars.ROVRCONFIG)
+            config_dir.mkdir(parents=True, exist_ok=True)
+            (config_dir / "config.toml").write_text(config_toml, encoding="utf-8")
+            (config_dir / "keys.toml").write_text(keys_toml, encoding="utf-8")
             await self.push_screen_wait(FinalStuff())
 
     @work(exclusive=True)

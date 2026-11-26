@@ -6,12 +6,23 @@ from textual_autocomplete import TargetState
 
 from rovr.navigation_widgets.path_input import (
     PathAutoCompleteInput,
+    _win_get_candidates,
     should_exclude_hidden,
 )
 
 
 def test_should_exclude_hidden_empty() -> None:
     assert not should_exclude_hidden("")
+
+
+@pytest.mark.parametrize("prefix", [r"\\w", "//wsl.localhost/", r"\\wsl.localhost\Fed"])
+def test_partial_unc_never_probes_filesystem(
+    prefix: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(
+        "pathlib.Path.is_dir", lambda *_: pytest.fail("probed UNC prefix")
+    )
+    assert _win_get_candidates(prefix) == []
 
 
 def test_should_exclude_hidden_dot_terminal() -> None:

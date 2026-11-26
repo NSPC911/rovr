@@ -34,7 +34,10 @@ def test_load_pins_no_file_returns_defaults() -> None:
     assert result["pins"] == []
 
 
-def test_load_pins_valid_file_expands_home_variable() -> None:
+def test_load_pins_valid_file_expands_home_variable(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    monkeypatch.setattr(RovrVars, "HOME", tmp_path.anchor)
     pin_file = Path(pins_module.PIN_PATH)
     data = {
         "default": [{"name": "Home", "path": "$HOME"}],
@@ -46,7 +49,7 @@ def test_load_pins_valid_file_expands_home_variable() -> None:
 
     home = RovrVars.HOME
     assert result["default"][0]["path"] == home
-    assert result["pins"][0]["path"] == f"{home}/mydir"
+    assert result["pins"][0]["path"] == str(Path(home) / "mydir")
 
 
 def test_load_pins_corrupt_json_falls_back_to_defaults() -> None:
@@ -63,7 +66,7 @@ def test_add_pin_appears_in_pins_and_persisted(tmp_path: Path) -> None:
     load_pins()
     target = tmp_path / "project"
     target.mkdir()
-    target = target.as_posix()
+    target = str(target)
 
     add_pin("Project", target)
 
@@ -76,7 +79,7 @@ def test_remove_pin_is_gone_from_pins(tmp_path: Path) -> None:
     load_pins()
     target = tmp_path / "to-remove"
     target.mkdir()
-    target = target.as_posix()
+    target = str(target)
 
     add_pin("ToRemove", target)
     assert any(p.get("path") == target for p in pins_module.pins["pins"])
@@ -90,7 +93,7 @@ def test_toggle_pin_adds_when_absent(tmp_path: Path) -> None:
     load_pins()
     target = tmp_path / "new-pin"
     target.mkdir()
-    target = target.as_posix()
+    target = str(target)
 
     assert not any(p.get("path") == target for p in pins_module.pins.get("pins", []))
 
@@ -103,7 +106,7 @@ def test_toggle_pin_removes_when_present(tmp_path: Path) -> None:
     load_pins()
     target = tmp_path / "existing-pin"
     target.mkdir()
-    target = target.as_posix()
+    target = str(target)
 
     add_pin("Existing", target)
     assert any(p.get("path") == target for p in pins_module.pins["pins"])

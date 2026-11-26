@@ -355,3 +355,10 @@ sl-sidebar-state-persist > ul ul li {
 :is(th, td):not(:last-child) {
   border-inline-end: 1px solid var(--sl-color-hairline-light);
 }
+
+kbd {
+  background: var(--sl-color-bg-inline-code);
+  padding: 0.125rem 0.375rem;
+  font-size: var(--sl-text-code-sm);
+  box-shadow: 0 2px 3px #0007;
+}

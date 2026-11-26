@@ -9,7 +9,6 @@ import sys
 from contextlib import suppress
 from functools import lru_cache, partial
 from os import path
-from subprocess import CompletedProcess
 from typing import Any, Callable, Literal, TypedDict, overload
 
 import oslex
@@ -23,16 +22,32 @@ from rovr.classes.config import (
     _RightClickIf,
     _RovrConfigSettingsOpenersGroupsAdditionalpropertiesItemOneof1If,
 )
-from rovr.classes.type_aliases import (
-    SortByOptions,
-)
+from rovr.classes.type_aliases import Command, RaiseNow, SortByOptions
 from rovr.variables.constants import log_name
 from rovr.variables.maps import CONTROL_PICTURES
 
 from .drive_workers import normalise
 from .icons import get_icon_for_file, get_icon_for_folder
 
+PATH_SEPARATORS = (path.sep, path.altsep) if path.altsep else (path.sep,)
 natsort_compiled = re.compile(r"(\d+)")
+
+
+def sanitize_path_input(value: str) -> str:
+    from pathvalidate import sanitize_filename, sanitize_filepath
+
+    if altsep := path.altsep:
+        value = value.replace(altsep, path.sep)
+        sanitized = sanitize_filepath(value, platform="auto")
+        if value.endswith(path.sep) and not sanitized.endswith(path.sep):
+            sanitized += path.sep
+        return sanitized
+
+    # pathvalidate's filepath sanitizer treats backslashes as separators on POSIX too.
+    return path.sep.join(
+        sanitize_filename(part, platform="auto") if part not in ("", ".", "..") else part
+        for part in value.split(path.sep)
+    )
 
 
 @lru_cache(maxsize=2048)
@@ -468,7 +483,7 @@ def get_recursive_files(
                     FileObj(
                         path=full_path,
                         relative_loc=normalise(
-                            path.relpath(full_path, object_path + "/..")
+                            path.relpath(full_path, path.join(object_path, ".."))
                         ),
                     )
                 )
@@ -639,12 +654,10 @@ def ifed(
     return disabled
 
 
-def run_opener(app: App, target_path: str) -> None:
+async def run_opener(app: App, target_path: str) -> None:
     from fnmatch import fnmatch
 
     from rovr.variables.constants import config
-
-    from . import utils
 
     groups = config["settings"].get("openers", {}).get("groups", {})
     matches = config["settings"].get("openers", {}).get("match", {})
@@ -679,24 +692,23 @@ def run_opener(app: App, target_path: str) -> None:
                         to_run = runner + " " + oslex.quote(target_path)
                     else:
                         to_run = runner + [target_path]
-
+                run_type = (
+                    ("orphan" if opener.get("orphan", True) else "suspend")
+                    if isinstance(opener, dict)
+                    else "orphan"
+                )
                 try:
-                    proc = utils.run_command(
-                        app,
-                        to_run,
-                        run_type=("orphan" if opener.get("orphan", True) else "suspend")
-                        if isinstance(opener, dict)
-                        else "orphan",
+                    returncode = await app.run_command(
+                        Command(to_run, run_type),
                         shell=opener.get("shell", True)
                         if isinstance(opener, dict)
                         else True,
-                    )
+                        title=None,
+                        on_error=RaiseNow,
+                    ).wait()
                 except Exception:
                     continue
-                if isinstance(proc, CompletedProcess):
-                    if proc.returncode == 0:
-                        return
-                else:
+                if returncode in (None, 0):
                     return
     open_file(app, target_path)
 

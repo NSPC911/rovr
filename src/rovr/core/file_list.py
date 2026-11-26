@@ -709,7 +709,7 @@ class FileList(
                 return
             # before opening, check whether the basedir is cwd
             full_path = selected_option.dir_entry.path
-            if path.dirname(full_path) != cwd:
+            if full_path != path.join(cwd, file_name):
                 return
             if path.isdir(full_path):
                 self.app.cd(full_path, clear_search=True)

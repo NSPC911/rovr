@@ -60,7 +60,7 @@ VALID_KEY_CONTEXTS = frozenset({
 
 
 class RovrVars:
-    ROVRCONFIG = path.normpath(environ.get("ROVR_CONFIG_FOLDER") or dirs.user_config_dir)
+    ROVRCONFIG = path.realpath(environ.get("ROVR_CONFIG_FOLDER") or dirs.user_config_dir)
     ROVRTHEMES = path.join(ROVRCONFIG, "themes")
     ROVRSTATE = (
         path.join(path.expanduser("~"), ".local", "state", "rovr")

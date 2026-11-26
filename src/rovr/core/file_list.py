@@ -556,7 +556,7 @@ class FileList(
                 self.select_mode = False
             # session handler
             self.app.query_one("#path_switcher", PathInput).value = cwd + (
-                "" if cwd.endswith("/") else "/"
+                "" if cwd.endswith(path.sep) else path.sep
             )
             if add_to_session:
                 if session.lastHighlighted.get(cwd) is None and isinstance(
@@ -618,7 +618,7 @@ class FileList(
             else:
                 self.scroll_to_highlight()
             self.app.tabWidget.active_tab.label = (
-                path.basename(cwd) if path.basename(cwd) != "" else cwd.strip("/")
+                path.basename(cwd) or cwd.rstrip(path.sep) or cwd
             )
             self.app.tabWidget.active_tab.directory = cwd
             self.app.tabWidget.parent.on_resize()
@@ -709,7 +709,7 @@ class FileList(
                 return
             # before opening, check whether the basedir is cwd
             full_path = selected_option.dir_entry.path
-            if path.dirname(full_path) != cwd:
+            if full_path != path.join(cwd, file_name):
                 return
             if path.isdir(full_path):
                 self.app.cd(full_path, clear_search=True)

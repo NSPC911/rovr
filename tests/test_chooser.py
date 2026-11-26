@@ -34,7 +34,7 @@ async def test_chooser_open_writes_highlighted_file(tmp_path: Path) -> None:
         await pilot.press("enter")
         await pilot.pause()
 
-    assert chooser_file.read_text(encoding="utf-8") == selected_file.as_posix()
+    assert chooser_file.read_text(encoding="utf-8") == str(selected_file)
 
 
 @pytest.mark.asyncio
@@ -54,6 +54,6 @@ async def test_chooser_open_writes_visual_selection(tmp_path: Path) -> None:
         await pilot.pause()
 
     assert chooser_file.read_text(encoding="utf-8").splitlines() == [
-        selected_files[0].as_posix(),
-        selected_files[2].as_posix(),
+        str(selected_files[0]),
+        str(selected_files[2]),
     ]

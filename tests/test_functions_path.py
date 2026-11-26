@@ -11,7 +11,7 @@ from rovr.functions import path as path_utils
 
 def test_normalise() -> None:
     the_path = os.getcwd()
-    assert path_utils.normalise(the_path) == Path(the_path).as_posix()
+    assert path_utils.normalise(the_path) == str(Path(the_path))
     with pytest.raises(ValueError):
         path_utils.normalise()
 

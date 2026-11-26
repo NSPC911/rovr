@@ -34,9 +34,11 @@ def test_is_valid_file_path_absolute_paths() -> None:
     if os.name == "nt":  # Windows
         assert validator.validate("C:\\Users\\test\\valid_file.txt").is_valid
         assert validator.validate("C:/Users/test/valid_file.txt").is_valid
+        assert validator.validate(r"\\wsl.localhost\FedoraLinux-45\home\nspc911").is_valid
     else:  # Unix-like
         assert validator.validate("/tmp/valid_file.txt").is_valid
         assert validator.validate("/home/user/valid_file.txt").is_valid
+        assert validator.validate(r"/tmp/file\name").is_valid
 
     # Test invalid absolute paths
     if os.name == "nt":

@@ -11,6 +11,7 @@ import zipfile
 from contextlib import closing
 from functools import partial
 from os import path
+from pathlib import PurePath
 from tempfile import TemporaryDirectory
 from threading import get_ident
 from typing import Any, Callable, Literal, TypeVar
@@ -213,17 +214,11 @@ class ProgressBarContainer(VerticalGroup, inherit_bindings=False):
         self._last_text_update = now
 
         if is_path:
-            label = path_utils.control(label)
             if config["interface"]["truncate_progress_file_path"]:
-                new_label = label.split("/")
-                if len(new_label) == 1:
-                    self.text_label.update(label)
-                    return
-                new_path = new_label[0]
-                for p in new_label[1:-1]:
-                    if p:
-                        new_path += f"/{p[0]}"
-                label = new_path + f"/{new_label[-1]}"
+                parts = PurePath(label).parts
+                if len(parts) > 1:
+                    label = path.join(parts[0], *(p[0] for p in parts[1:-1]), parts[-1])
+            label = path_utils.control(label)
 
         self.call_safe(self.text_label.update, label)
 

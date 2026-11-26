@@ -36,11 +36,11 @@ async def test_navigation_preserves_directory_symlink(tmp_path: Path) -> None:
     async with app.run_test(size=(143, 37)) as pilot:
         await iter_until(pilot, lambda: app.tabWidget.active_tab is not None)
 
-        assert getcwd() == link.as_posix()
-        assert app.tabWidget.active_tab.directory == link.as_posix()
+        assert getcwd() == str(link)
+        assert app.tabWidget.active_tab.directory == str(link)
 
         await pilot.click("UpButton")
-        await iter_until(pilot, lambda: getcwd() == tmp_path.as_posix())
+        await iter_until(pilot, lambda: getcwd() == str(tmp_path))
 
 
 @pytest.mark.asyncio
@@ -54,9 +54,9 @@ async def test_dir_returns_last_known(tmp_path: Path) -> None:
     target = tmp_path / "target" / "nested" / "dir"
     target.mkdir(parents=True, exist_ok=True)
     chdir(target.as_posix())
-    assert getcwd() == target.as_posix()
+    assert getcwd() == str(target)
     shutil.rmtree(tmp_path / "target")
-    assert getcwd() == target.as_posix()
+    assert getcwd() == str(target)
     with pytest.raises(FileNotFoundError):
         os.getcwd()
 
@@ -98,7 +98,7 @@ async def test_multiple_startup_paths_open_tabs(tmp_path: Path) -> None:
 
         assert len(app.tabWidget.query(TablineTab)) == 2
         assert isinstance(app.tabWidget.active_tab, TablineTab)
-        assert app.tabWidget.active_tab.directory == first.as_posix()
+        assert app.tabWidget.active_tab.directory == str(first)
         assert Path.cwd() == first
 
 

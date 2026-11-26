@@ -1,3 +1,5 @@
+import ntpath
+import posixpath
 from pathlib import Path
 from typing import cast
 from unittest.mock import MagicMock
@@ -22,6 +24,7 @@ def test_get_mounted_drives_filters_non_directory_posix_mounts(
     on POSIX-like systems.
     """
     # Mix of directory and non-directory mountpoints
+    monkeypatch.setattr(drive_workers, "path", posixpath)
     monkeypatch.setattr(
         drive_workers,
         "_get_posix_drives",
@@ -47,6 +50,7 @@ def test_get_mounted_drives_filters_non_directory_linux_mounts(
     Ensure get_mounted_drives filters out mountpoints that are not directories
     on Linux.
     """
+    monkeypatch.setattr(drive_workers, "path", posixpath)
     monkeypatch.setattr(
         drive_workers,
         "_get_linux_drives",
@@ -64,8 +68,20 @@ def test_get_mounted_drives_filters_non_directory_linux_mounts(
     assert drives == ["/", "/media/usb", "/proc"]
 
 
-def test_normalise_joins_and_fixes_slashes() -> None:
-    assert drive_workers.normalise("/foo", "bar") == "/foo/bar"
+def test_normalise_preserves_unc_paths(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(drive_workers, "path", ntpath)
+    root = r"\\wsl.localhost\FedoraLinux-45"
+    expected = root + r"\home\nspc911"
+    assert drive_workers.normalise(expected) == expected
+    assert (
+        drive_workers.normalise("//wsl.localhost/FedoraLinux-45/home/nspc911") == expected
+    )
+    assert drive_workers.normalise(root, "home", "other", "..", b"nspc911") == expected
+
+
+def test_normalise_preserves_posix_backslashes(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(drive_workers, "path", posixpath)
+    assert drive_workers.normalise("//foo", r"bar\baz") == r"//foo/bar\baz"
 
 
 def test_normalise_no_args_raises() -> None:
@@ -123,6 +139,7 @@ def test_get_posix_drives_filters_non_device_mounts(
 def test_get_mounted_drives_applies_exclude_patterns(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    monkeypatch.setattr(drive_workers, "path", posixpath)
     monkeypatch.setattr(drive_workers, "_get_posix_drives", lambda: ["/", "/mnt/usb"])
     monkeypatch.setattr(drive_workers.path, "isdir", lambda p: True)
 
@@ -148,6 +165,7 @@ def test_get_mounted_drives_falls_back_on_exception(
 def test_get_mounted_drives_linux_falls_back_to_posix_on_oserror(
     monkeypatch: pytest.MonkeyPatch, config: RovrConfig
 ) -> None:
+    monkeypatch.setattr(drive_workers, "path", posixpath)
     monkeypatch.setattr(
         drive_workers,
         "_get_linux_drives",

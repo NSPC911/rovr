@@ -51,7 +51,7 @@ def load_folder_prefs() -> dict[str, FolderPrefDict]:
                     if var.startswith(("__", "ROVR")):
                         continue
                     folder_path = folder_path.replace(f"${var}", getattr(RovrVars, var))
-                expanded[folder_path] = cast(FolderPrefDict, pref)
+                expanded[normalise(folder_path)] = cast(FolderPrefDict, pref)
 
         folder_prefs = expanded
     except (IOError, ValueError, json.JSONDecodeError):

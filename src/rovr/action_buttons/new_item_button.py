@@ -17,7 +17,7 @@ from rovr.classes.type_aliases import Command, RaiseNow
 from rovr.footer.process_container import ProcessContainer, ProgressBarContainer
 from rovr.functions.cwd import getcwd
 from rovr.functions.icons import get_icon
-from rovr.functions.path import dump_exc, normalise
+from rovr.functions.path import PATH_SEPARATORS, dump_exc, normalise
 from rovr.functions.utils import command, dump_on_exc, s
 from rovr.variables.constants import config
 
@@ -45,7 +45,7 @@ class NewItemButton(Button):
         response = await self.app.push_screen(
             screens.ModalInput(
                 border_title="Create New Item",
-                border_subtitle="End with a slash (/) to create a directory",
+                border_subtitle=f"End with {path.sep} to create a directory",
                 is_path=True,
                 validators=[PathNoLongerExists(), IsValidFilePath()],
             ),
@@ -54,10 +54,8 @@ class NewItemButton(Button):
         if not response:
             return
         response = str(response)
-        location = normalise(path.join(getcwd(), response)) + (
-            "/" if response.endswith("/") or response.endswith("\\") else ""
-        )
-        if location.endswith("/"):
+        location = normalise(getcwd(), response)
+        if response.endswith(PATH_SEPARATORS):
             # recursive directory creation
             try:
                 makedirs(location)
@@ -76,38 +74,10 @@ class NewItemButton(Button):
                     severity="error",
                     markup=False,
                 )
-        elif len(location.split("/")) > 1:
-            # recursive directory until file creation
-            location_parts = location.split("/")
-            dir_path = "/".join(location_parts[:-1])
-            try:
-                makedirs(dir_path)
-                # performance wise shouldn't be that bad, unless
-                # the file is being created in a directory with a very long path
-                # or some weird voodoo stuff happens, idk
-                with open(location, "w") as f:
-                    f.write("")  # Create an empty file
-            except FileExistsError:
-                with open(location, "w") as f:
-                    f.write("")
-            except Exception as exc:
-                # i had to force a cast, i didn't have any other choice
-                # notify supports non-string objects, but ty wasn't taking
-                # any of it, so i had to cast it
-                self.notify(
-                    message=cast(
-                        str,
-                        Content(
-                            f"Error creating file '{response}'\n{type(exc).__name__}: {exc}"
-                        ),
-                    ),
-                    title="New Item",
-                    severity="error",
-                    markup=False,
-                )
         else:
-            # normal file creation I hope
             try:
+                if dir_path := path.dirname(location):
+                    makedirs(dir_path, exist_ok=True)
                 with open(location, "w") as f:
                     f.write("")  # Create an empty file
             except Exception as exc:
@@ -121,7 +91,7 @@ class NewItemButton(Button):
             self.app.file_list.focus()
             with contextlib.suppress(WorkerError):
                 await self.app.file_list.update_file_list(
-                    add_to_session=False, focus_on=path.basename(location.rstrip("/"))
+                    add_to_session=False, focus_on=path.basename(location)
                 ).wait()
 
     @work
@@ -200,7 +170,7 @@ class NewItemButton(Button):
         if first_created:
             with self.app.file_list.pause_checks(), dump_on_exc(self):
                 self.app.file_list.focus()
-                focus_on = path.basename(first_created.rstrip("/"))
+                focus_on = path.basename(first_created)
                 with contextlib.suppress(WorkerError):
                     await self.app.file_list.update_file_list(
                         add_to_session=False, focus_on=focus_on
@@ -232,10 +202,8 @@ class NewItemButton(Button):
         flags = os.O_CREAT | os.O_EXCL | os.O_WRONLY
         for entry in entries:
             bar.set_text(entry)
-            is_dir = entry.endswith(("/", "\\"))
-            location = normalise(entry if path.isabs(entry) else path.join(cwd, entry))
-            if is_dir:
-                location = location + "/"
+            is_dir = entry.endswith(PATH_SEPARATORS)
+            location = normalise(cwd, entry)
             try:
                 if is_dir:
                     makedirs(location, exist_ok=False)

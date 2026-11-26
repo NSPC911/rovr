@@ -6098,10 +6098,11 @@ Must be one of:
 | **Required**              | No          |
 | **Additional properties** | Not allowed |
 
-| Property                              | Type    | Title/Description                           |
-| ------------------------------------- | ------- | ------------------------------------------- |
-| [enabled](#plugins_bat_enabled)       | boolean | Enable or disable bat for previewing files. |
-| [executable](#plugins_bat_executable) | string  | The executable for bat.                     |
+| Property                              | Type    | Title/Description                                                                                                                                             |
+| ------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [enabled](#plugins_bat_enabled)       | boolean | Enable or disable bat for previewing files.                                                                                                                   |
+| [executable](#plugins_bat_executable) | string  | The executable for bat.                                                                                                                                       |
+| [chunk_size](#plugins_bat_chunk_size) | integer | The number of lines to read from a file at a time when previewing with bat<br />Smaller != faster, larger != slower. You need to adjust based on your system. |
 
 #### <a name="plugins_bat_enabled"></a>7.2.1. Property `Rovr Config > plugins > bat > enabled`
 
@@ -6122,6 +6123,21 @@ Must be one of:
 | **Default**  | `"bat"`  |
 
 **Description:** The executable for bat.
+
+#### <a name="plugins_bat_chunk_size"></a>7.2.3. Property `Rovr Config > plugins > bat > chunk_size`
+
+|              |           |
+| ------------ | --------- |
+| **Type**     | `integer` |
+| **Required** | No        |
+| **Default**  | `384`     |
+
+**Description:** The number of lines to read from a file at a time when previewing with bat
+Smaller != faster, larger != slower. You need to adjust based on your system.
+
+| Restrictions |        |
+| ------------ | ------ |
+| **Minimum**  | &ge; 1 |
 
 ### <a name="plugins_fd"></a>7.3. Property `Rovr Config > plugins > fd`
 

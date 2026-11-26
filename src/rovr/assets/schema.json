@@ -1611,6 +1611,12 @@
               "type": "string",
               "default": "bat",
               "description": "The executable for bat."
+            },
+            "chunk_size": {
+              "type": "integer",
+              "default": 384,
+              "minimum": 1,
+              "description": "The number of lines to read from a file at a time when previewing with bat\nSmaller != faster, larger != slower. You need to adjust based on your system."
             }
           }
         },

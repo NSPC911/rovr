@@ -9,7 +9,6 @@ import sys
 from contextlib import suppress
 from functools import lru_cache, partial
 from os import path
-from subprocess import CompletedProcess
 from typing import Any, Callable, Literal, TypedDict, overload
 
 import oslex
@@ -23,9 +22,7 @@ from rovr.classes.config import (
     _RightClickIf,
     _RovrConfigSettingsOpenersGroupsAdditionalpropertiesItemOneof1If,
 )
-from rovr.classes.type_aliases import (
-    SortByOptions,
-)
+from rovr.classes.type_aliases import Command, RaiseNow, SortByOptions
 from rovr.variables.constants import log_name
 from rovr.variables.maps import CONTROL_PICTURES
 
@@ -657,12 +654,10 @@ def ifed(
     return disabled
 
 
-def run_opener(app: App, target_path: str) -> None:
+async def run_opener(app: App, target_path: str) -> None:
     from fnmatch import fnmatch
 
     from rovr.variables.constants import config
-
-    from . import utils
 
     groups = config["settings"].get("openers", {}).get("groups", {})
     matches = config["settings"].get("openers", {}).get("match", {})
@@ -697,24 +692,23 @@ def run_opener(app: App, target_path: str) -> None:
                         to_run = runner + " " + oslex.quote(target_path)
                     else:
                         to_run = runner + [target_path]
-
+                run_type = (
+                    ("orphan" if opener.get("orphan", True) else "suspend")
+                    if isinstance(opener, dict)
+                    else "orphan"
+                )
                 try:
-                    proc = utils.run_command(
-                        app,
-                        to_run,
-                        run_type=("orphan" if opener.get("orphan", True) else "suspend")
-                        if isinstance(opener, dict)
-                        else "orphan",
+                    returncode = await app.run_command(
+                        Command(to_run, run_type),
                         shell=opener.get("shell", True)
                         if isinstance(opener, dict)
                         else True,
-                    )
+                        title=None,
+                        on_error=RaiseNow,
+                    ).wait()
                 except Exception:
                     continue
-                if isinstance(proc, CompletedProcess):
-                    if proc.returncode == 0:
-                        return
-                else:
+                if returncode in (None, 0):
                     return
     open_file(app, target_path)
 

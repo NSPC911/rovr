@@ -1011,6 +1011,7 @@ class PreviewContainer(Actionable, PDFMixin, BatMixin, Container):
                     if content is None:
                         try:
                             with Archive(file_path, mode="r") as archive:
+                                self.set_border("title", titles.archive)
                                 all_files = []
                                 for member in archive.infolist():
                                     utils.check_cancel()

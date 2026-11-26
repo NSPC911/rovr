@@ -21,7 +21,7 @@ from rovr.functions.ansi import ansi_to_rich_text
 from rovr.functions.path import dump_exc
 from rovr.variables.constants import (
     BAT_PREVIEW_CACHE_VERSION,
-    BAT_PREVIEW_PAGE_SIZE,
+    BAT_PREVIEW_CHUNK_SIZE,
     BAT_PREVIEWER_GROUP,
     PREVIEWER_GROUP,
     config,
@@ -318,8 +318,8 @@ class BatMixin:
         sig: tuple[str, str],
         page: int,
     ) -> list[Text]:
-        start = page * BAT_PREVIEW_PAGE_SIZE + 1
-        end = start + BAT_PREVIEW_PAGE_SIZE - 1
+        start = page * BAT_PREVIEW_CHUNK_SIZE + 1
+        end = start + BAT_PREVIEW_CHUNK_SIZE - 1
         cache_range = f"{start}:{end}"
         content = cache._load_text(realpath, "bat-page", stat_res, sig, cache_range)
         if content is None:
@@ -371,7 +371,7 @@ class BatMixin:
                 source,
                 page,
                 [Text(f"bat: {exc}", style="red")]
-                + [Text()] * (BAT_PREVIEW_PAGE_SIZE - 1),
+                + [Text()] * (BAT_PREVIEW_CHUNK_SIZE - 1),
             )
         finally:
             self.preview_token.reset(context_token)
@@ -486,10 +486,10 @@ class BatMixin:
                     group=BAT_PREVIEWER_GROUP,
                 )
 
-            first_page_is_complete = len(first_page) < BAT_PREVIEW_PAGE_SIZE
+            first_page_is_complete = len(first_page) < BAT_PREVIEW_CHUNK_SIZE
             source = LazyTextLines(
-                len(first_page) if first_page_is_complete else BAT_PREVIEW_PAGE_SIZE,
-                BAT_PREVIEW_PAGE_SIZE,
+                len(first_page) if first_page_is_complete else BAT_PREVIEW_CHUNK_SIZE,
+                BAT_PREVIEW_CHUNK_SIZE,
                 request_page,
             )
             source.set_page(0, first_page)

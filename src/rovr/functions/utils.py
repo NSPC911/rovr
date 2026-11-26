@@ -2,6 +2,7 @@ import os
 import re
 import subprocess
 from contextlib import AbstractContextManager, contextmanager, suppress
+from sys import platform
 from typing import (
     Any,
     Callable,
@@ -182,6 +183,26 @@ def get_shortcut(
     return least_len[1]
 
 
+@overload
+def run_command(
+    app: App,
+    command: str | list[str],
+    run_type: Literal["orphan", "background"],
+    shell: bool = True,
+    on_error: Callable[[str, str], None] | None = None,
+) -> subprocess.Popen: ...
+
+
+@overload
+def run_command(
+    app: App,
+    command: str | list[str],
+    run_type: Literal["suspend"],
+    shell: bool = True,
+    on_error: Callable[[str, str], None] | None = None,
+) -> subprocess.CompletedProcess: ...
+
+
 def run_command(
     app: App,
     command: str | list[str],
@@ -201,28 +222,25 @@ def run_command(
         app.log(command)
 
     match run_type:
+        case "orphan" if platform == "win32":
+            return subprocess.Popen(
+                command,
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                creationflags=subprocess.CREATE_NEW_PROCESS_GROUP
+                | subprocess.DETACHED_PROCESS,
+                shell=shell,
+            )
         case "orphan":
-            import sys
-
-            if sys.platform == "win32":
-                return subprocess.Popen(
-                    command,
-                    stdin=subprocess.DEVNULL,
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL,
-                    creationflags=subprocess.CREATE_NEW_PROCESS_GROUP
-                    | subprocess.DETACHED_PROCESS,
-                    shell=shell,
-                )
-            else:
-                return subprocess.Popen(
-                    command,
-                    stdin=subprocess.DEVNULL,
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL,
-                    start_new_session=True,
-                    shell=shell,
-                )
+            return subprocess.Popen(
+                command,
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                start_new_session=True,
+                shell=shell,
+            )
         case "background":
             return subprocess.Popen(
                 command,
@@ -235,7 +253,11 @@ def run_command(
 
             def func() -> subprocess.CompletedProcess:
                 with app.suspend():
-                    return subprocess.run(command, shell=shell)
+                    try:
+                        return subprocess.run(command, shell=shell)
+                    except Exception as e:
+                        exc = e
+                raise exc
 
             try:
                 process = app.call_from_thread(func)
@@ -244,10 +266,6 @@ def run_command(
             if process.returncode != 0 and on_error:
                 on_error(f"Error Code {process.returncode}", "Editor Error")
             return process
-        case _:
-            from typing import assert_never
-
-            assert_never(run_type)
 
 
 def dismiss(

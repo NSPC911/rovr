@@ -1,8 +1,10 @@
 from pathlib import Path
+from subprocess import CompletedProcess
 from unittest.mock import AsyncMock
 
 import pytest
 
+import rovr.app
 from rovr.action_buttons import rename_item_button
 from rovr.action_buttons.rename_item_button import RenameItemButton
 from rovr.app import Application
@@ -75,16 +77,17 @@ async def test_bulk_rename_with_no_visible_files(
     for name in ("apple", "banana"):
         (tmp_path / name).write_text(name)
 
-    def edit_names(app: Application, filename: str, **kwargs: object) -> None:
-        names = Path(filename)
+    def edit_names(app: Application, command: str, **kwargs: object) -> CompletedProcess:
+        names = Path(command)
         lines = names.read_text(encoding="utf-8").splitlines()
         assert [line.split("➔")[-1].strip() for line in lines] == ["apple", "banana"]
         names.write_text(
             "\n".join(line.rstrip() + "-new" for line in lines), encoding="utf-8"
         )
+        return CompletedProcess(command, 0)
 
     monkeypatch.setattr(rename_item_button, "command", lambda editor, filename: filename)
-    monkeypatch.setattr(rename_item_button, "run_command", edit_names)
+    monkeypatch.setattr(rovr.app, "run_command", edit_names)
     app = Application(startup_path=tmp_path.as_posix())
     async with app.run_test(size=(143, 37)) as pilot:
         await iter_until(pilot, lambda: app.file_list.option_count == 2)

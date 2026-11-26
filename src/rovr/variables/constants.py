@@ -156,6 +156,6 @@ def RESAMPLING_METHOD() -> int:  # noqa: N802
 PREVIEWER_GROUP = "previewers"
 TEXT_PREVIEW_CACHE_VERSION = "windowed-v2"
 BAT_PREVIEW_CACHE_VERSION = "paged-v3"
-BAT_PREVIEW_PAGE_SIZE = 256
+BAT_PREVIEW_CHUNK_SIZE = config["plugins"]["bat"]["chunk_size"]
 BAT_PREVIEWER_GROUP = "bat-pages"
 RESVG_CACHE_SIGNATURE = (str(config["plugins"]["resvg"]), "resvg-v2")

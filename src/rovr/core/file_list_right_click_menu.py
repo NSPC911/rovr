@@ -1,6 +1,5 @@
 import os
 from functools import partial
-from subprocess import Popen
 from typing import ClassVar, Literal
 
 from textual import events, work
@@ -11,15 +10,13 @@ from textual.errors import NoWidget
 from textual.reactive import var
 from textual.widgets import OptionList
 
-from rovr.classes.config import (
-    _RightClickItem,
-    _RightClickItemOptionsItem,
-)
+from rovr.classes.config import _RightClickItem, _RightClickItemOptionsItem
 from rovr.classes.textual_options import RightClickMenuOption
+from rovr.classes.type_aliases import Command
 from rovr.components.popup_option_list import PopupOptionList
 from rovr.functions.cwd import getcwd
 from rovr.functions.path import ifed
-from rovr.functions.utils import check_key, expand_command, is_archive, run_command
+from rovr.functions.utils import check_key, expand_command, is_archive
 from rovr.variables.constants import bindings, config
 
 
@@ -270,24 +267,15 @@ class FileListRightClickMenu(PopupOptionList, inherit_bindings=False):
                 focus_on=None if is_real_dir else os.path.basename(resolved_path),
             )
         elif hasattr(self.app.file_list, f"action_{event.option.id}"):
-            self.call_next(
-                getattr(
-                    self.app.file_list,
-                    f"action_{event.option.id}",
-                )
-            )
+            self.call_next(getattr(self.app.file_list, f"action_{event.option.id}"))
         elif event.option.id.startswith("shell_"):
             command: str | list[str] = await expand_command(
                 self.app, event.option.action["run"]
             )
-            proc = run_command(
-                self.app,
-                command,
-                event.option.action["run_type"],
+            self.app.run_command(
+                Command(command, event.option.action["run_type"]),
                 shell=event.option.action.get("shell", False),
             )
-            if isinstance(proc, Popen) and event.option.action["run_type"] != "orphan":
-                self.app.shell_thread(proc, "Context Menu")
 
     def on_blur(self, event: events.Blur) -> None:  # ty: ignore[invalid-method-override]
         event.prevent_default().stop()

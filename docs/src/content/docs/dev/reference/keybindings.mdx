@@ -67,17 +67,21 @@ contexts are checked before reusable contexts, such as `file_list` before `lists
 `search_input` before `inputs`.
 
 `main` is available only while the main screen is unobstructed. `global` is checked separately
-for application-wide bindings, including while a modal is open. Set an inherited key to `noop`
-to consume it without running an action.
+for application-wide bindings, including while a modal is open
 
 ```toml
 inherit = "vim"
 
-[file_list]
-"q" = "noop"
-
 [global]
 "ctrl+q" = "app.quit"
+```
+
+## `noop`
+
+`noop` is a special action that does nothing. It can be used to disable a binding inherited from a parent context or preset:
+```toml
+[main]
+"ctrl+q" = "noop"
 ```
 
 ## Application contexts
@@ -97,35 +101,36 @@ Use `global` sparingly for actions that must work regardless of the active scree
 The application context used while the main screen is active and no modal screen is overlaying
 it. The `app.` prefix is optional here.
 
-| Action                         | Description                                                   | Example                                   |
-| ------------------------------ | ------------------------------------------------------------- | ----------------------------------------- |
-| `activate_tab(index)`          | Activate a tab by zero-based index.                           | `"1" = "activate_tab(0)"`                 |
-| `cycle_tab(offset)`            | Move relative to the current tab.                             | `"ctrl+j" = "cycle_tab(1)"`               |
-| `tab_next`                     | Activate the next tab.                                        | `"ctrl+j" = "tab_next"`                   |
-| `tab_previous`                 | Activate the previous tab.                                    | `"ctrl+k" = "tab_previous"`               |
-| `tab_new`                      | Create a tab.                                                 | `"ctrl+t" = "tab_new"`                    |
-| `tab_close`                    | Close the current tab.                                        | `"ctrl+w" = "tab_close"`                  |
-| `focus_file_list`              | Focus the active file list.                                   | `"escape" = "focus_file_list"`            |
-| `focus_next`                   | Focus the next focusable widget.                              | `"tab" = "focus_next"`                    |
-| `focus_previous`               | Focus the previous focusable widget.                          | `"shift+tab" = "focus_previous"`          |
-| `focus_toggle_pinned_sidebar`  | Switch between the pinned sidebar and file list.              | `"s" = "focus_toggle_pinned_sidebar"`     |
-| `focus_toggle_preview_sidebar` | Switch between the preview and file list.                     | `"i" = "focus_toggle_preview_sidebar"`    |
-| `focus_toggle_path_switcher`   | Switch between the path input and file list.                  | `"ctrl+l" = "focus_toggle_path_switcher"` |
-| `focus_toggle_processes`       | Switch between processes and file list.                       | `"p" = "focus_toggle_processes"`          |
-| `focus_toggle_clipboard`       | Switch between the clipboard and file list.                   | `"c" = "focus_toggle_clipboard"`          |
-| `focus_toggle_metadata`        | Switch between metadata and file list.                        | `"m" = "focus_toggle_metadata"`           |
-| `toggle_pinned_sidebar`        | Show or hide the pinned sidebar.                              | `"S" = "toggle_pinned_sidebar"`           |
-| `toggle_preview_sidebar`       | Show or hide the preview.                                     | `"I" = "toggle_preview_sidebar"`          |
-| `toggle_footer`                | Show or hide the footer.                                      | `"F" = "toggle_footer"`                   |
-| `toggle_menu_wrapper`          | Show or hide the menu bar.                                    | `"M" = "toggle_menu_wrapper"`             |
-| `change_theme`                 | Open the theme chooser.                                       | `"T" = "change_theme"`                    |
-| `show_keybinds`                | Open the active keybindings screen.                           | `"?" = "show_keybinds"`                   |
-| `show_shell_screen`            | Open a shell command screen in this directory.                | `">" = "show_shell_screen"`               |
-| `print_dom`                    | Equivalent of `rovr --tree-dom`: prints widget tree to stdout | `"ctrl+shift+d" = "print_dom"`            |
-| `cd_zoxide`                    | Open the zoxide directory chooser.                            | `"z" = "cd_zoxide"`                       |
-| `search_fd`                    | Open recursive file search.                                   | `"f" = "search_fd"`                       |
-| `search_rg`                    | Open file-content search.                                     | `"\\" = "search_rg"`                      |
-| `open_recycle_bin`             | Open the recycle bin.                                         | `"T" = "open_recycle_bin"`                |
+| Action                            | Description                                                   | Example                                                |
+| --------------------------------- | ------------------------------------------------------------- | ------------------------------------------------------ |
+| `activate_tab(index)`             | Activate a tab by zero-based index.                           | `"1" = "activate_tab(0)"`                              |
+| `cycle_tab(offset)`               | Move relative to the current tab.                             | `"ctrl+j" = "cycle_tab(1)"`                            |
+| `tab_next`                        | Activate the next tab.                                        | `"ctrl+j" = "tab_next"`                                |
+| `tab_previous`                    | Activate the previous tab.                                    | `"ctrl+k" = "tab_previous"`                            |
+| `tab_new`                         | Create a tab.                                                 | `"ctrl+t" = "tab_new"`                                 |
+| `tab_close`                       | Close the current tab.                                        | `"ctrl+w" = "tab_close"`                               |
+| `focus_file_list`                 | Focus the active file list.                                   | `"escape" = "focus_file_list"`                         |
+| `focus_next`                      | Focus the next focusable widget.                              | `"tab" = "focus_next"`                                 |
+| `focus_previous`                  | Focus the previous focusable widget.                          | `"shift+tab" = "focus_previous"`                       |
+| `focus_toggle_pinned_sidebar`     | Switch between the pinned sidebar and file list.              | `"s" = "focus_toggle_pinned_sidebar"`                  |
+| `focus_toggle_preview_sidebar`    | Switch between the preview and file list.                     | `"i" = "focus_toggle_preview_sidebar"`                 |
+| `toggle_maximize(selector)`       | Maximize or restore a widget.                                 | `"f11" = "toggle_maximize('PreviewContainer > *')"` |
+| `focus_toggle_path_switcher`      | Switch between the path input and file list.                  | `"ctrl+l" = "focus_toggle_path_switcher"`              |
+| `focus_toggle_processes`          | Switch between processes and file list.                       | `"p" = "focus_toggle_processes"`                       |
+| `focus_toggle_clipboard`          | Switch between the clipboard and file list.                   | `"c" = "focus_toggle_clipboard"`                       |
+| `focus_toggle_metadata`           | Switch between metadata and file list.                        | `"m" = "focus_toggle_metadata"`                        |
+| `toggle_pinned_sidebar`           | Show or hide the pinned sidebar.                              | `"S" = "toggle_pinned_sidebar"`                        |
+| `toggle_preview_sidebar`          | Show or hide the preview.                                     | `"I" = "toggle_preview_sidebar"`                       |
+| `toggle_footer`                   | Show or hide the footer.                                      | `"F" = "toggle_footer"`                                |
+| `toggle_menu_wrapper`             | Show or hide the menu bar.                                    | `"M" = "toggle_menu_wrapper"`                          |
+| `change_theme`                    | Open the theme chooser.                                       | `"T" = "change_theme"`                                 |
+| `show_keybinds`                   | Open the active keybindings screen.                           | `"?" = "show_keybinds"`                                |
+| `show_shell_screen`               | Open a shell command screen in this directory.                | `">" = "show_shell_screen"`                            |
+| `print_dom`                       | Equivalent of `rovr --tree-dom`: prints widget tree to stdout | `"ctrl+shift+d" = "print_dom"`                         |
+| `cd_zoxide`                       | Open the zoxide directory chooser.                            | `"z" = "cd_zoxide"`                                    |
+| `search_fd`                       | Open recursive file search.                                   | `"f" = "search_fd"`                                    |
+| `search_rg`                       | Open file-content search.                                     | `"\\" = "search_rg"`                                   |
+| `open_recycle_bin`                | Open the recycle bin.                                         | `"T" = "open_recycle_bin"`                             |
 
 ### Running commands
 
@@ -336,30 +341,32 @@ These actions apply only while their corresponding modal is open.
 
 Certain actions support expansions based on their state.
 
-#### `sort_order.toggle_custom_sort`
+### `sort_order.toggle_custom_sort`
 
 - `%state`: returns "enable" if the sort order set is for that folder only. "disable" otherwise
 - `%nextstate`: opposite of `%state`
 - `%State` and `%Nextstate`: same as above, but capitalized
 
+## Prefix keybinds
+
+Prefix keybinds (or layers, modes, leader keys) are supported. An example layer used in rovr is
+
+```toml
+[file_list.","]
+desc = "Sort order"
+"a" = { action = "sort_order.name", desc = "Sort by name" }
+"e" = { action = "sort_order.extension", desc = "Sort by extension" }
+"n" = { action = "sort_order.natural", desc = "Sort naturally" }
+"s" = { action = "sort_order.size", desc = "Sort by size" }
+"c" = { action = "sort_order.created", desc = "Sort by creation time" }
+"m" = { action = "sort_order.modified", desc = "Sort by modification time" }
+"d" = { action = "sort_order.descending", desc = "Toggle descending order" }
+"p" = { action = "sort_order.toggle_custom_sort", desc = "%Nextstate sorting for this path only" }
+```
+
 ## Finding the key names
 
 Run `rovr --show-keys` to display the key name that will be used.
-
-### Mouse Buttons
-
-Mouse buttons 4-7 are supported as keys. If your mouse has extra keys and the terminal emulator supports
-SGR Extended Mouse Mode, you can bind them to actions. The key names are `mouse4`, `mouse5`,
-`mouse6`, and `mouse7`.
-
-Supported terminals based on testing:
-
-- kitty
-- Foot
-- XTerm
-- Tilix
-- Gnome Terminal
-- Ghostty
 
 ### Known key conflicts:
 
@@ -375,12 +382,36 @@ if your terminal emulator supports kitty keyboard protocol, it should not cause 
 | <kbd>alt+b</kbd>  | <kbd>ctrl+left</kbd>  |
 | <kbd>alt+f</kbd>  | <kbd>ctrl+right</kbd> |
 
-alt keybinds are also handled a bit weirdly, there is an internal timer that checks for the escape key,
-and if another printable key is sent within 0.25 seconds, it will be counted as a `alt+` keybind, obviously dont push it
+<kbd>alt</kbd> keybinds are also handled a bit weirdly, there is an internal timer that checks for the <kbd>esc</kbd> key,
+and if another printable key is sent within 0.25 seconds, it will be counted as a <kbd>alt+</kbd> keybind, obviously dont push it
 
 but it exists if you want it
 
 obviously please use kitty keyboard protocol.
+
+## Mouse Buttons
+
+Mouse buttons 4-7 are supported as keys. If your mouse has extra keys and the terminal emulator supports
+SGR Extended Mouse Mode, you can bind them to actions. The key names are `mouse4`, `mouse5`,
+`mouse6`, and `mouse7`.
+
+Supported terminals based on testing:
+
+- kitty
+- Foot
+- XTerm
+- Tilix
+- Gnome Terminal
+- Ghostty
+
+rovr has bound mouse4 and mouse5 to `hist_previous` and `hist_next` respectively only on `file_list`, but you can change them in your keybinds. For example,
+```toml
+[file_list]
+"mouse4" = "hist_previous"
+"mouse5" = "hist_next"
+```
+You must note that your cursor must be over the file list for this to work, and it will not work when hovering over other widgets.
+If you want it globally, apply it on the global context and `noop` these inherited binds.
 
 ## MIGRATION FROM < 0.11.0
 

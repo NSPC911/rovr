@@ -459,6 +459,48 @@ example_function(10)"""
             "[bold red]Error:[/] --force-first-launch and --ignore-first-launch are mutually exclusive, and hence cannot be used simultaneously."
         )
         sys.exit(1)
+    outputs = {"__stdout__": sys.__stdout__, "__stderr__": sys.__stderr__}
+    cwd_file = outputs.get(args.cwd_file, args.cwd_file)
+    chooser_file = outputs.get(args.chooser_file, args.chooser_file)
+    if not args.force_tty or args.tree_dom:
+        _run_ui(args, cwd_file, chooser_file)
+        return
+
+    # textual-image probes the terminal when the UI modules are first imported.
+    with (
+        open("CONOUT$" if os.name == "nt" else "/dev/tty", "w") as tty_out,
+        open("CONIN$" if os.name == "nt" else "/dev/tty", "r") as tty_in,
+    ):
+        streams = sys.stdin, sys.stdout, sys.stderr
+        originals = sys.__stdin__, sys.__stdout__, sys.__stderr__
+        restore_standard_input = _redirect_windows_stdin(tty_in)
+        try:
+            sys.__stdout__ = sys.stdout = tty_out
+            sys.__stderr__ = sys.stderr = tty_out
+            sys.__stdin__ = sys.stdin = tty_in
+
+            from rich.color import ColorSystem
+
+            from rovr import get_console
+
+            if get_console()._detect_color_system() == ColorSystem.WINDOWS:
+                from textual import constants
+
+                constants.COLOR_SYSTEM = "truecolor"
+            _run_ui(args, cwd_file, chooser_file)
+        finally:
+            sys.stdin, sys.stdout, sys.stderr = streams
+            sys.__stdin__, sys.__stdout__, sys.__stderr__ = originals
+            restore_standard_input()
+
+
+def _run_ui(
+    args: argparse.Namespace,
+    cwd_file: str | TextIOWrapper | None,
+    chooser_file: str | TextIOWrapper | None,
+) -> None:
+    from rovr.variables.maps import RovrVars
+
     config_missing = not os.path.exists(RovrVars.ROVRCONFIG) or not os.listdir(
         RovrVars.ROVRCONFIG
     )
@@ -491,24 +533,7 @@ example_function(10)"""
     for feature_path in args.without_features:
         set_nested_value(cast(dict, config), feature_path, False)
 
-    cwd_file: str | TextIOWrapper | None = args.cwd_file
-    chooser_file: str | TextIOWrapper | None = args.chooser_file
-
-    backup_stdout = sys.__stdout__
-    backup_stderr = sys.__stderr__
-    backup_stdin = sys.__stdin__
-
     from rovr.app import Application
-
-    if chooser_file == "__stdout__":
-        chooser_file = backup_stdout
-    elif chooser_file == "__stderr__":
-        chooser_file = backup_stderr
-
-    if cwd_file == "__stdout__":
-        cwd_file = backup_stdout
-    elif cwd_file == "__stderr__":
-        cwd_file = backup_stderr
 
     new_app = lambda: Application(
         startup_path=args.paths,
@@ -537,35 +562,6 @@ example_function(10)"""
         asyncio.run(print_dom(new_app()))
     elif args.ignore_missing_tty or sys.stdout.isatty():
         new_app().run()
-    elif args.force_tty:
-        open_stdout = "CONOUT$" if os.name == "nt" else "/dev/tty"
-        open_stdin = "CONIN$" if os.name == "nt" else "/dev/tty"
-        try:
-            with (
-                open(open_stdout, "w") as tty_out,
-                open(open_stdin, "r") as tty_in,
-            ):
-                restore_standard_input = _redirect_windows_stdin(tty_in)
-                try:
-                    sys.__stdout__ = sys.stdout = tty_out
-                    sys.__stderr__ = sys.stderr = tty_out
-                    sys.__stdin__ = sys.stdin = tty_in
-
-                    from rich.color import ColorSystem
-
-                    from rovr import get_console
-
-                    if get_console()._detect_color_system() == ColorSystem.WINDOWS:
-                        from textual import constants
-
-                        constants.COLOR_SYSTEM = "truecolor"
-                    new_app().run()
-                finally:
-                    restore_standard_input()
-        finally:
-            sys.__stdout__ = sys.stdout = backup_stdout
-            sys.__stderr__ = sys.stderr = backup_stderr
-            sys.__stdin__ = sys.stdin = backup_stdin
     else:
         print("Error: rovr needs a TTY to run in application.")
         sys.exit(1)

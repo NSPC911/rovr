@@ -1289,7 +1289,9 @@ class ProcessContainer(Actionable, VerticalScroll):
                     source,
                     destination,
                     allow_overwrite=(
-                        source_is_dir == destination_is_dir and not same_path
+                        type_of_selection == "copy"
+                        and source_is_dir == destination_is_dir
+                        and not same_path
                     ),
                 )
                 if action == "cancel":
@@ -1302,22 +1304,10 @@ class ProcessContainer(Actionable, VerticalScroll):
                     bar.set_text(display_path(destination, dest))
                 elif not (source_is_dir and destination_is_dir):
                     if path.islink(source):
-                        if type_of_selection == "cut":
-                            try:
-                                os.replace(source, destination)
-                            except OSError as exc:
-                                if exc.errno != errno.EXDEV:
-                                    raise
-                            else:
-                                bar.advance()
-                                return True
-
                         with TemporaryDirectory(dir=path.dirname(destination)) as tmp:
                             temp_link = path.join(tmp, "link")
                             copy_link(temp_link)
                             os.replace(temp_link, destination)
-                        if type_of_selection == "cut":
-                            os.unlink(source)
                         bar.advance()
                         return True
                     if path.isjunction(destination):

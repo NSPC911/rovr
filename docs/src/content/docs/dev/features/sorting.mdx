@@ -4,6 +4,7 @@ description: how to sort files and folders in rovr.
 ---
 
 import InlineSVG from "@/components/InlineSVG.astro";
+import { Tabs, TabItem } from "@astrojs/starlight/components";
 
 <InlineSVG src="/rovr/screenshots/sort-order.svg" alt="sort options" />
 
@@ -50,14 +51,37 @@ Optionally, you can enable `This path only` in the sort menu to apply to only th
 
 ## config
 
-```toml
-[keybinds.change_sort_order]
-open_popup = [","]
-name = ["a"]
-extension = ["e"]
-natural = ["n"]
-size = ["s"]
-created = ["c"]
-modified = ["m"]
-descending = ["d"]
+<Tabs>
+  <TabItem label="Using popup menu">
+
+```toml title="keys.toml"
+[file_list]
+"," = { action = "sort_order.open_popup", desc = "Open sort order menu" }
+[sort_menu]
+"a" = "sort_order.name"
+"e" = "sort_order.extension"
+"n" = "sort_order.natural"
+"s" = "sort_order.size"
+"c" = "sort_order.created"
+"m" = "sort_order.modified"
+"d" = "sort_order.descending"
 ```
+
+  </TabItem>
+  <TabItem label="Using prefix key">
+
+```toml title=keys.toml
+[file_list.","]
+desc = "Sort order"
+"a" = { action = "sort_order.name", desc = "Sort by name" }
+"e" = { action = "sort_order.extension", desc = "Sort by extension" }
+"n" = { action = "sort_order.natural", desc = "Sort naturally" }
+"s" = { action = "sort_order.size", desc = "Sort by size" }
+"c" = { action = "sort_order.created", desc = "Sort by creation time" }
+"m" = { action = "sort_order.modified", desc = "Sort by modification time" }
+"d" = { action = "sort_order.descending", desc = "Toggle descending order" }
+"p" = { action = "sort_order.toggle_custom_sort", desc = "%Nextstate sorting for this path only" }
+```
+
+  </TabItem>
+</Tabs>

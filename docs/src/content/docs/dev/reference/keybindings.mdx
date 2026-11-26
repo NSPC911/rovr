@@ -67,17 +67,21 @@ contexts are checked before reusable contexts, such as `file_list` before `lists
 `search_input` before `inputs`.
 
 `main` is available only while the main screen is unobstructed. `global` is checked separately
-for application-wide bindings, including while a modal is open. Set an inherited key to `noop`
-to consume it without running an action.
+for application-wide bindings, including while a modal is open
 
 ```toml
 inherit = "vim"
 
-[file_list]
-"q" = "noop"
-
 [global]
 "ctrl+q" = "app.quit"
+```
+
+## `noop`
+
+`noop` is a special action that does nothing. It can be used to disable a binding inherited from a parent context or preset:
+```toml
+[main]
+"ctrl+q" = "noop"
 ```
 
 ## Application contexts
@@ -337,30 +341,32 @@ These actions apply only while their corresponding modal is open.
 
 Certain actions support expansions based on their state.
 
-#### `sort_order.toggle_custom_sort`
+### `sort_order.toggle_custom_sort`
 
 - `%state`: returns "enable" if the sort order set is for that folder only. "disable" otherwise
 - `%nextstate`: opposite of `%state`
 - `%State` and `%Nextstate`: same as above, but capitalized
 
+## Prefix keybinds
+
+Prefix keybinds (or layers, modes, leader keys) are supported. An example layer used in rovr is
+
+```toml
+[file_list.","]
+desc = "Sort order"
+"a" = { action = "sort_order.name", desc = "Sort by name" }
+"e" = { action = "sort_order.extension", desc = "Sort by extension" }
+"n" = { action = "sort_order.natural", desc = "Sort naturally" }
+"s" = { action = "sort_order.size", desc = "Sort by size" }
+"c" = { action = "sort_order.created", desc = "Sort by creation time" }
+"m" = { action = "sort_order.modified", desc = "Sort by modification time" }
+"d" = { action = "sort_order.descending", desc = "Toggle descending order" }
+"p" = { action = "sort_order.toggle_custom_sort", desc = "%Nextstate sorting for this path only" }
+```
+
 ## Finding the key names
 
 Run `rovr --show-keys` to display the key name that will be used.
-
-### Mouse Buttons
-
-Mouse buttons 4-7 are supported as keys. If your mouse has extra keys and the terminal emulator supports
-SGR Extended Mouse Mode, you can bind them to actions. The key names are `mouse4`, `mouse5`,
-`mouse6`, and `mouse7`.
-
-Supported terminals based on testing:
-
-- kitty
-- Foot
-- XTerm
-- Tilix
-- Gnome Terminal
-- Ghostty
 
 ### Known key conflicts:
 
@@ -376,12 +382,36 @@ if your terminal emulator supports kitty keyboard protocol, it should not cause 
 | <kbd>alt+b</kbd>  | <kbd>ctrl+left</kbd>  |
 | <kbd>alt+f</kbd>  | <kbd>ctrl+right</kbd> |
 
-alt keybinds are also handled a bit weirdly, there is an internal timer that checks for the escape key,
-and if another printable key is sent within 0.25 seconds, it will be counted as a `alt+` keybind, obviously dont push it
+<kbd>alt</kbd> keybinds are also handled a bit weirdly, there is an internal timer that checks for the <kbd>esc</kbd> key,
+and if another printable key is sent within 0.25 seconds, it will be counted as a <kbd>alt+</kbd> keybind, obviously dont push it
 
 but it exists if you want it
 
 obviously please use kitty keyboard protocol.
+
+## Mouse Buttons
+
+Mouse buttons 4-7 are supported as keys. If your mouse has extra keys and the terminal emulator supports
+SGR Extended Mouse Mode, you can bind them to actions. The key names are `mouse4`, `mouse5`,
+`mouse6`, and `mouse7`.
+
+Supported terminals based on testing:
+
+- kitty
+- Foot
+- XTerm
+- Tilix
+- Gnome Terminal
+- Ghostty
+
+rovr has bound mouse4 and mouse5 to `hist_previous` and `hist_next` respectively only on `file_list`, but you can change them in your keybinds. For example,
+```toml
+[file_list]
+"mouse4" = "hist_previous"
+"mouse5" = "hist_next"
+```
+You must note that your cursor must be over the file list for this to work, and it will not work when hovering over other widgets.
+If you want it globally, apply it on the global context and `noop` these inherited binds.
 
 ## MIGRATION FROM < 0.11.0
 

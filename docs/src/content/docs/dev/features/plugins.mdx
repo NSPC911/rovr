@@ -12,22 +12,27 @@ there are a couple integrations to improve rovr's functionality. enable and conf
 
 <InlineSVG src="/rovr/screenshots/plugin-zoxide.svg" alt="rovr's zoxide integration" />
 
-[zoxide](https://github.com/ajeetdsouza/zoxide) allows you to zip around your filesystem, and can be integrated into rovr
+[zoxide](https://github.com/ajeetdsouza/zoxide) allows you to zip around your filesystem
 
 <Tabs>
   <TabItem label="config.toml">
-    <Code
-      code={`[plugins.zoxide]\nenabled = true\nshow_scores = false  # include the zoxide scores in the results`}
-      lang="toml"
-      frame="code"
-    />
+
+```toml
+[plugins.zoxide]
+enabled = true
+show_scores = false  # include the zoxide scores in the results
+```
+
   </TabItem>
   <TabItem label="keys.toml">
-    <Code
-      code={`[main]\n"z" = { action = "cd_zoxide", desc = "Jump to a directory" }`}
-      lang="toml"
-      frame="code"
-    />
+
+```toml
+[main]
+"z" = { action = "cd_zoxide", desc = "Jump to a directory" }
+# optional
+"Z" = { action = "run_command(['zoxide', 'add', '%cwd'])", desc = "Add current directory to zoxide" }
+```
+
   </TabItem>
 </Tabs>
 
@@ -52,18 +57,28 @@ uses [fd](https://github.com/sharkdp/fd) to search recursively in the current di
 
 <Tabs>
   <TabItem label="config.toml">
-    <Code
-      code={`[plugins.fd]\nenabled = true\nexecutable = "fd"\nrelative_paths = true\nfollow_symlinks = false   # search inside symlinks as well\nno_ignore_parent = false  # ignore .ignore files from parent directories\nsearch_hidden = false\ndefault_filter_types = ["file", "directory"]  # set default item filters (like \`file\`, \`directory\`, etc.)\ntimeout = 15  # set it to a reasonably high amount, searching without indexing takes time\nthreads = 2   # use multiple threads for faster searching`}
-      lang="toml"
-      frame="code"
-    />
+
+```toml
+[plugins.fd]
+enabled = true
+executable = "fd"
+relative_paths = true
+follow_symlinks = false   # search inside symlinks as well
+no_ignore_parent = false  # ignore .ignore files from parent directories
+search_hidden = false
+default_filter_types = ["file", "directory"]  # set default item filters (like \file\`, \`directory\`, etc.)
+timeout = 15  # set it to a reasonably high amount, searching without indexing takes time
+threads = 2   # use multiple threads for faster searching`
+```
+
   </TabItem>
   <TabItem label="keys.toml">
-    <Code
-      code={`[main]\n"f" = { action = "search_fd", desc = "Search for files" }`}
-      lang="toml"
-      frame="code"
-    />
+
+```toml
+[main]
+"f" = { action = "search_fd", desc = "Search for files" }
+```
+
   </TabItem>
 </Tabs>
 
@@ -75,18 +90,26 @@ uses [ripgrep](https://github.com/BurntSushi/ripgrep) to search inside files
 
 <Tabs>
   <TabItem label="config.toml">
-    <Code
-      code={`[plugins.rg]\nenabled = true\nexecutable = "rg"\ncase_sensitive = true\nno_ignore_parent = false  # ignore .ignore files from parent directories\nfollow_symlinks = false\nsearch_hidden = false\ntimeout = 60  # set it to a much higher amount, content searching takes time\nthreads = 4   # use multiple threads for faster searching`}
-      lang="toml"
-      frame="code"
-    />
+
+```toml
+[plugins.rg]
+enabled = true
+executable = "rg"
+case_sensitive = true
+no_ignore_parent = false  # ignore .ignore files from parent directories
+follow_symlinks = false
+search_hidden = false
+timeout = 60  # set it to a much higher amount, content searching takes time
+threads = 4   # use multiple threads for faster searching
+```
+
   </TabItem>
   <TabItem label="keys.toml">
-    <Code
-      code={`[main]\n"\\" = { action = "search_rg", desc = "Search file contents" }`}
-      lang="toml"
-      frame="code"
-    />
+
+```toml
+[main]
+"\\" = { action = "search_rg", desc = "Search file contents" }
+```
   </TabItem>
 </Tabs>
 

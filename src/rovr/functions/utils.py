@@ -235,7 +235,11 @@ def run_command(
 
             def func() -> subprocess.CompletedProcess:
                 with app.suspend():
-                    return subprocess.run(command, shell=shell)
+                    try:
+                        return subprocess.run(command, shell=shell)
+                    except Exception as e:
+                        exc = e
+                raise exc
 
             try:
                 process = app.call_from_thread(func)

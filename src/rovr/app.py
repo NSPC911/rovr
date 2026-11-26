@@ -483,17 +483,26 @@ class Application(
             event.prevent_default()
             await self._on_key(event)
 
+    @work(thread=True, group="shell_exec")
     def on_shell_exec_response(
         self, response: screens.ShellExec.ReturnType | None, shell: bool = True
     ) -> None:
         if response is None or response.command == "":
             return
 
-        proc = run_command(
-            self, response.command, run_type=response.run_type, shell=shell
-        )
-        if response.run_type == "background":
-            self.shell_thread(proc, "Shell Exec")
+        try:
+            proc = run_command(
+                self, response.command, run_type=response.run_type, shell=shell
+            )
+            if response.run_type == "background":
+                self.shell_thread(proc, "Shell Exec")
+        except Exception as exc:
+            self.notify(
+                f"{type(exc).__name__}: {exc}\ncmd: {response.command}",
+                severity="error",
+                markup=False,
+            )
+            dump_exc(self, exc)
 
     @work(thread=True)
     def shell_thread(self, proc: Popen, title: str = "") -> None:

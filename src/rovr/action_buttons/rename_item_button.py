@@ -9,14 +9,15 @@ from tempfile import NamedTemporaryFile, mkdtemp
 
 from textual import work
 from textual.widgets import Button
-from textual.worker import Worker, WorkerError
+from textual.worker import WorkerError, WorkerFailed
 
 import rovr.screens as screens
 from rovr.classes.textual_validators import IsValidFilePath, PathNoLongerExists
+from rovr.classes.type_aliases import Command, RaiseNow
 from rovr.functions.cwd import getcwd
 from rovr.functions.icons import get_icon
 from rovr.functions.path import control, dump_exc, normalise
-from rovr.functions.utils import command, run_command
+from rovr.functions.utils import command
 from rovr.variables.constants import config
 
 
@@ -190,36 +191,32 @@ class RenameItemButton(Button):
                         temp.write(f"{selectedItem:<{max_len}}  ➔  {selectedItem}\n")
                     else:
                         temp.write(f"{selectedItem}\n")
-                temp.flush()
-                temp.close()
-
-                def on_error(message: str, title: str) -> None:
-                    self.notify(message, title=title, severity="error", markup=False)
+                temp.flush(), temp.close()
 
                 try:
-                    run_command(
-                        self.app,
-                        command(bulk_editor["run"], temp_path),
-                        run_type="suspend",
-                        on_error=on_error,
+                    await self.app.run_command(
+                        Command(
+                            command(bulk_editor["run"], temp_path), run_type="suspend"
+                        ),
+                        on_error=RaiseNow,
                         shell=bulk_editor["shell"],
-                    )
-                except FileNotFoundError:
-                    self.notify(
-                        f"Editor '{bulk_editor}' not found. Check your config.",
-                        title="Editor not found",
-                        severity="error",
-                        markup=False,
-                    )
-                    return
-                except Exception as exc:
+                    ).wait()
+                except WorkerFailed as exc:
+                    if isinstance(exc.error, FileNotFoundError):
+                        self.notify(
+                            f"Editor '{bulk_editor}' not found. Check your config.",
+                            title="Editor not found",
+                            severity="error",
+                            markup=False,
+                        )
+                    else:
+                        self.notify(
+                            f"{type(exc).__name__}: {exc}",
+                            title="Error launching editor",
+                            severity="error",
+                            markup=False,
+                        )
                     dump_exc(self, exc)
-                    self.notify(
-                        f"{type(exc).__name__}: {exc}",
-                        title="Error launching editor",
-                        severity="error",
-                        markup=False,
-                    )
                     return
 
                 # read edited contents
@@ -274,8 +271,7 @@ class RenameItemButton(Button):
                     os.unlink(temp_path)
         with self.app.file_list.pause_checks():
             self.app.file_list.focus()
-            worker: Worker = self.app.file_list.update_file_list(
-                add_to_session=False, focus_on=path.basename(new_name)
-            )
             with contextlib.suppress(WorkerError):
-                await worker.wait()
+                await self.app.file_list.update_file_list(
+                    add_to_session=False, focus_on=path.basename(new_name)
+                ).wait()

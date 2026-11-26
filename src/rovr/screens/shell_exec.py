@@ -1,10 +1,9 @@
-from typing import NamedTuple
-
 from textual import events, work
 from textual.binding import Binding
 from textual.widgets import Input
 
-from rovr.functions.utils import ShellRunTypes, dismiss, expand_command
+from rovr.classes.type_aliases import Command
+from rovr.functions.utils import dismiss, expand_command
 
 from .input import ModalInput
 
@@ -13,10 +12,6 @@ class ShellExec(ModalInput):
     key_contexts = ("shell_exec", "modal_input")
     last_input: str = ""
     last_in_bg: bool = True
-
-    class ReturnType(NamedTuple):
-        command: str | list[str]
-        run_type: ShellRunTypes
 
     BINDINGS = [
         Binding("escape", "dismiss"),
@@ -57,7 +52,7 @@ class ShellExec(ModalInput):
         ShellExec.last_in_bg = self.in_bg
         dismiss(
             self,
-            ShellExec.ReturnType(
+            Command(
                 await expand_command(self.app, event.input.value),
                 run_type="background" if self.in_bg else "suspend",
             ),

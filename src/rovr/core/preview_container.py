@@ -1567,14 +1567,14 @@ class PreviewContainer(Actionable, PDFMixin, BatMixin, Container):
                     self.mount_special_messages()
                     return
 
-        cache._save_image(
-            source,
-            "video",
-            stat_res,
-            image,
-            VIDEO_CACHE_SIGNATURE,
-            extra=position,
-        )
+            cache._save_image(
+                source,
+                "video",
+                stat_res,
+                image,
+                VIDEO_CACHE_SIGNATURE,
+                extra=position,
+            )
         if widget := self.get_child(".image_preview"):
             self.call_from_thread(setattr, widget, "image", image)
         else:

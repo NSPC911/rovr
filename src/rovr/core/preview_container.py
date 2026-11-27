@@ -11,7 +11,7 @@ from math import ceil
 from os import path
 from tempfile import NamedTemporaryFile, TemporaryDirectory
 from time import monotonic, time
-from typing import Awaitable, Callable, Literal, TypeVar, cast, overload
+from typing import IO, Awaitable, Callable, Literal, TypeVar, cast, overload
 
 import textual_image.renderable
 import textual_image.widget
@@ -52,6 +52,7 @@ from rovr.variables.constants import (
     RESAMPLING_METHOD,
     RESVG_CACHE_SIGNATURE,
     TEXT_PREVIEW_CACHE_VERSION,
+    VIDEO_CACHE_SIGNATURE,
     config,
     file_one,
     titles,
@@ -1503,52 +1504,77 @@ class PreviewContainer(Actionable, PDFMixin, BatMixin, Container):
                 duration = float(result.stdout)
                 if 0 < duration < float("inf"):
                     self.call_from_thread(setattr, self, "_video_duration", duration)
+        self.set_border(
+            "subtitle",
+            f"{position // 60:02}:{position % 60:02}"
+            + (
+                f" / {int(self._video_duration) // 60:02}:{int(self._video_duration) % 60:02}"
+                if self._video_duration is not None
+                else ""
+            ),
+        )
 
         width, height = settings["size"]
         utils.check_cancel()
-        with contextlib.ExitStack() as stack:
-            try:
-                stdout = stack.enter_context(NamedTemporaryFile(suffix=".png"))
-                stderr = stack.enter_context(NamedTemporaryFile(suffix=".log"))
-                proc = subprocess.Popen(
-                    [settings["ffmpeg_path"], "-v", "error", "-nostdin"]
-                    + ["-ss", str(position), "-i", source]
-                    + ["-map", "0:v:0", "-frames:v", "1", "-vf"]
-                    + [f"scale={width}:{height}:force_original_aspect_ratio=decrease"]
-                    + ["-c:v", "png", "-f", "image2pipe", "pipe:1"],
-                    stdout=stdout,
-                    stderr=stderr,
-                )
-                seek_read = lambda obj: (obj.seek(0), obj.read())[0]
-                timeout, start = 15, monotonic()
-                while proc.poll() is None:
-                    if monotonic() - start > timeout or utils.check_cancel(False):
-                        proc.kill(), proc.communicate()
-                        out, err = seek_read(stdout), seek_read(stderr)
-                        raise subprocess.TimeoutExpired(proc.args, timeout, out, err)
-                    with contextlib.suppress(subprocess.TimeoutExpired):
-                        # perfectly reasonable to do this because wait can exit
-                        # unlike sleep, so we can check for cancel
-                        proc.wait(timeout=0.5)
-                proc.communicate()
-                if proc.returncode != 0:
-                    out, err = seek_read(stdout), seek_read(stderr)
-                    raise subprocess.CalledProcessError(
-                        proc.returncode, proc.args, output=out, stderr=err
+        stat_res = os.stat(source)
+        image = cache._load_image(
+            source, "video", stat_res, VIDEO_CACHE_SIGNATURE, extra=position
+        )
+        if not image:
+            with contextlib.ExitStack() as stack:
+                try:
+                    stdout = stack.enter_context(NamedTemporaryFile(suffix=".png"))
+                    stderr = stack.enter_context(NamedTemporaryFile(suffix=".log"))
+                    proc = subprocess.Popen(
+                        [settings["ffmpeg_path"], "-v", "error", "-nostdin"]
+                        + ["-ss", str(position), "-i", source]
+                        + ["-map", "0:v:0", "-frames:v", "1", "-vf"]
+                        + [f"scale={width}:{height}:force_original_aspect_ratio=decrease"]
+                        + ["-c:v", "png", "-f", "image2pipe", "pipe:1"],
+                        stdout=stdout,
+                        stderr=stderr,
                     )
-                stdout.seek(0)
-                image = stack.enter_context(Image.open(stdout)).copy()
-            except (
-                OSError,
-                ValueError,
-                subprocess.SubprocessError,
-                subprocess.TimeoutExpired,
-            ) as exc:
-                utils.check_cancel()
-                self._current_content = f"Cannot preview video:\n{exc!r}"
-                self.mount_special_messages()
-                return
+                    seek_read: Callable[[IO], str] = lambda obj: (
+                        obj.seek(0),
+                        obj.read(),
+                    )[1]
+                    timeout, start = 15, monotonic()
+                    while proc.poll() is None:
+                        if monotonic() - start > timeout or utils.check_cancel(False):
+                            proc.kill(), proc.communicate()
+                            out, err = seek_read(stdout), seek_read(stderr)
+                            raise subprocess.TimeoutExpired(proc.args, timeout, out, err)
+                        with contextlib.suppress(subprocess.TimeoutExpired):
+                            # perfectly reasonable to do this because wait can exit
+                            # unlike sleep, so we can check for cancel
+                            proc.wait(timeout=0.5)
+                    proc.communicate()
+                    if proc.returncode != 0:
+                        out, err = seek_read(stdout), seek_read(stderr)
+                        raise subprocess.CalledProcessError(
+                            proc.returncode, proc.args, output=out, stderr=err
+                        )
+                    stdout.seek(0)
+                    image = stack.enter_context(Image.open(stdout)).copy()
+                except (
+                    OSError,
+                    ValueError,
+                    subprocess.SubprocessError,
+                    subprocess.TimeoutExpired,
+                ) as exc:
+                    utils.check_cancel()
+                    self._current_content = f"Cannot preview video:\n{exc!r}"
+                    self.mount_special_messages()
+                    return
 
+        cache._save_image(
+            source,
+            "video",
+            stat_res,
+            image,
+            VIDEO_CACHE_SIGNATURE,
+            extra=position,
+        )
         if widget := self.get_child(".image_preview"):
             self.call_from_thread(setattr, widget, "image", image)
         else:
@@ -1556,7 +1582,6 @@ class PreviewContainer(Actionable, PDFMixin, BatMixin, Container):
             widget = self.NewImage(image)
             widget.can_focus = True
             self.call_from_thread(self.mount, widget)
-        self.set_border("subtitle", f"{position // 60:02}:{position % 60:02}")
 
     def _seek_video(self, delta: int) -> None:
         if not config["plugins"]["ffmpeg"]["enabled"] or self._video_source is None:

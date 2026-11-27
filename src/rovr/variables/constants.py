@@ -159,3 +159,4 @@ BAT_PREVIEW_CACHE_VERSION = "paged-v3"
 BAT_PREVIEW_CHUNK_SIZE = config["plugins"]["bat"]["chunk_size"]
 BAT_PREVIEWER_GROUP = "bat-pages"
 RESVG_CACHE_SIGNATURE = (str(config["plugins"]["resvg"]), "resvg-v2")
+VIDEO_CACHE_SIGNATURE = (str(config["plugins"]["ffmpeg"]), "video")

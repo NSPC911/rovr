@@ -220,7 +220,7 @@ if (-not $writeTo) { $writeTo = '.' }
 & libreoffice --headless --convert-to pdf $ToPreview --outdir $writeTo 2>&1
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 $pdf = Join-Path $writeTo (([IO.Path]::GetFileNameWithoutExtension($ToPreview)) + '.pdf')
-Move-Item -LiteralPath $pdf -Destination $Outfile -Force
+Move-Item -LiteralPath $pdf -Destination $Outfile -Force -ErrorAction Stop
 ```
 
   </TabItem>

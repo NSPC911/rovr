@@ -421,6 +421,7 @@ class Application(
         1 / 0
 
     def on_unmount(self) -> None:
+        self._close_portal_transfer()
         self._shutdown_event.set()
         for proc in tuple(self._background_processes):
             self._stop_background_process(proc)

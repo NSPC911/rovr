@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import re
+import sys
 from contextlib import suppress
 from dataclasses import replace
 from difflib import get_close_matches
@@ -347,6 +348,13 @@ class ThemeHandler:
 
 
 class DragAndDrop:
+    _portal_bus = None
+
+    def _close_portal_transfer(self) -> None:
+        if self._portal_bus is not None:
+            self._portal_bus.disconnect()
+            self._portal_bus = None
+
     async def dnd_drag_out_operation(
         self: App, pos: Offset
     ) -> DNDDragOutOperation | None:
@@ -416,16 +424,27 @@ class DragAndDrop:
                 size=2,
             )
 
+            self._close_portal_transfer()
+            extra_mimes = {
+                # this is the most off-spec way to handle this
+                f"rovr/cwd-{getcwd()}": b"look at mime",
+                f"rovr/count-{len(selected)}": b"look at mime",
+                f"rovr/type-{'folder' if all(path.isdir(p) for p in selected) else 'file'}": b"look at mime",
+            }
+            if sys.platform == "linux":
+                try:
+                    from rovr.functions.file_transfer import export_files
+
+                    key, self._portal_bus = await export_files(selected)
+                    extra_mimes["application/vnd.portal.filetransfer"] = key
+                except Exception as error:
+                    self.log.debug(f"File transfer portal unavailable: {error}")
+
             return DNDDragOutOperation(
                 [Path(p).as_uri() for p in selected],
                 "either",
                 label=label,
-                extra_mimes={
-                    # this is the most off-spec way to handle this
-                    f"rovr/cwd-{getcwd()}": b"look at mime",
-                    f"rovr/count-{len(selected)}": b"look at mime",
-                    f"rovr/type-{'folder' if all(path.isdir(p) for p in selected) else 'file'}": b"look at mime",
-                },
+                extra_mimes=extra_mimes,
             )
 
     def _directory_under_pos(self: App, pos: Offset) -> str | None:
@@ -495,6 +514,7 @@ class DragAndDrop:
         return self._dnd_conflict_cache[key]
 
     def on_drag_out_finished(self: App, event: DragOutFinished) -> None:
+        self._close_portal_transfer()
         self._dnd_dragged_paths = []
         self._dnd_resolved_sources = []
         self._dnd_conflict_cache.clear()

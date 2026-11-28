@@ -1026,9 +1026,11 @@ class PreviewContainer(Actionable, PDFMixin, BatMixin, Container):
                                 ("json", "utf-8"),
                                 all_files,
                             )
+                        except ValueError as exc:
+                            if "password" in str(exc).lower():
+                                content = [" Archive is password protected"]
                         except (
                             BadArchiveError,
-                            ValueError,
                             FileNotFoundError,
                             EOFError,
                         ):

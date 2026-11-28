@@ -59,7 +59,7 @@ class FileSearchToggles(
                 "search_hidden",
                 config["plugins"]["fd"]["search_hidden"],
             ),
-            Selection("Filter Type", "", False, disabled=True),
+            Selection(" Filter Type", "", False, disabled=True),
             Selection("Files", "file", FILTER_TYPES["file"]),
             Selection("Folders", "directory", FILTER_TYPES["directory"]),
             Selection("Symlinks", "symlink", FILTER_TYPES["symlink"]),

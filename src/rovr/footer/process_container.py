@@ -669,7 +669,6 @@ class ProcessContainer(Actionable, VerticalScroll):
         archive_name: str,
         algo: Literal["zip", "tar", "tar.gz", "tar.bz2", "tar.xz", "tar.zst"],
         level: int,
-        password: str | None = None,  # soon soon trust me
     ) -> None:
         """Compress files into an archive.
 
@@ -678,7 +677,6 @@ class ProcessContainer(Actionable, VerticalScroll):
             archive_name (str): Path for the output archive.
             algo: Compression algorithm to use.
             level (int): Compression level (0-9 (or 0-22 for zstd)).
-            password (str | None): Currently does nothing.
         """
         from multiarchive import Archive
 

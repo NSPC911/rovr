@@ -120,6 +120,7 @@ drive_exclude = ["/var/*"]
 
 "application/(x-)?font-.*" = "font"
 "image/.*" = "image"
+"video/.*" = "video"
 "text/.*" = "text"
 "font/.*" = "font"
 
@@ -321,6 +322,14 @@ show_scores = false
 enabled = false
 executable = "bat"
 chunk_size = 384
+
+[plugins.ffmpeg]
+enabled = true
+ffmpeg_path = "ffmpeg"
+ffprobe_path = "ffprobe"
+size = [960, 540]
+seek_seconds = 1
+page_seek_seconds = 10
 
 [plugins.fd]
 enabled = true

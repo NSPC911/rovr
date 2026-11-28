@@ -7,10 +7,11 @@ import subprocess
 from contextvars import ContextVar
 from functools import partial
 from io import BytesIO
+from math import ceil
 from os import path
 from tempfile import NamedTemporaryFile, TemporaryDirectory
-from time import time
-from typing import Awaitable, Callable, Literal, TypeVar, cast, overload
+from time import monotonic, time
+from typing import IO, Awaitable, Callable, Literal, TypeVar, cast, overload
 
 import textual_image.renderable
 import textual_image.widget
@@ -24,6 +25,7 @@ from textual.css.query import NoMatches
 from textual.dom import DOMNode
 from textual.geometry import Region
 from textual.timer import Timer
+from textual.widget import Widget
 from textual.widgets import Static
 from textual.widgets.selection_list import Selection
 from textual.worker import Worker
@@ -50,6 +52,7 @@ from rovr.variables.constants import (
     RESAMPLING_METHOD,
     RESVG_CACHE_SIGNATURE,
     TEXT_PREVIEW_CACHE_VERSION,
+    VIDEO_CACHE_SIGNATURE,
     config,
     file_one,
     titles,
@@ -110,6 +113,7 @@ class LoadingPreview(Static):
 
 class PreviewContainer(Actionable, PDFMixin, BatMixin, Container):
     key_contexts = ("preview", "scroll")
+    ALLOW_MAXIMIZE = True
     LOADER_WIDGET = LoadingPreview()
 
     ACTIONS: list[Action] = [
@@ -137,9 +141,32 @@ class PreviewContainer(Actionable, PDFMixin, BatMixin, Container):
         self._preview_texts = config["interface"]["preview_text"]
         self._active_preview_token = object()
         self.pdf = PDFHandler()
+        self._video_source: tuple[str, float] | None = None
+        self._video_position = 0
+        self._video_duration: float | None = None
 
     def compose(self) -> ComposeResult:
         yield Static(self._preview_texts["start"], classes="special")
+
+    def on_mount(self) -> None:
+        self.watch(self.screen, "maximized", self._on_maximized, init=False)
+
+    def _on_maximized(self, widget: Widget | None) -> None:
+        if widget is None or (widget is not self and self not in widget.ancestors):
+            return
+        if widget is not self:
+            # Maximizing a focused image would leave the rest of the preview behind.
+            self.screen.maximized = self
+        else:
+            self.call_after_refresh(self._focus_if_maximized)
+
+    def _focus_if_maximized(self) -> None:
+        if (
+            self.screen.is_active
+            and self.screen.maximized is self
+            and not self.has_focus_within
+        ):
+            self.focus()
 
     def get_loading_widget(self) -> LoadingPreview:
         """Get a widget to display a loading indicator.
@@ -845,6 +872,10 @@ class PreviewContainer(Actionable, PDFMixin, BatMixin, Container):
 
     def show_preview(self, file_path: str, mtime: int | float) -> None:
         """Public method to show preview."""
+        if self._video_source != (file_path, mtime):
+            self._video_source = (file_path, mtime)
+            self._video_position = 0
+            self._video_duration = None
         token = self._active_preview_token = object()
         if (
             "hide" in self.classes
@@ -919,7 +950,11 @@ class PreviewContainer(Actionable, PDFMixin, BatMixin, Container):
                     return
 
             self.call_from_thread(setattr, self, "_rendered_preview_key", None)
-            self.set_border("subtitle", "")
+            if self._file_type != "video" or (file_path, mtime) != (
+                self._current_file_path,
+                self._file_mtime,
+            ):
+                self.set_border("subtitle", "")
             utils.check_cancel()
 
             # Reset PDF state when changing files
@@ -1101,6 +1136,8 @@ class PreviewContainer(Actionable, PDFMixin, BatMixin, Container):
         elif file_type == "image":
             self.log("Showing image preview")
             self.show_image_preview()
+        elif file_type == "video":
+            self.show_video_preview(file_path, self._video_position)
         elif file_type == "archive":
             self.log("Showing archive preview")
             self.show_archive_preview()
@@ -1449,6 +1486,116 @@ class PreviewContainer(Actionable, PDFMixin, BatMixin, Container):
         if event.widget is self and self.children:
             self.children[-1].focus()
 
+    def show_video_preview(self, source: str, position: int) -> None:
+        settings = config["plugins"]["ffmpeg"]
+        self.set_border("title", "Video Preview")
+        if not settings["enabled"]:
+            self._current_content = "Video previews are disabled."
+            self.mount_special_messages()
+            return
+
+        if position == 0 and self._video_duration is None:
+            with contextlib.suppress(OSError, ValueError, subprocess.SubprocessError):
+                result = subprocess.run(
+                    [settings["ffprobe_path"], "-show_entries", "format=duration", "-v"]
+                    + ["error", "-of", "default=noprint_wrappers=1:nokey=1", source],
+                    capture_output=True,
+                    timeout=3,
+                    check=True,
+                )
+                duration = float(result.stdout)
+                if 0 < duration < float("inf"):
+                    self.call_from_thread(setattr, self, "_video_duration", duration)
+        self.set_border(
+            "subtitle",
+            f"{position // 60:02}:{position % 60:02}"
+            + (
+                f" / {int(self._video_duration) // 60:02}:{int(self._video_duration) % 60:02}"
+                if self._video_duration is not None
+                else ""
+            ),
+        )
+
+        width, height = settings["size"]
+        utils.check_cancel()
+        stat_res = os.stat(source)
+        image = cache._load_image(
+            source, "video", stat_res, VIDEO_CACHE_SIGNATURE, extra=position
+        )
+        if not image:
+            with contextlib.ExitStack() as stack:
+                try:
+                    stdout = stack.enter_context(NamedTemporaryFile(suffix=".png"))
+                    stderr = stack.enter_context(NamedTemporaryFile(suffix=".log"))
+                    proc = subprocess.Popen(
+                        [settings["ffmpeg_path"], "-v", "error", "-nostdin"]
+                        + ["-ss", str(position), "-i", source]
+                        + ["-map", "0:v:0", "-frames:v", "1", "-vf"]
+                        + [f"scale={width}:{height}:force_original_aspect_ratio=decrease"]
+                        + ["-c:v", "png", "-f", "image2pipe", "pipe:1"],
+                        stdout=stdout,
+                        stderr=stderr,
+                    )
+                    seek_read: Callable[[IO], str] = lambda obj: (
+                        obj.seek(0),
+                        obj.read(),
+                    )[1]
+                    timeout, start = 15, monotonic()
+                    while proc.poll() is None:
+                        if monotonic() - start > timeout or utils.check_cancel(False):
+                            proc.kill(), proc.communicate()
+                            out, err = seek_read(stdout), seek_read(stderr)
+                            raise subprocess.TimeoutExpired(proc.args, timeout, out, err)
+                        with contextlib.suppress(subprocess.TimeoutExpired):
+                            # perfectly reasonable to do this because wait can exit
+                            # unlike sleep, so we can check for cancel
+                            proc.wait(timeout=0.5)
+                    proc.communicate()
+                    if proc.returncode != 0:
+                        out, err = seek_read(stdout), seek_read(stderr)
+                        raise subprocess.CalledProcessError(
+                            proc.returncode, proc.args, output=out, stderr=err
+                        )
+                    stdout.seek(0)
+                    image = stack.enter_context(Image.open(stdout)).copy()
+                except (
+                    OSError,
+                    ValueError,
+                    subprocess.SubprocessError,
+                    subprocess.TimeoutExpired,
+                ) as exc:
+                    utils.check_cancel()
+                    self._current_content = f"Cannot preview video:\n{exc!r}"
+                    self.mount_special_messages()
+                    return
+
+            cache._save_image(
+                source,
+                "video",
+                stat_res,
+                image,
+                VIDEO_CACHE_SIGNATURE,
+                extra=position,
+            )
+        if widget := self.get_child(".image_preview"):
+            self.call_from_thread(setattr, widget, "image", image)
+        else:
+            self.call_from_thread(self.remove_children)
+            widget = self.NewImage(image)
+            widget.can_focus = True
+            self.call_from_thread(self.mount, widget)
+
+    def _seek_video(self, delta: int) -> None:
+        if not config["plugins"]["ffmpeg"]["enabled"] or self._video_source is None:
+            return
+        position = max(0, self._video_position + delta)
+        if self._video_duration is not None:
+            position = min(position, ceil(self._video_duration) - 1)
+        if position != self._video_position:
+            self._video_position = position
+            self._rendered_preview_key = None
+            self.show_preview(*self._video_source)
+
     def _is_pdf(self) -> bool:
         return (
             self._file_type == "pdf"
@@ -1488,12 +1635,16 @@ class PreviewContainer(Actionable, PDFMixin, BatMixin, Container):
             filelist.action_cursor_down()
 
     def action_left(self) -> None:
+        if self._file_type == "video":
+            return self._seek_video(-config["plugins"]["ffmpeg"]["seek_seconds"])
         if self._is_pdf() and self.pdf.images is not None:
             self.update_current_pdf_page_by_diff(-1)
         elif text_preview := self.get_child(WindowedTextPreview):
             text_preview.scroll_left(animate=False)
 
     def action_right(self) -> None:
+        if self._file_type == "video":
+            return self._seek_video(config["plugins"]["ffmpeg"]["seek_seconds"])
         if self._is_pdf() and self.pdf.images is not None:
             self.update_current_pdf_page_by_diff(1)
         elif text_preview := self.get_child(WindowedTextPreview):
@@ -1528,12 +1679,16 @@ class PreviewContainer(Actionable, PDFMixin, BatMixin, Container):
             filelist.action_page_down()
 
     def action_page_left(self) -> None:
+        if self._file_type == "video":
+            return self._seek_video(-config["plugins"]["ffmpeg"]["page_seek_seconds"])
         if self._is_pdf() and self.pdf.images is not None:
             self.update_current_pdf_page_by_diff(-1)
         elif text_preview := self.get_child(WindowedTextPreview):
             text_preview.scroll_page_left(animate=False)
 
     def action_page_right(self) -> None:
+        if self._file_type == "video":
+            return self._seek_video(config["plugins"]["ffmpeg"]["page_seek_seconds"])
         if self._is_pdf() and self.pdf.images is not None:
             self.update_current_pdf_page_by_diff(1)
         elif text_preview := self.get_child(WindowedTextPreview):

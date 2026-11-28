@@ -3,7 +3,7 @@ title: previewing files
 description: how rovr's file preview panel works.
 ---
 
-import { Aside } from "@astrojs/starlight/components";
+import { Aside, Code, Tabs, TabItem } from "@astrojs/starlight/components";
 import InlineSVG from "@/components/InlineSVG.astro";
 
 ## Supported preview types
@@ -19,6 +19,7 @@ plain text files are displayed in a text area with syntax highlighting. the lang
 ### `details` of unknown/binary files
 
 <InlineSVG src="/rovr/screenshots/mime-type.svg" alt="mime type detection" />
+
 mime types are automatically obtained using [puremagic](https://pypi.org/project/puremagic) to give you a more accurate information of the file's type. If you additionally have `plugins.file_one` enabled with `plugins.file_one.get_description`, you can view extra information, like how many sections, what type, etc.
 
 ### bat plugin
@@ -29,7 +30,12 @@ if you have [`bat`](/rovr/dev/features/plugins#bat) installed and enabled in the
 
 ### `image`s
 
+![pdf preview](/rovr/screenshots/preview-image.png)
+
 `rovr` can display images directly in the terminal. refer to the [image previews](/rovr/dev/features/image-previews) guide for more details on terminal compatibility and configuration.
+
+rovr's image preview is based on [PIL](https://pillow.readthedocs.io/en/stable/), so it supports a wide range of image formats, including `.png`, `.jpg`, `.jpeg`, `.gif`, `.bmp`, `.tiff`, and more. \
+For unsupported image formats, if imagemagick is configured, it will automatically be used to convert the image to a supported format for previewing.
 
 ### `folder`s
 
@@ -64,6 +70,10 @@ rovr makes use of [resvg-py](https://pypi.org/project/resvg-py) to render svg fi
 
 for font files (like `.ttf`, `.otf`), rovr will display a preview of the font. you can customise the text used in the preview if you want to test extra things
 
+### `video`s with ffmpeg
+
+it will display the first frame of the video as an image, and you can use your keyboard to navigate through the video, 1 second (or 10 seconds) at a time
+
 ## Custom preview rules
 
 You can change the file type to preview association by modifying the `[settings.preview_rules]` section in your `config.toml`
@@ -95,9 +105,11 @@ default = "previewer_name"
 extensions = { "ext1" = "previewer_name1", "ext2" = "previewer_name2" }
 ```
 
-## custom previewers
+## Custom previewers
 
-You can also create your own previewers for any file type. For example, if you want to preview `.md` files using [`glow`](https://github.com/charmbracelet/glow), you can add the following to your `config.toml`:
+You can also create your own previewers for any file type.
+
+For example, if you want to preview `.md` files using [`glow`](https://github.com/charmbracelet/glow), you can add the following to your `config.toml`:
 
 ```toml
 [settings.previewers]
@@ -108,13 +120,21 @@ default = "text"
 extensions = { "md" = "glow" }
 ```
 
-rovr will now use `glow` to preview `.md` files instead of `bat` (or rovr's built-in text highlighter). This preview is also cached, so if you have a large markdown file, it will not be re-rendered every time you open it. You can also use the `--style` option to change the theme of the preview.
+rovr will now use `glow` to preview `.md` files instead of `bat` (or rovr's built-in text highlighter).
 
-For images, you can have `type = "image"` for your custom previewer. For example, if you want to preview `.html` files using helium (or any chromium browsers), you can add the following to your `config.toml`:
+<Aside type="note">
+  This preview is also cached, so if you have a large markdown file, it will not be re-rendered every time you open it. You can also use the `--style` option to change the theme of the preview.
+  <br/>However, this also means that since files are not incrementally rendered, the preview will take some time to load for larger files.
+</Aside>
+
+For images, you can have `type = "image"` for your custom previewer.
+
+An example of this is to preview `.html` files. You can use helium (or any chromium browsers) to do so, just add the following to your `config.toml`:
 
 ```toml
 [settings.previewers.helium]
 command = ["helium", "--headless", "--no-first-run", "--disable-gpu", "--user-data-dir=%tmpdir", "--screenshot=%file", "%h"]
+# create a temporary file with the .png extension for the screenshot
 file = "%temp.png"
 type = "image"
 
@@ -129,9 +149,10 @@ extensions = { html = "helium", htm = "helium" }
 
 `%file` is the path configured by `file`, so helium writes the PNG that rovr reads. `%temp` keeps the source extension; `%temp.png` uses `.png` instead. This also works with other output extensions, provided your previewer can produce and rovr can display them. `%tmpdir` gives each run its own temporary browser profile and is removed when the command finishes.
 
-A launcher-supplied `--user-data-dir` can override the temporary profile above. On Windows with [scoop](https://scoop.sh), it will force a profile directory, you should instead direct it to the underlying `chrome.exe` path
-
-The `%h` is the path to the file being previewed. The command will be run with the file path as an argument, and the output will be displayed in the preview panel.
+<Aside type="note">
+  A launcher-supplied `--user-data-dir` can override the temporary profile above.
+  <br/>On Windows with <a href="https://scoop.sh">scoop</a>, it will force a profile directory, you should instead direct it to the underlying `chrome.exe` path
+</Aside>
 
 <br />
 The `%temp` is the path to a temporary file that will be created for the
@@ -166,32 +187,52 @@ Supported Expansions:
 Helium and Glow are mentioned above, here is a few more previewers that you can use:
 
 - [libreoffice](https://www.libreoffice.org/): for previewing office documents like `.docx`, `.xlsx`, `.pptx`
-Paste the following python script somewhere accessible and add it to your config.toml as a previewer:
-```python
-import subprocess, os, sys
-to_preview, outfile = sys.argv
-write_to = os.path.dirname(outfile)
-proc = subprocess.run(
-    ["libreoffice", "--headless", "--convert-to", "pdf",
-     to_preview, "--outdir", write_to],
-    capture_output=True,
-    check=False,
-)
-if proc.returncode != 0:
-    # because libreoffice prints errors to stdout
-    print(proc.stdout.decode())
-    exit(proc.returncode)
-else:
-    replace(
-        path.join(write_to, os.path.splitext(os.path.basename(to_preview))[0] + ".pdf"),
-        outfile,
-    )
+Paste the following script somewhere accessible and add it to your config.toml as a previewer:
+
+<Tabs>
+  <TabItem label="bash/zsh">
+
+```bash frame="none"
+#!/usr/bin/env bash
+set -e
+to_preview=$1
+outfile=$2
+write_to=$(dirname "$outfile")
+pdf="$write_to/$(basename "${to_preview%.*}").pdf"
+if ! libreoffice --headless --convert-to pdf "$to_preview" --outdir "$write_to"; then
+    exit 1
+fi
+mv -f -- "$pdf" "$outfile"
 ```
+
+Then `chmod +x /path/to/libreoffice-preview.sh` to make it executable.
+
+  </TabItem>
+  <TabItem label="powershell">
+
+```powershell frame="none"
+param(
+    [Parameter(Mandatory = $true)][string]$ToPreview,
+    [Parameter(Mandatory = $true)][string]$Outfile
+)
+$writeTo = Split-Path -Parent $Outfile
+if (-not $writeTo) { $writeTo = '.' }
+& libreoffice --headless --convert-to pdf $ToPreview --outdir $writeTo 2>&1
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+$pdf = Join-Path $writeTo (([IO.Path]::GetFileNameWithoutExtension($ToPreview)) + '.pdf')
+Move-Item -LiteralPath $pdf -Destination $Outfile -Force -ErrorAction Stop
+```
+
+  </TabItem>
+</Tabs>
 Then add the following to your config.toml:
 
 ```toml
 [settings.previewers.libreoffice]
-command = ["python", "/path/to/libre.py", "%h", "%file"]
+# powershell
+command = ['powershell', '-NoProfile', '-File', '/path/to/libreoffice-preview.ps1', '%h', '%file']
+# bash
+# command = ['/path/to/libreoffice-preview.sh', '%h', '%file']
 file = "%temp.pdf"
 type = "pdf"
 
@@ -202,7 +243,7 @@ type = "pdf"
 "application/msword" = "libreoffice"
 ```
 
-- [pixelorama](https://pixelorama.org): for previewing `.pxo` files, frames arent supported, its just a static image previewer
+- [pixelorama](https://pixelorama.org): for previewing `.pxo` files, frames arent supported, it's just a static image previewer
 ```toml
 [settings.previewers.pixelorama]
 command = ['pixelorama', '--headless', '--quit', '--', '%h', '--export', '--output', '%file']
